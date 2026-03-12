@@ -73,7 +73,8 @@ Always return:
 ## References
 
 - [runtime-investigation-checklist.md](./references/incident-response/runtime-investigation-checklist.md)
-- [incident-scenario-playbooks.md](./references/incident-response/incident-scenario-playbooks.md) – focused debug scenarios adapted from broader MCP prompt surfaces
+- [runtime-prompts-and-troubleshooting-scenarios.md](./references/incident-response/runtime-prompts-and-troubleshooting-scenarios.md) – runtime prompts and troubleshooting scenario map for tail_logs, trace_request, monitor_metrics, inspect_cache
+- [incident-scenario-playbooks.md](./references/incident-response/incident-scenario-playbooks.md) – focused debug scenarios
 - [symptom-hypothesis-matrix.md](./references/incident-response/symptom-hypothesis-matrix.md) – troubleshooting hypothesis shortcuts for faster evidence-driven diagnosis
 - [incident-report-template.md](./references/incident-response/incident-report-template.md)
 - [quick-start-execution-path.md](./references/dispatcher-foundation/quick-start-execution-path.md) – normalize repo root and select the incident path quickly

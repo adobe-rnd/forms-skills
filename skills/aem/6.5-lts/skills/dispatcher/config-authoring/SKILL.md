@@ -85,6 +85,7 @@ Permission-sensitive caching (`/auth_checker`) is end-to-end: it requires both D
 - [reference-snippets.md](./references/config-authoring/reference-snippets.md) – reusable starter snippets for consistent config authoring
 - [validation-playbook.md](./references/config-authoring/validation-playbook.md)
 - [mcp-tool-orchestration.md](./references/config-authoring/mcp-tool-orchestration.md)
+- For **runtime prompts** and **troubleshooting scenarios** (tail_logs, trace_request, monitor_metrics, inspect_cache), use the **incident-response** skill reference `runtime-prompts-and-troubleshooting-scenarios.md` when incident triage is needed.
 - [quick-start-execution-path.md](./references/dispatcher-foundation/quick-start-execution-path.md) – single entry path for new users and broad requests
 - [repo-layout-workflows.md](./references/dispatcher-foundation/repo-layout-workflows.md) – map the user repo to the dispatcher `src` root and likely file families
 - [playbook-command-linkage.md](./references/dispatcher-foundation/playbook-command-linkage.md) – convert selected playbooks into exact MCP command chains

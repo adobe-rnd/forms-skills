@@ -2,7 +2,7 @@
 
 Use this reference when cloud dispatcher work requires a local SDK-backed runtime, not just static validation.
 
-This file documents the launcher contract exposed by the shipped Dispatcher SDK scripts. Treat the help output from the installed SDK package as the final authority for your exact SDK version.
+This file documents the launcher contract exposed by the shipped Dispatcher SDK scripts. It aligns with [Set up Dispatcher Tools (Adobe Experience League)](https://experienceleague.adobe.com/en/docs/experience-manager-learn/cloud-service/local-development-environment-set-up/dispatcher-tools): Dispatcher is run locally using Docker against the **src** Dispatcher and Apache Web server configuration files. Treat the help output from the installed SDK package as the final authority for your exact SDK version.
 
 ## When To Use This
 
@@ -19,36 +19,52 @@ Do not confuse this with deployable cloud config content. These commands are loc
 The shipped launcher usage is:
 
 ```bash
-./bin/docker_run.sh <deployment-folder> <aem-host>:<aem-port> <local-port>
-./bin/docker_run.sh <deployment-folder> <aem-host>:<aem-port> test
+./bin/docker_run.sh <dispatcher-src> <aem-host>:<aem-port> <local-port>
+./bin/docker_run.sh <dispatcher-src> <aem-host>:<aem-port> test
 ```
 
-Common examples:
+Common examples (first argument is the path to the Dispatcher configuration **src** folder):
 
 ```bash
-./bin/docker_run.sh out <aem-host>:4503 8080
-DISP_RUN_MODE=stage ./bin/docker_run.sh out <aem-host>:4503 8080
-DISP_LOG_LEVEL=trace1 ./bin/docker_run.sh out <aem-host>:4503 8080
-REWRITE_LOG_LEVEL=trace2 ./bin/docker_run.sh out <aem-host>:4503 8080
-./bin/docker_run.sh out <aem-host>:4503 test
+./bin/docker_run.sh ./src <aem-host>:4503 8080
+DISP_RUN_MODE=stage ./bin/docker_run.sh ./src <aem-host>:4503 8080
+DISP_LOG_LEVEL=trace1 ./bin/docker_run.sh ./src <aem-host>:4503 8080
+REWRITE_LOG_LEVEL=trace2 ./bin/docker_run.sh ./src <aem-host>:4503 8080
+./bin/docker_run.sh ./src <aem-host>:4503 test
 ```
+
+For an AEM project, point to the project's `dispatcher/src` folder (e.g. `~/code/my-project/dispatcher/src`).
 
 Meaning of the positional arguments:
 
-- `<deployment-folder>`: prepared SDK deployment directory, often `out`
+- `<dispatcher-src>`: path to the Dispatcher configuration **src** folder (e.g. SDK's `./src` or project's `dispatcher/src`). The launcher runs against these config files; there is no separate "out" deployment folder.
 - `<aem-host>:<aem-port>`: backend AEM endpoint the local Dispatcher runtime should talk to
 - `<local-port>`: host port that exposes the local Dispatcher runtime
 - `test`: run config test mode instead of exposing a live local port
 
-## Hot Reload Launcher
+## Hot reload
 
-Some shipped SDK packages also include:
+Hot reload lets the container pick up changes to Dispatcher and Apache config files without restarting the container—useful when iterating on rewrites, filters, vhosts, or other config under `<dispatcher-src>`.
+
+### Preferred: hot-reload launcher
+
+Many SDK packages include a dedicated launcher:
 
 ```bash
-./bin/docker_run_hot_reload.sh <deployment-folder> <aem-host>:<aem-port> <local-port>
+./bin/docker_run_hot_reload.sh <dispatcher-src> <aem-host>:<aem-port> <local-port>
 ```
 
-In shipped packages, this launcher follows the same positional contract as `docker_run.sh` and enables hot-reload semantics for the deployment folder. If your installed SDK version prints different help text, prefer the installed script output.
+It uses the same positional contract as `docker_run.sh` but watches the config src folder and reloads when files change. Prefer this when available; if your SDK prints different usage, follow its help output.
+
+### Fallback: `HOT_RELOAD` with standard launcher
+
+If `docker_run_hot_reload.sh` is not present, some SDK versions support hot reload via the standard launcher and the `HOT_RELOAD` environment variable:
+
+```bash
+HOT_RELOAD=true ./bin/docker_run.sh ./src <aem-host>:<aem-port> 8080
+```
+
+Check your SDK version; when supported, config changes under the src folder are picked up without restarting. See [Runtime Environment Variables](#runtime-environment-variables) for the `HOT_RELOAD` variable details.
 
 ## Runtime Environment Variables
 
@@ -106,7 +122,7 @@ Use this when local SDK execution depends on variables that would otherwise be e
 
 ### `HOT_RELOAD`
 
-Enables config reload when watched files change.
+Enables config reload when watched files in the config src folder change (no container restart).
 
 Valid values:
 
@@ -115,7 +131,7 @@ Valid values:
 
 Default is `false`.
 
-Use this for local iteration loops on rewrites, filters, and vhosts.
+Use this for local iteration loops on rewrites, filters, and vhosts. When your SDK does not provide `docker_run_hot_reload.sh`, try `HOT_RELOAD=true` with `docker_run.sh` if the package supports it. See [Hot reload](#hot-reload) for usage.
 
 ### `ALLOW_CACHE_INVALIDATION_GLOBALLY`
 
@@ -184,7 +200,7 @@ This is a host Docker-client compatibility override, not a dispatcher runtime se
 Use this first when the goal is syntax or processed-config validation:
 
 ```bash
-./bin/docker_run.sh out <aem-host>:<aem-port> test
+./bin/docker_run.sh ./src <aem-host>:<aem-port> test
 ```
 
 Use this before claiming runtime behavior is verified.
@@ -194,20 +210,20 @@ Use this before claiming runtime behavior is verified.
 Use this when you need request/response verification:
 
 ```bash
-./bin/docker_run.sh out <aem-host>:<aem-port> 8080
+./bin/docker_run.sh ./src <aem-host>:<aem-port> 8080
 ```
 
 Then verify behavior with representative requests against the local port.
 
 ### 3. Hot Reload Iteration
 
-Use this when tuning rewrites, filters, or vhosts repeatedly:
+Use this when tuning rewrites, filters, or vhosts repeatedly so config changes apply without restarting the container. See [Hot reload](#hot-reload) for the launcher and `HOT_RELOAD` fallback.
 
 ```bash
-./bin/docker_run_hot_reload.sh out <aem-host>:<aem-port> 8080
+./bin/docker_run_hot_reload.sh ./src <aem-host>:<aem-port> 8080
 ```
 
-If your SDK package does not include this launcher, use `HOT_RELOAD=true` with the standard launcher when supported by that package version.
+If your SDK does not include `docker_run_hot_reload.sh`, use `HOT_RELOAD=true ./bin/docker_run.sh ./src <aem-host>:<aem-port> 8080` when supported.
 
 ## Skill Usage Guidance
 
