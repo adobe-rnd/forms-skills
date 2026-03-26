@@ -1,0 +1,1 @@
+Use Agents.md for all the rules
