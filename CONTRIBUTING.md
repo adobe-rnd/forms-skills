@@ -1,10 +1,16 @@
-# Contributing to helix-webiste
+# Contributing to Adobe Skills for AI Coding Agents
 
 This project is an Open Development/Inner Source project and welcomes contributions from everyone who finds it useful or lacking.
 
 ## Code Of Conduct
 
 This project adheres to the Adobe [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to cstaub at adobe dot com.
+
+## Community
+
+Have questions, want feedback on a skill, or need a review? Reach out on [#agentskills](https://adobe.enterprise.slack.com/archives/C0APTKDNPEY) on Slack.
+
+For background on the skills format and specification, see [agentskills.io](https://agentskills.io) and the [agentskills GitHub org](https://github.com/agentskills/agentskills).
 
 ## Contributor License Agreement
 
@@ -20,6 +26,10 @@ For other contributors, a maintainer of the project has to approve the pull requ
 
 * Check that there is an existing issue in GitHub issues
 * Check if there are other pull requests that might overlap or conflict with your intended contribution
+
+## Writing Skills
+
+To contribute a new skill, follow the format described in the [Agent Skills specification](https://agentskills.io). When your skill is ready, open a pull request and ping [#agentskills](https://adobe.enterprise.slack.com/archives/C0APTKDNPEY) on Slack to get a review.
 
 # How to Contribute
 
