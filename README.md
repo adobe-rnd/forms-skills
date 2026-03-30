@@ -149,7 +149,7 @@ skills/
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding or updating skills.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding or updating skills. Join [#agentskills](https://adobe.enterprise.slack.com/archives/C0APTKDNPEY) on Adobe Slack for questions and discussion.
 
 ## Resources
 
@@ -157,6 +157,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding or updating skil
 - [Claude Code Plugins](https://code.claude.com/docs/en/discover-plugins)
 - [Vercel Skills](https://github.com/vercel-labs/skills)
 - [upskill GitHub Extension](https://github.com/trieloff/gh-upskill)
+- [#agentskills Slack Channel](https://adobe.enterprise.slack.com/archives/C0APTKDNPEY)
 
 ## License
 
