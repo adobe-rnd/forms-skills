@@ -175,7 +175,7 @@ def update_edge_delivery_config(
     config: "Config",
     form_path: str,
     on_progress: Optional[callable] = None,
-) -> None:
+) -> dict:
     """
     Update the Edge Delivery Service configuration for a form with the GitHub branch.
 
@@ -187,29 +187,56 @@ def update_edge_delivery_config(
         config: Configuration object with github_branch, github_owner, github_repo.
         form_path: Path to the form (e.g., /content/forms/af/forms-team/myform).
         on_progress: Optional callback for progress messages.
+
+    Returns:
+        dict with keys:
+            success (bool): Whether the config was updated successfully.
+            message (str): Description of what happened.
+            remediation (str | None): Suggested fix if the update failed.
     """
 
     def log(message: str) -> None:
         if on_progress:
             on_progress(message)
 
+    def result(success: bool, message: str, remediation: str = None) -> dict:
+        return {"success": success, "message": message, "remediation": remediation}
+
     # Skip if no branch configured
     if not config.github_branch:
-        log("Skipping Edge Delivery config update: GITHUB_BRANCH not set")
-        return
+        msg = "GITHUB_BRANCH is not set in .env"
+        log(f"Skipping Edge Delivery config update: {msg}")
+        return result(
+            False,
+            msg,
+            "Add GITHUB_BRANCH=main (or your branch name) to your workspace .env file and retry.",
+        )
 
     owner = config.github_owner
     repo = config.github_repo
 
     if not owner or not repo:
-        log(
-            "Skipping Edge Delivery config update: Could not parse owner/repo from GITHUB_URL"
+        msg = "Could not parse owner/repo from GITHUB_URL"
+        log(f"Skipping Edge Delivery config update: {msg}")
+        return result(
+            False,
+            msg,
+            "Set GITHUB_URL=https://github.com/<owner>/<repo> in your workspace .env file and retry.",
         )
-        return
 
     # Get CSRF token
     log("Getting CSRF token...")
-    csrf_token = get_csrf_token(client)
+    try:
+        csrf_token = get_csrf_token(client)
+    except Exception as e:
+        msg = f"Failed to get CSRF token: {e}"
+        log(msg)
+        return result(
+            False,
+            msg,
+            "Verify AEM_HOST and AEM_TOKEN (or AEM_USERNAME/AEM_PASSWORD) are correct in .env. "
+            "The token may have expired — regenerate it from AEM Developer Console.",
+        )
 
     # Build config path
     config_path = get_config_path_from_form_path(form_path)
@@ -243,14 +270,50 @@ def update_edge_delivery_config(
         response = requests.post(url, data=form_data, headers=headers)
 
         if not response.ok:
-            log(
-                f"Warning: Edge Delivery config update returned HTTP {response.status_code}: {response.text[:200]}"
-            )
+            msg = f"HTTP {response.status_code} from AEM at {config_path}"
+            detail = response.text[:200] if response.text else "(no response body)"
+            log(f"Warning: Edge Delivery config update failed — {msg}: {detail}")
+
+            if response.status_code == 401:
+                remediation = (
+                    "Authentication failed. Regenerate your bearer token from AEM Developer Console "
+                    "and update AEM_TOKEN in .env."
+                )
+            elif response.status_code == 403:
+                remediation = (
+                    f"Permission denied writing to {config_path}. "
+                    "Ensure the AEM user has write access to /conf/forms/ and that "
+                    "the form path is included in AEM_WRITE_PATHS in .env."
+                )
+            elif response.status_code == 404:
+                remediation = (
+                    f"Cloud config path not found: {config_path}. "
+                    "The form may not have been created correctly on AEM, or the "
+                    "cloud config node does not exist yet. Try re-creating the form."
+                )
+            else:
+                remediation = (
+                    f"AEM returned HTTP {response.status_code}. Check AEM logs for details. "
+                    "Verify AEM_HOST is correct and the AEM instance is healthy."
+                )
+
+            return result(False, f"{msg} — {detail}", remediation)
         else:
-            log(f"Edge Delivery config updated: branch set to '{config.github_branch}'")
+            msg = (
+                f"Edge Delivery config updated: branch set to '{config.github_branch}'"
+            )
+            log(msg)
+            return result(True, msg)
 
     except requests.RequestException as e:
-        log(f"Warning: Failed to update Edge Delivery config: {e}")
+        msg = f"Network error updating Edge Delivery config: {e}"
+        log(msg)
+        return result(
+            False,
+            msg,
+            "Check network connectivity to AEM_HOST. Verify the URL is correct and "
+            "the AEM instance is reachable from your machine.",
+        )
 
 
 def create_empty_form(
@@ -1071,7 +1134,13 @@ def push_form(
     # Update Edge Delivery config for new forms/fragments
     if is_new_form:
         log("Updating Edge Delivery configuration...")
-        update_edge_delivery_config(client, config, target_path, on_progress)
+        eds_config_result = update_edge_delivery_config(
+            client, config, target_path, on_progress
+        )
+        if not eds_config_result["success"]:
+            log(f"⚠ Edge Delivery config update failed: {eds_config_result['message']}")
+            if eds_config_result.get("remediation"):
+                log(f"  Remediation: {eds_config_result['remediation']}")
 
     return target_path, is_new_form
 

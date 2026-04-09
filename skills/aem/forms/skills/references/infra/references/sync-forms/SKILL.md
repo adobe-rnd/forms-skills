@@ -81,10 +81,11 @@ FORM_SYNC_ENV=prod
 
 ```
 <workspace>/
-├── form/
-│   ├── <form-name>.form.json    # Main form content
-│   ├── <form-name>.rule.json    # Rules (separated on pull)
-│   └── metadata.json            # Sync tracking metadata
+├── repo/
+│   └── content/forms/af/        # Mirrors AEM content path — forms pulled here
+│       └── <team>/<path>/
+│           ├── <form-name>.form.json
+│           └── <form-name>.rule.json
 ├── refs/
 │   ├── metadata.json            # Fragment registry
 │   ├── <fragment>.form.json     # Fragment content

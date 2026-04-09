@@ -9,7 +9,6 @@ from . import __version__
 from .config import Config
 from .exceptions import FormSyncError
 
-
 # Global verbose flag
 _verbose = False
 
@@ -35,10 +34,19 @@ def cli():
 
 @cli.command()
 @click.argument("form_path")
-@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output for debugging")
+@click.option(
+    "--verbose", "-v", is_flag=True, help="Enable verbose output for debugging"
+)
 @click.option("--no-rules", is_flag=True, help="Skip rules extraction")
-@click.option("--output", "-o", default=None, help="Output directory (mutually exclusive with --no-edit)")
-@click.option("--no-edit", is_flag=True, help="Sync to refs directory (read-only reference)")
+@click.option(
+    "--output",
+    "-o",
+    default=None,
+    help="Output directory (mutually exclusive with --no-edit)",
+)
+@click.option(
+    "--no-edit", is_flag=True, help="Sync to refs directory (read-only reference)"
+)
 def pull(form_path: str, verbose: bool, no_rules: bool, output: str, no_edit: bool):
     """Pull a form from AEM to local filesystem.
 
@@ -61,11 +69,14 @@ def pull(form_path: str, verbose: bool, no_rules: bool, output: str, no_edit: bo
     _verbose = verbose
 
     from pathlib import Path
+
     from .pull import pull_form
 
     # Validate mutual exclusion
     if output and no_edit:
-        raise click.UsageError("Cannot use --output with --no-edit. Use one or the other.")
+        raise click.UsageError(
+            "Cannot use --output with --no-edit. Use one or the other."
+        )
 
     try:
         # Load configuration
@@ -75,7 +86,9 @@ def pull(form_path: str, verbose: bool, no_rules: bool, output: str, no_edit: bo
 
         # Pull the form
         click.echo(f"Fetching form from AEM: {form_path}")
-        log_verbose(f"API URL: {config.aem_host}{form_path}/jcr:content/root/section/form.-1.json")
+        log_verbose(
+            f"API URL: {config.aem_host}{form_path}/jcr:content/root/section/form.-1.json"
+        )
         if no_rules:
             log_verbose("Skipping rules extraction")
         if no_edit:
@@ -85,10 +98,11 @@ def pull(form_path: str, verbose: bool, no_rules: bool, output: str, no_edit: bo
 
         output_dir = Path(output) if output else None
         output_path, form_key = pull_form(
-            form_path, config,
+            form_path,
+            config,
             extract_rules=not no_rules,
             output_dir=output_dir,
-            no_edit=no_edit
+            no_edit=no_edit,
         )
 
         # Success output
@@ -102,7 +116,10 @@ def pull(form_path: str, verbose: bool, no_rules: bool, output: str, no_edit: bo
     except Exception as e:
         if verbose:
             import traceback
-            click.secho(f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True)
+
+            click.secho(
+                f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True
+            )
         else:
             click.secho(f"UNEXPECTED ERROR: {e}", fg="red", err=True)
         sys.exit(1)
@@ -110,13 +127,32 @@ def pull(form_path: str, verbose: bool, no_rules: bool, output: str, no_edit: bo
 
 @cli.command("list")
 @click.argument("dam_path")
-@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output for debugging")
+@click.option(
+    "--verbose", "-v", is_flag=True, help="Enable verbose output for debugging"
+)
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 @click.option("--pull", "do_pull", is_flag=True, help="Pull all listed forms")
 @click.option("--no-rules", is_flag=True, help="Skip rules extraction when pulling")
-@click.option("--output", "-o", default=None, help="Output directory for pulled forms (mutually exclusive with --no-edit)")
-@click.option("--no-edit", is_flag=True, help="Sync pulled forms to refs directory (read-only reference)")
-def list_forms(dam_path: str, verbose: bool, as_json: bool, do_pull: bool, no_rules: bool, output: str, no_edit: bool):
+@click.option(
+    "--output",
+    "-o",
+    default=None,
+    help="Output directory for pulled forms (mutually exclusive with --no-edit)",
+)
+@click.option(
+    "--no-edit",
+    is_flag=True,
+    help="Sync pulled forms to refs directory (read-only reference)",
+)
+def list_forms(
+    dam_path: str,
+    verbose: bool,
+    as_json: bool,
+    do_pull: bool,
+    no_rules: bool,
+    output: str,
+    no_edit: bool,
+):
     """List forms in an AEM DAM folder.
 
     \b
@@ -136,17 +172,22 @@ def list_forms(dam_path: str, verbose: bool, as_json: bool, do_pull: bool, no_ru
 
     import json
     from pathlib import Path
+
     from .client import AEMClient
     from .pull import pull_form
 
     # Validate mutual exclusion
     if output and no_edit:
-        raise click.UsageError("Cannot use --output with --no-edit. Use one or the other.")
+        raise click.UsageError(
+            "Cannot use --output with --no-edit. Use one or the other."
+        )
 
     def dam_to_content_path(dam_path: str) -> str:
         """Convert DAM path to form content path."""
         if dam_path.startswith("/content/dam/formsanddocuments"):
-            return dam_path.replace("/content/dam/formsanddocuments", "/content/forms/af")
+            return dam_path.replace(
+                "/content/dam/formsanddocuments", "/content/forms/af"
+            )
         return dam_path
 
     try:
@@ -212,10 +253,11 @@ def list_forms(dam_path: str, verbose: bool, as_json: bool, do_pull: bool, no_ru
             for form in forms:
                 try:
                     output_path, form_key = pull_form(
-                        form["contentPath"], config,
+                        form["contentPath"],
+                        config,
                         extract_rules=not no_rules,
                         output_dir=output_dir,
-                        no_edit=no_edit
+                        no_edit=no_edit,
                     )
                     click.echo(f"  ✓ Pulled: {form['name']} → {output_path}")
                     success_count += 1
@@ -232,7 +274,10 @@ def list_forms(dam_path: str, verbose: bool, as_json: bool, do_pull: bool, no_ru
     except Exception as e:
         if verbose:
             import traceback
-            click.secho(f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True)
+
+            click.secho(
+                f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True
+            )
         else:
             click.secho(f"UNEXPECTED ERROR: {e}", fg="red", err=True)
         sys.exit(1)
@@ -263,8 +308,17 @@ def list_forms(dam_path: str, verbose: bool, as_json: bool, do_pull: bool, no_ru
     is_flag=True,
     help="Push to preview path defined by FORM_SYNC_PREVIEW_PATH env variable",
 )
-@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output for debugging")
-def push(form_path: str, source: str, suffix: str, force_new: bool, preview: bool, verbose: bool):
+@click.option(
+    "--verbose", "-v", is_flag=True, help="Enable verbose output for debugging"
+)
+def push(
+    form_path: str,
+    source: str,
+    suffix: str,
+    force_new: bool,
+    preview: bool,
+    verbose: bool,
+):
     """Push a local form to AEM.
 
     \b
@@ -302,13 +356,16 @@ def push(form_path: str, source: str, suffix: str, force_new: bool, preview: boo
                 click.secho(
                     "WARNING: --preview flag used but FORM_SYNC_PREVIEW_PATH environment variable is not set.\n"
                     "Please set FORM_SYNC_PREVIEW_PATH in your .env file to use preview mode.",
-                    fg="yellow", err=True
+                    fg="yellow",
+                    err=True,
                 )
                 sys.exit(1)
             preview_path = config.preview_path
             # Normalize to DAM path format (accepts both forms and DAM paths)
             if preview_path.startswith("/content/forms/af/"):
-                preview_path = preview_path.replace("/content/forms/af/", "/content/dam/formsanddocuments/")
+                preview_path = preview_path.replace(
+                    "/content/forms/af/", "/content/dam/formsanddocuments/"
+                )
                 log_verbose(f"Converted forms path to DAM path: {preview_path}")
             log_verbose(f"Preview path: {preview_path}")
 
@@ -327,8 +384,13 @@ def push(form_path: str, source: str, suffix: str, force_new: bool, preview: boo
                 click.echo(f"  {message}")
 
         target_path, is_new_form = push_form(
-            form_path, config, source, suffix, force_new, on_progress if verbose else None,
-            preview_path=preview_path
+            form_path,
+            config,
+            source,
+            suffix,
+            force_new,
+            on_progress if verbose else None,
+            preview_path=preview_path,
         )
 
         # Success output
@@ -348,7 +410,10 @@ def push(form_path: str, source: str, suffix: str, force_new: bool, preview: boo
     except Exception as e:
         if verbose:
             import traceback
-            click.secho(f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True)
+
+            click.secho(
+                f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True
+            )
         else:
             click.secho(f"UNEXPECTED ERROR: {e}", fg="red", err=True)
         sys.exit(1)
@@ -356,7 +421,9 @@ def push(form_path: str, source: str, suffix: str, force_new: bool, preview: boo
 
 @cli.command()
 @click.argument("form_path")
-@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output for debugging")
+@click.option(
+    "--verbose", "-v", is_flag=True, help="Enable verbose output for debugging"
+)
 def clear(form_path: str, verbose: bool):
     """Clear a local form to empty state.
 
@@ -377,6 +444,7 @@ def clear(form_path: str, verbose: bool):
 
     import json
     from pathlib import Path
+
     from .metadata import MetadataManager
 
     # Minimal form structure
@@ -386,7 +454,7 @@ def clear(form_path: str, verbose: bool):
         "sling:resourceType": "fd/franklin/components/form/v1/form",
         "fd:version": "2.1",
         "dorType": "none",
-        "thankYouOption": "message"
+        "thankYouOption": "message",
     }
 
     try:
@@ -400,13 +468,20 @@ def clear(form_path: str, verbose: bool):
         for key in metadata_manager._data:
             data = metadata_manager._data[key]
             if isinstance(data, dict) and "originalPath" in data:
-                if data.get("originalPath") == form_path or data.get("currentPath") == form_path:
+                if (
+                    data.get("originalPath") == form_path
+                    or data.get("currentPath") == form_path
+                ):
                     form_key = key
                     form_metadata = metadata_manager.get_form(key)
                     break
 
         if not form_metadata:
-            click.secho(f"ERROR: Form with path '{form_path}' not found in metadata.json", fg="red", err=True)
+            click.secho(
+                f"ERROR: Form with path '{form_path}' not found in metadata.json",
+                fg="red",
+                err=True,
+            )
             sys.exit(1)
 
         log_verbose(f"Form key: {form_key}")
@@ -450,7 +525,10 @@ def clear(form_path: str, verbose: bool):
     except Exception as e:
         if verbose:
             import traceback
-            click.secho(f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True)
+
+            click.secho(
+                f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True
+            )
         else:
             click.secho(f"UNEXPECTED ERROR: {e}", fg="red", err=True)
         sys.exit(1)
@@ -459,7 +537,9 @@ def clear(form_path: str, verbose: bool):
 @cli.command()
 @click.argument("folder_path")
 @click.argument("form_name")
-@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output for debugging")
+@click.option(
+    "--verbose", "-v", is_flag=True, help="Enable verbose output for debugging"
+)
 def create(folder_path: str, form_name: str, verbose: bool):
     """Create a new empty form on AEM.
 
@@ -481,10 +561,15 @@ def create(folder_path: str, form_name: str, verbose: bool):
     _verbose = verbose
 
     import time
+
     from .client import AEMClient
-    from .push import create_empty_form, get_form_path_from_url, update_edge_delivery_config
-    from .pull import pull_form
     from .metadata import MetadataManager
+    from .pull import pull_form
+    from .push import (
+        create_empty_form,
+        get_form_path_from_url,
+        update_edge_delivery_config,
+    )
 
     try:
         # Load configuration
@@ -500,7 +585,8 @@ def create(folder_path: str, form_name: str, verbose: bool):
             click.secho(
                 f"ERROR: Folder path must start with /content/forms/af/\n"
                 f"Got: {folder_path}",
-                fg="red", err=True
+                fg="red",
+                err=True,
             )
             sys.exit(1)
 
@@ -510,7 +596,9 @@ def create(folder_path: str, form_name: str, verbose: bool):
         log_verbose("Path is in allowlist")
 
         # Convert forms path to DAM path for listing
-        dam_path = folder_path.replace("/content/forms/af/", "/content/dam/formsanddocuments/")
+        dam_path = folder_path.replace(
+            "/content/forms/af/", "/content/dam/formsanddocuments/"
+        )
         log_verbose(f"DAM path: {dam_path}")
 
         # List existing forms in the folder
@@ -520,7 +608,9 @@ def create(folder_path: str, form_name: str, verbose: bool):
             data = response.json()
             existing_forms = set()
             for key, value in data.items():
-                if not key.startswith(("jcr:", "sling:", "rep:")) and isinstance(value, dict):
+                if not key.startswith(("jcr:", "sling:", "rep:")) and isinstance(
+                    value, dict
+                ):
                     existing_forms.add(key)
             log_verbose(f"Found {len(existing_forms)} existing form(s)")
         except FormSyncError:
@@ -560,7 +650,9 @@ def create(folder_path: str, form_name: str, verbose: bool):
 
         # Pull the form to create local files and metadata
         click.echo(f"Pulling form to create local files...")
-        output_path, form_key = pull_form(target_path, config, extract_rules=True, override_form_key=final_form_name)
+        output_path, form_key = pull_form(
+            target_path, config, extract_rules=True, override_form_key=final_form_name
+        )
 
         # Set currentPath to the target_path so push updates this form instead of creating a new version
         metadata_manager = MetadataManager()
@@ -570,8 +662,28 @@ def create(folder_path: str, form_name: str, verbose: bool):
         def on_progress(message: str) -> None:
             if verbose:
                 click.echo(f"  {message}")
+
         click.echo("Updating Edge Delivery configuration...")
-        update_edge_delivery_config(client, config, target_path, on_progress if verbose else None)
+        eds_result = update_edge_delivery_config(
+            client, config, target_path, on_progress if verbose else None
+        )
+        if eds_result["success"]:
+            click.echo("✓ Edge Delivery configuration updated")
+        else:
+            click.secho(
+                f"⚠ Edge Delivery config update failed: {eds_result['message']}",
+                fg="yellow",
+                err=True,
+            )
+            if eds_result.get("remediation"):
+                click.secho(
+                    f"  Remediation: {eds_result['remediation']}", fg="yellow", err=True
+                )
+            click.secho(
+                "  The form was created successfully, but its EDS cloud config needs to be fixed manually.",
+                fg="yellow",
+                err=True,
+            )
 
         # Success output
         click.echo(f"✓ Saved to {output_path}")
@@ -584,7 +696,10 @@ def create(folder_path: str, form_name: str, verbose: bool):
     except Exception as e:
         if verbose:
             import traceback
-            click.secho(f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True)
+
+            click.secho(
+                f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True
+            )
         else:
             click.secho(f"UNEXPECTED ERROR: {e}", fg="red", err=True)
         sys.exit(1)
@@ -593,7 +708,9 @@ def create(folder_path: str, form_name: str, verbose: bool):
 @cli.command("create-fragment")
 @click.argument("folder_path")
 @click.argument("fragment_name")
-@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output for debugging")
+@click.option(
+    "--verbose", "-v", is_flag=True, help="Enable verbose output for debugging"
+)
 def create_fragment(folder_path: str, fragment_name: str, verbose: bool):
     """Create a new empty fragment on AEM.
 
@@ -615,10 +732,11 @@ def create_fragment(folder_path: str, fragment_name: str, verbose: bool):
     _verbose = verbose
 
     import time
+
     from .client import AEMClient
-    from .push import create_empty_fragment, update_edge_delivery_config
-    from .pull import pull_form
     from .metadata import MetadataManager
+    from .pull import pull_form
+    from .push import create_empty_fragment, update_edge_delivery_config
 
     try:
         # Load configuration
@@ -634,7 +752,8 @@ def create_fragment(folder_path: str, fragment_name: str, verbose: bool):
             click.secho(
                 f"ERROR: Folder path must start with /content/forms/af/\n"
                 f"Got: {folder_path}",
-                fg="red", err=True
+                fg="red",
+                err=True,
             )
             sys.exit(1)
 
@@ -644,7 +763,9 @@ def create_fragment(folder_path: str, fragment_name: str, verbose: bool):
         log_verbose("Path is in allowlist")
 
         # Convert forms path to DAM path for listing
-        dam_path = folder_path.replace("/content/forms/af/", "/content/dam/formsanddocuments/")
+        dam_path = folder_path.replace(
+            "/content/forms/af/", "/content/dam/formsanddocuments/"
+        )
         log_verbose(f"DAM path: {dam_path}")
 
         # List existing fragments in the folder
@@ -656,7 +777,9 @@ def create_fragment(folder_path: str, fragment_name: str, verbose: bool):
             # Handle both dict and list responses from AEM
             if isinstance(data, dict):
                 for key, value in data.items():
-                    if not key.startswith(("jcr:", "sling:", "rep:")) and isinstance(value, dict):
+                    if not key.startswith(("jcr:", "sling:", "rep:")) and isinstance(
+                        value, dict
+                    ):
                         existing_items.add(key)
             elif isinstance(data, list):
                 # List response - extract names from items
@@ -678,7 +801,9 @@ def create_fragment(folder_path: str, fragment_name: str, verbose: bool):
             log_verbose(f"Name conflict, trying: {final_fragment_name}")
 
         if final_fragment_name != fragment_name:
-            click.echo(f"Fragment '{fragment_name}' already exists, using: {final_fragment_name}")
+            click.echo(
+                f"Fragment '{fragment_name}' already exists, using: {final_fragment_name}"
+            )
 
         # Create the fragment
         click.echo(f"Creating fragment: {final_fragment_name}")
@@ -700,7 +825,12 @@ def create_fragment(folder_path: str, fragment_name: str, verbose: bool):
 
         # Pull the fragment to create local files and metadata
         click.echo(f"Pulling fragment to create local files...")
-        output_path, fragment_key = pull_form(target_path, config, extract_rules=True, override_form_key=final_fragment_name)
+        output_path, fragment_key = pull_form(
+            target_path,
+            config,
+            extract_rules=True,
+            override_form_key=final_fragment_name,
+        )
 
         # Set currentPath to the target_path so push updates this fragment instead of creating a new version
         metadata_manager = MetadataManager()
@@ -710,13 +840,35 @@ def create_fragment(folder_path: str, fragment_name: str, verbose: bool):
         def on_progress(message: str) -> None:
             if verbose:
                 click.echo(f"  {message}")
+
         click.echo("Updating Edge Delivery configuration...")
-        update_edge_delivery_config(client, config, target_path, on_progress if verbose else None)
+        eds_result = update_edge_delivery_config(
+            client, config, target_path, on_progress if verbose else None
+        )
+        if eds_result["success"]:
+            click.echo("✓ Edge Delivery configuration updated")
+        else:
+            click.secho(
+                f"⚠ Edge Delivery config update failed: {eds_result['message']}",
+                fg="yellow",
+                err=True,
+            )
+            if eds_result.get("remediation"):
+                click.secho(
+                    f"  Remediation: {eds_result['remediation']}", fg="yellow", err=True
+                )
+            click.secho(
+                "  The fragment was created successfully, but its EDS cloud config needs to be fixed manually.",
+                fg="yellow",
+                err=True,
+            )
 
         # Success output
         click.echo(f"✓ Saved to {output_path}")
         click.echo(f"✓ Updated metadata.json (key: {fragment_key}, fragment: true)")
-        click.secho(f"SUCCESS: Fragment created and pulled to {output_path}", fg="green")
+        click.secho(
+            f"SUCCESS: Fragment created and pulled to {output_path}", fg="green"
+        )
 
     except FormSyncError as e:
         click.secho(f"ERROR: {e}", fg="red", err=True)
@@ -724,7 +876,10 @@ def create_fragment(folder_path: str, fragment_name: str, verbose: bool):
     except Exception as e:
         if verbose:
             import traceback
-            click.secho(f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True)
+
+            click.secho(
+                f"UNEXPECTED ERROR: {e}\n{traceback.format_exc()}", fg="red", err=True
+            )
         else:
             click.secho(f"UNEXPECTED ERROR: {e}", fg="red", err=True)
         sys.exit(1)

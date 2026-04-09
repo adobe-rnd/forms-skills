@@ -54,7 +54,7 @@ Accept any reasonable name (e.g. `personal-loan-form`, `my-project`, `acme-onboa
 Create the workspace directory **inside the current working directory** — the directory the user already has open in their editor / terminal. Do NOT ask the user where to put it; it always goes in cwd.
 
 ```
-mkdir -p <name>/{form,repo,refs/apis,code/blocks/form/{scripts,api-clients,components},journeys,plans,.agent}
+mkdir -p <name>/{repo,refs/apis,code/blocks/form/{scripts,api-clients,components},journeys,plans,.agent}
 ```
 
 Then immediately write the absolute path into `<name>/.env` as the first entry:
@@ -212,9 +212,6 @@ Confirm to the user:
 │   ├── handover.md
 │   ├── history.md
 │   └── sessions.md
-├── form/
-│   ├── <form-name>.form.json     # Active form content definition
-│   └── <form-name>.rule.json     # Rules/events (separated on pull)
 ├── repo/
 │   └── content/forms/af/         # Mirrors AEM content path — pulled forms land here
 │       └── <team>/<app>/
@@ -243,7 +240,6 @@ Confirm to the user:
 
 | Directory | Purpose |
 |-----------|---------|
-| `form/` | Active form being edited — the working copy of the form and its rules |
 | `repo/` | Mirrors AEM Author content structure; forms are pulled here under their AEM content path |
 | `refs/` | Read-only references — fragments, API specs, and generated API clients (staging area) |
 | `code/` | Mirrors your EDS GitHub repo; contains blocks, custom functions, API clients, and components |
