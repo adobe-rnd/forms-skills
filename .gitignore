@@ -1,13 +1,43 @@
-# Dependencies
+# ── Dependencies ─────────────────────────────────────────
 node_modules/
 
-# OS files
-.DS_Store
+# ── Python ───────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+*.egg
+pip-wheel-metadata/
 
-# Editor files
+# ── Build / Distribution ────────────────────────────────
+dist/
+build/
+*.whl
+
+# ── Test / Coverage ──────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# ── Credentials & Environment ────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── OS Files ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editor / IDE ─────────────────────────────────────────
 *.swp
 *.swo
 *~
+.idea/
+.vscode/
+*.code-workspace
 
-# Temporary files
+# ── Temporary Files ──────────────────────────────────────
 drafts/tmp/

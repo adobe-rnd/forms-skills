@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aem-forms-skills"
+version = "0.1.0"
+description = "CLI tools for AEM Forms Skills plugin"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+dependencies = [
+    "click>=8.0.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.28.0",
+    "pydantic>=2.0",
+    "PyYAML>=6.0.0",
+    "Jinja2>=3.0.0",
+    "apispec>=6.0.0",
+    "openapi-spec-validator>=0.7.0",
+    "PyGithub>=2.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+form-sync = "form_sync.cli:cli"
+eds-code-sync = "eds_code_sync.cli:cli"
+api-manager = "api_manager.cli:cli"
+cct = "cct.cli:cli"
+git-sandbox = "git_sandbox.cli:cli"
+
+[tool.setuptools.packages.find]
+where = [
+    "skills/scripts",
+    "skills/references/build/references/create-component/scripts",
+    "skills/references/build/references/create-form/scripts",
+    "skills/references/build/references/scaffold-form/scripts",
+    "skills/references/infra/references/sync-forms/scripts",
+    "skills/references/infra/references/sync-eds-code/scripts",
+    "skills/references/infra/references/git-sandbox/scripts",
+    "skills/references/integration/references/manage-apis/scripts",
+]

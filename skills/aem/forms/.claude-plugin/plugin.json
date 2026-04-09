@@ -1,0 +1,42 @@
+{
+  "name": "aem-forms",
+  "version": "0.1.0",
+  "description": "Skills for building AEM Adaptive Forms through AI conversation — create, validate, and deploy forms via natural language",
+  "author": {
+    "name": "Adobe"
+  },
+  "repository": "https://github.com/adobe/skills",
+  "license": "Apache-2.0",
+  "skills": [
+    "./skills",
+    "./skills/references/infra",
+    "./skills/references/infra/references/setup-workspace",
+    "./skills/references/infra/references/sync-forms",
+    "./skills/references/infra/references/sync-eds-code",
+    "./skills/references/infra/references/git-sandbox",
+    "./skills/references/analysis",
+    "./skills/references/analysis/references/analyze-requirements",
+    "./skills/references/analysis/references/analyze-v1-form",
+    "./skills/references/analysis/references/create-screen-doc",
+    "./skills/references/analysis/references/review-screen-doc",
+    "./skills/references/build",
+    "./skills/references/build/references/scaffold-form",
+    "./skills/references/build/references/create-form",
+    "./skills/references/build/references/create-component",
+    "./skills/references/logic",
+    "./skills/references/logic/references/add-rules",
+    "./skills/references/logic/references/create-function",
+    "./skills/references/logic/references/optimize-rules",
+    "./skills/references/integration",
+    "./skills/references/integration/references/manage-apis",
+    "./skills/references/context",
+    "./skills/references/context/references/manage-context"
+  ],
+  "keywords": [
+    "adobe",
+    "aem",
+    "forms",
+    "adaptive-forms",
+    "edge-delivery-services"
+  ]
+}

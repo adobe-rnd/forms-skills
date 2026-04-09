@@ -1,0 +1,88 @@
+{
+  "_description": "Navigate to a help URL in a new tab when Help button is clicked",
+  "_natural_language": "When Help button is clicked, navigate to 'https://help.example.com' in new tab",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Open Help Page",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.helpButton",
+                  "displayName": "Help Button",
+                  "type": "AFCOMPONENT|FIELD|BUTTON",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/Help Button/",
+                  "name": "helpButton",
+                  "parent": "$form"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is clicked"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": null
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "NAVIGATE_TO",
+                          "items": [
+                            {
+                              "nodeName": "NAVIGATE_TO_EXPRESSION",
+                              "choice": {
+                                "nodeName": "URL_LITERAL",
+                                "value": "https://help.example.com"
+                              }
+                            },
+                            {
+                              "nodeName": "in",
+                              "value": null
+                            },
+                            {
+                              "nodeName": "NAVIGATE_METHOD_OPTIONS",
+                              "choice": {
+                                "nodeName": "NEW_TAB",
+                                "value": null
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
