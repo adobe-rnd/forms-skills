@@ -35,12 +35,12 @@ git-sandbox = "git_sandbox.cli:cli"
 
 [tool.setuptools.packages.find]
 where = [
-    "skills/scripts",
-    "skills/references/build/references/create-component/scripts",
-    "skills/references/build/references/create-form/scripts",
-    "skills/references/build/references/scaffold-form/scripts",
-    "skills/references/infra/references/sync-forms/scripts",
-    "skills/references/infra/references/sync-eds-code/scripts",
-    "skills/references/infra/references/git-sandbox/scripts",
-    "skills/references/integration/references/manage-apis/scripts",
+    "forms-orchestrator/scripts",
+    "forms-orchestrator/references/domain-registry/references/build/references/create-component/scripts",
+    "forms-orchestrator/references/domain-registry/references/build/references/create-form/scripts",
+    "forms-orchestrator/references/domain-registry/references/build/references/scaffold-form/scripts",
+    "forms-orchestrator/references/domain-registry/references/infra/references/sync-forms/scripts",
+    "forms-orchestrator/references/domain-registry/references/infra/references/sync-eds-code/scripts",
+    "forms-orchestrator/references/domain-registry/references/infra/references/git-sandbox/scripts",
+    "forms-orchestrator/references/domain-registry/references/integration/references/manage-apis/scripts",
 ]
