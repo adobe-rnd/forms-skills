@@ -142,3 +142,4 @@ Document the analysis and acceptance criteria in your response. This becomes the
 - [Visual Analysis](resources/visual-analysis.md)
 - [Task Types](resources/task-types.md)
 
+
