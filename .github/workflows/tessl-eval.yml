@@ -129,7 +129,9 @@ jobs:
           FAIL=0
           SUMMARY_FILE=$(mktemp)
           ERRORS_FILE=$(mktemp)
-          trap 'rm -f "$SUMMARY_FILE" "$ERRORS_FILE"' EXIT
+          STDOUT_TMP=$(mktemp)
+          STDERR_TMP=$(mktemp)
+          trap 'rm -f "$SUMMARY_FILE" "$ERRORS_FILE" "$STDOUT_TMP" "$STDERR_TMP"' EXIT
 
           POLL_INTERVAL=30
           TIMEOUT=900
@@ -170,8 +172,28 @@ jobs:
               sleep "$POLL_INTERVAL"
               ELAPSED=$((ELAPSED + POLL_INTERVAL))
 
-              STATUS_OUTPUT=$(tessl eval view "$RUN_ID" --json 2>&1) || true
-              EVAL_STATUS=$(echo "$STATUS_OUTPUT" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['attributes']['status'])" 2>/dev/null) || EVAL_STATUS="unknown"
+              # Capture stdout and stderr separately to avoid breaking JSON parsing
+              VIEW_EXIT=0
+              tessl eval view "$RUN_ID" --json >"$STDOUT_TMP" 2>"$STDERR_TMP" || VIEW_EXIT=$?
+
+              if [ "$VIEW_EXIT" -ne 0 ]; then
+                STDERR_CONTENT=$(cat "$STDERR_TMP")
+                echo "  [$TILE_NAME] tessl eval view exited $VIEW_EXIT: $STDERR_CONTENT"
+                if echo "$STDERR_CONTENT" | grep -qi "not found"; then
+                  # Transient: run not yet visible, keep polling
+                  EVAL_STATUS="unknown"
+                else
+                  # Permanent failure
+                  echo "::warning::tessl eval view failed for $TILE_NAME (exit $VIEW_EXIT): $STDERR_CONTENT"
+                  EVAL_STATUS="failed"
+                  break
+                fi
+              else
+                EVAL_STATUS=$(python3 -c "import sys,json; print(json.load(sys.stdin)['data']['attributes']['status'])" <"$STDOUT_TMP" 2>/dev/null) || {
+                  echo "  [$TILE_NAME] Warning: could not parse JSON from stdout"
+                  EVAL_STATUS="unknown"
+                }
+              fi
 
               echo "  [$TILE_NAME] Poll at ${ELAPSED}s: status=$EVAL_STATUS"
 
