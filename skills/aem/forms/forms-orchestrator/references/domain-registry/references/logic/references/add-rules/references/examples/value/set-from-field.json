@@ -1,0 +1,101 @@
+{
+  "_description": "Copy value from one field to another when Copy button is clicked",
+  "_natural_language": "When Copy button is clicked, set shippingAddress to billingAddress",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Copy Billing to Shipping",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.addressSection.copyAddressButton",
+                  "displayName": "Copy Address Button",
+                  "type": "AFCOMPONENT|FIELD|BUTTON",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/AddressSection/Copy Address Button/",
+                  "name": "copyAddressButton",
+                  "parent": "$form.addressSection"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is clicked"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": null
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "SET_VALUE_STATEMENT",
+                          "items": [
+                            {
+                              "nodeName": "VALUE_FIELD",
+                              "value": {
+                                "id": "$form.addressSection.shippingAddress",
+                                "displayName": "Shipping Address",
+                                "type": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+                                "isDuplicate": false,
+                                "displayPath": "FORM/AddressSection/Shipping Address/",
+                                "name": "shippingAddress",
+                                "parent": "$form.addressSection"
+                              }
+                            },
+                            {
+                              "nodeName": "to",
+                              "value": null
+                            },
+                            {
+                              "nodeName": "EXPRESSION",
+                              "choice": {
+                                "nodeName": "COMPONENT",
+                                "value": {
+                                  "id": "$form.addressSection.billingAddress",
+                                  "displayName": "Billing Address",
+                                  "type": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+                                  "isDuplicate": false,
+                                  "displayPath": "FORM/AddressSection/Billing Address/",
+                                  "name": "billingAddress",
+                                  "parent": "$form.addressSection"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
