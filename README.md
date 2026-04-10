@@ -118,6 +118,31 @@ cd your-edge-delivery-project   # or any subdirectory within it
 | `whitepaper` | Create professional PDF whitepapers from Markdown |
 | `auth` | Authenticate with AEM Config Service API |
 
+### AEM Forms
+
+Turn natural language into production AEM Adaptive Forms. A plan-driven skill gateway with 16 skills across 6 domains.
+
+**Quick Start:**
+```bash
+# Say: "Set up a new AEM Forms workspace for my project."
+# Then: "Here's the requirements doc for my form. Build it."
+```
+
+The **forms-orchestrator** routes intents through a 6-step algorithm — it generates plans from requirements via a Planner, resolves skills via a Domain Registry, and executes them. For single tasks it routes directly to the matching domain.
+
+#### Domains
+
+| Domain | Skills |
+|--------|--------|
+| `analysis` | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `review-screen-doc` |
+| `build` | `scaffold-form`, `create-form`, `create-component` |
+| `logic` | `add-rules`, `create-function`, `optimize-rules` |
+| `integration` | `manage-apis` |
+| `infra` | `setup-workspace`, `sync-forms`, `sync-eds-code`, `git-sandbox` |
+| `context` | `manage-context` |
+
+**Requirements:** Node.js 18+, Python 3.10+, `git` on PATH. The plugin manages its own Python virtual environment — dependencies are installed automatically on first use.
+
 ## Repository Structure
 
 ```
@@ -130,6 +155,26 @@ skills/
     │       ├── content-driven-development/
     │       ├── building-blocks/
     │       └── ...
+    ├── forms/
+    │   ├── .claude-plugin/
+    │   │   └── plugin.json
+    │   ├── pyproject.toml
+    │   ├── setup.sh
+    │   ├── forms-orchestrator/
+    │   │   ├── SKILL.md
+    │   │   ├── assets/
+    │   │   ├── scripts/              ← CLI tools (accessed via ${CLAUDE_PLUGIN_ROOT}/forms-orchestrator/scripts/)
+    │   │   └── references/
+    │   │       ├── planner/
+    │   │       └── domain-registry/
+    │   │           └── references/
+    │   │               ├── analysis/
+    │   │               ├── build/
+    │   │               ├── logic/
+    │   │               ├── integration/
+    │   │               ├── infra/
+    │   │               └── context/
+    │   └── tests/
     └── project-management/
         ├── .claude-plugin/
         │   └── plugin.json
