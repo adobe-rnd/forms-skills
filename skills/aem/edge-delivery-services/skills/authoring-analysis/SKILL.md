@@ -1,6 +1,7 @@
 ---
 name: authoring-analysis
 description: Analyze content sequences and determine authoring approach (default content vs blocks). Validates block selection and section styling for import/migration to AEM Edge Delivery Services.
+license: Apache-2.0
 ---
 
 # Authoring Analysis

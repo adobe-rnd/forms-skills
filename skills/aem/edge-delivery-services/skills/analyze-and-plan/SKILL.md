@@ -1,6 +1,7 @@
 ---
 name: analyze-and-plan
 description: Analyze development requirements and define acceptance criteria for AEM Edge Delivery Services tasks. Handles new blocks, variants, modifications, bug fixes, and styling changes with task-specific guidance.
+license: Apache-2.0
 ---
 
 # Analyze & Plan

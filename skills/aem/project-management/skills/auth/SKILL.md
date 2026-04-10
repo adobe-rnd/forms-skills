@@ -1,6 +1,7 @@
 ---
 name: auth
 description: Authenticate with AEM Edge Delivery Services Config Service API. Opens a browser window for Adobe ID login and captures the auth token when browser is closed. Use when generating guides/documentation that require API access.
+license: Apache-2.0
 allowed-tools: Read, Write, Edit, Bash, AskUserQuestion
 ---
 
