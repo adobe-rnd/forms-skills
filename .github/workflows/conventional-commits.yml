@@ -1,4 +1,4 @@
-name: Conventional Commits
+name: Conventional Commits (at least one)
 
 on:
   pull_request:
@@ -16,7 +16,10 @@ jobs:
         run: |
           PATTERN='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_-]+\))?!?: .+'
 
-          COMMITS=$(git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%h %s")
+          COMMITS=$(git log ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} --pretty=format:"%h %s" 2>&1) || {
+            echo "::error::Failed to retrieve commits: $COMMITS"
+            exit 1
+          }
           if [ -z "$COMMITS" ]; then
             echo "No commits found in this PR."
             exit 1
@@ -39,9 +42,9 @@ jobs:
 
           echo ""
           if [ "$FOUND" -eq 1 ]; then
-            echo "✅ At least one conventional commit found."
+            echo "✅ Pass: at least one commit follows the Conventional Commits format."
           else
-            echo "❌ No conventional commits found. Please use the format: type(scope): description"
+            echo "❌ Fail: no commits follow the Conventional Commits format. At least one is required. Please use: type(scope): description"
             exit 1
           fi
 
