@@ -20,7 +20,7 @@ Every skill is a directory with at minimum a `SKILL.md`:
 
 ```
 <skill-name>/
-├── SKILL.md              # type: skill | router | domain | pipeline
+├── SKILL.md              # type: skill | router | domain
 ├── references/           # Sub-skills or reference docs
 │   ├── <sub-skill>/
 │   │   └── SKILL.md      # type: skill | router | domain
@@ -58,7 +58,6 @@ Level 0 (entry point)     → type: router       (orchestrator / gateway)
 Level 1 (registries)      → type: router       (domain registry)
                           → type: skill         (planner — generates plans dynamically)
 Level 2 (grouping)        → type: domain        (domain routers)
-                          → type: pipeline      (static workflow definitions — alternative to plans)
 Level 3 (implementation)  → type: skill         (leaf skills — do the work)
 
 Supporting files at any level:
@@ -74,7 +73,6 @@ Supporting files at any level:
 | 0 | `router` | Yes | No | 100 |
 | 1 | `router` | Yes | No | 100 |
 | 2 | `domain` | Yes | No | 100 |
-| 2 | `pipeline` | Yes (phases) | No | No limit (workflow spec) |
 | 1 | `skill` (planner) | No | Yes (generates plans) | 500 |
 | 3 | `skill` | No | Yes | 500 |
 | Any | `routing-table` | N/A | N/A | No limit |
@@ -135,56 +133,7 @@ The `type: router` SKILL.md is lean (< 100 lines) and links to `assets/` for det
 
 ## Deep Layout (10+ skills, multi-phase workflows)
 
-The full type stack: `router` → `router` (registries) → `domain` + `pipeline` → `skill`:
-
-```
-my-skill-tree/
-├── .claude-plugin/
-│   └── plugin.json
-└── skills/
-    └── <orchestrator>/
-        ├── SKILL.md                          # type: router (gateway)
-        ├── assets/
-        │   ├── routing-table.md              # type: routing-table
-        │   └── guidelines.md                 # type: guidelines
-        │
-        ├── references/
-        │   ├── <pipeline-registry>/
-        │   │   ├── SKILL.md                  # type: router (registry)
-        │   │   ├── assets/
-        │   │   │   ├── selection-rules.md    # type: routing-table
-        │   │   │   ├── contribution-guide.md
-        │   │   │   └── templates/
-        │   │   │       └── pipeline-template.md  # type: pipeline (template)
-        │   │   └── references/
-        │   │       └── <workflow>.md          # type: pipeline (definition)
-        │   │
-        │   └── <domain-registry>/
-        │       ├── SKILL.md                  # type: router (registry)
-        │       ├── assets/
-        │       │   ├── skills-catalog.md
-        │       │   ├── contribution-guide.md
-        │       │   └── templates/
-        │       │       └── domain-template.md  # produces type: domain
-        │       └── references/
-        │           ├── <domain-a>/
-        │           │   ├── SKILL.md          # type: domain
-        │           │   └── references/
-        │           │       ├── <skill-1>/
-        │           │       │   └── SKILL.md  # type: skill (leaf)
-        │           │       └── <skill-2>/
-        │           │           └── SKILL.md  # type: skill (leaf)
-        │           └── <domain-b>/
-        │               ├── SKILL.md          # type: domain
-        │               └── references/
-        │                   └── ...           # type: skill (leaves)
-        ├── scripts/
-        └── bin/
-```
-
-### Plan-Driven Layout (alternative to pipeline registry)
-
-When using dynamic plan generation instead of static pipeline definitions:
+The full type stack: `router` → `router` (registries) + `skill` (planner) → `domain` → `skill`:
 
 ```
 my-skill-tree/
@@ -235,10 +184,10 @@ my-skill-tree/
                 └── 04-error-handling.md
 ```
 
-Key differences from pipeline-based layout:
-- **No pipeline registry** — the planner is a single `type: skill`, not a registry of pipeline definitions
-- **Plans are generated at runtime** — `plans/` directory starts empty and is populated by the planner
-- **Plan type references** live under the planner, not as standalone pipeline definitions
+Key characteristics of the plan-driven deep layout:
+- **The planner is a single `type: skill`** that generates plans dynamically at runtime
+- **`plans/` directory starts empty** and is populated by the planner based on requirements
+- **Plan type references** live under the planner as structured specs for each category of work
 - **Strategy files** control decomposition — user can override with `plans/custom-strategy.md`
 
 ---
@@ -250,7 +199,6 @@ Key differences from pipeline-based layout:
 | **`type` field** | Every SKILL.md and typed asset file must declare `type` in frontmatter. |
 | **`type: router`** | < 100 lines. Route only, never implement. |
 | **`type: domain`** | < 100 lines. Route only, never implement. Groups related skills. |
-| **`type: pipeline`** | Workflow definition. Phases delegate to domains — never implements directly. |
 | **`type: skill`** | < 500 lines / 5,000 tokens. Does the actual work. |
 | **`type: routing-table`** | Asset file. Routing algorithm offloaded from a router. |
 | **`type: guidelines`** | Asset file. Cross-cutting constraints for multiple skills. |
@@ -282,4 +230,3 @@ Key differences from pipeline-based layout:
 | Plans with more than 10 steps | Too much scope in a single plan | Split into two plans along a natural boundary |
 | More than 15 plans per journey | Journey is too complex | Decompose the journey into sub-journeys |
 | Plan scope defined by skill domain instead of feature | Produces fragmented, hard-to-test increments | Scope plans by feature — each plan can invoke multiple skill domains |
-| Static pipeline used for variable-scope requirements | Pipeline phases can't adapt to different requirement sets | Use plan-driven approach with a planner instead |

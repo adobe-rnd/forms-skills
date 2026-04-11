@@ -26,13 +26,11 @@ These types apply to SKILL.md files — the nodes in a skill tree.
 |------|------|---------|-------------|----------|
 | `router` | Top-level gateway that dispatches to sub-skills, registries, or other routers | Yes | No | [skill-router-template.md](skill-router-template.md) |
 | `domain` | Groups related skills under a named domain, routes intents to leaf skills | Yes | No | Specialization — e.g., domain-template.md |
-| `pipeline` | Defines a multi-phase workflow as a directed graph of phases | Yes (phases) | No | Specialization — e.g., pipeline-template.md |
 | `skill` | Leaf node that does actual implementation work | No | Yes | *(none — leaf skills are freeform per agentskills.io)* |
 
 **Key rules:**
 - Every SKILL.md **must** have exactly one `type`
 - `router` and `domain` types never implement — they dispatch only
-- `pipeline` types define phase graphs but don't implement phases — they delegate to domains
 - Only `type: skill` files do real work (create files, run scripts, modify code)
 - The `type` field goes right after `description` in the frontmatter
 
@@ -72,7 +70,7 @@ A router:
 ---
 name: forms-orchestrator
 description: >
-  Skill Gateway for AEM Forms. Routes to pipelines and domains.
+  Skill Gateway for AEM Forms. Routes to domains.
 type: router
 license: Apache-2.0
 ---
@@ -85,17 +83,6 @@ name: analysis
 description: >
   Domain router for analysis & documentation skills.
 type: domain
-license: Apache-2.0
----
-```
-
-A pipeline:
-```
----
-name: build-journey
-description: >
-  End-to-end pipeline: requirements → analysis → build → deploy.
-type: pipeline
 license: Apache-2.0
 ---
 ```
@@ -141,25 +128,6 @@ A complex skill system stacks types in layers, from top to bottom:
                       │ type: skill  │  ← leaf nodes — do the actual work
                       └──────────────┘
 
-Alternative: Pipeline-based workflows
-┌──────────────┐    ┌──────────────┐
-│ type: router  │    │ type: router  │  ← registries (pipeline registry,
-│ (registries)  │    │ (registries)  │    domain registry)
-└──────┬───────┘    └──────┬───────┘
-       │                   │
-       ▼                   ▼
-┌──────────────┐    ┌──────────────┐
-│ type: pipeline│    │ type: domain  │  ← workflow graphs / skill containers
-│ (phase DAGs)  │    │ (domain       │
-│               │    │  routers)     │
-└──────┬───────┘    └──────┬───────┘
-       │                   │
-       ▼                   ▼
-┌──────────────────────────────────────┐
-│  type: skill                          │  ← leaf nodes — do the actual work
-│  (implementation)                     │
-└──────────────────────────────────────┘
-
 Supporting files (loaded on demand):
   type: routing-table  → assets/routing-table.md
   type: guidelines     → assets/guidelines.md
@@ -175,7 +143,7 @@ Not every skill tree needs all layers. Use what fits:
 | 1–4 skills | `skill` only — flat, no routing needed |
 | 5–10 skills | One `router` at the top + `skill` leaves |
 | 10–20 skills | `router` → `domain` → `skill` (group skills into domains) |
-| 20+ skills or phased workflows | Plan-driven: `router` → `skill` (planner) + `router` (domain registry) → `domain` → `skill`<br>Pipeline-based: `router` → `router` (registries) → `pipeline` + `domain` → `skill` |
+| 20+ skills or phased workflows | `router` → `skill` (planner) + `router` (domain registry) → `domain` → `skill` |
 
 ---
 
@@ -195,7 +163,6 @@ Skill trees may also define **specialized templates** that extend the generic ro
 | Specialization | Produces Type | Defined By | Location |
 |---------------|--------------|-----------|----------|
 | Domain Router Template | `domain` | `aem/forms` | `domains/assets/templates/domain-template.md` |
-| Pipeline Template | `pipeline` | `aem/forms` | `pipelines/assets/templates/pipeline-template.md` |
 | Planner Template | `skill` (planner) | `aem/forms` | `planner/SKILL.md` |
 | Plan Template | `plan-template` | `aem/forms` | `planner/assets/plan-template.md` |
 | Plan Type Reference | `plan-type` | `aem/forms` | `planner/references/<type>-plan.md` |
@@ -236,7 +203,7 @@ This is why routers stay lean — they're loaded on every routing decision. Asse
 
 | Directory | Purpose | Contains Types |
 |-----------|---------|---------------|
-| `references/` | Sub-skills or reference documentation | `router`, `domain`, `pipeline`, `skill` |
+| `references/` | Sub-skills or reference documentation | `router`, `domain`, `skill` |
 | `assets/` | Static resources offloaded from SKILL.md | `routing-table`, `guidelines`, templates, catalogs |
 | `scripts/` | Executable code (bash, python, JS) | N/A |
 
@@ -244,7 +211,7 @@ This is why routers stay lean — they're loaded on every routing decision. Asse
 
 - Directory names = `name` field in frontmatter (per agentskills.io spec)
 - Lowercase, hyphens only: `analyze-requirements`, `build-journey`
-- Router SKILL.md headings include their role: `# <Name> — Domain Router`, `# <Name> — Pipeline Registry`
+- Router SKILL.md headings include their role: `# <Name> — Domain Router`, `# <Name> — Domain Registry`
 
 ---
 
@@ -267,12 +234,6 @@ User Intent
      ├──→ plan exists? ──→ read plan step → resolve skill via domain registry
      │                                          │
      │                                          ▼
-     ├──→ matches a pipeline? ──→ [type: pipeline] defines phases
-     │         │                        │
-     │         │                  each phase declares
-     │         │                  domain + skill
-     │         │                        │
-     │         ▼                        ▼
      ├──→ [type: router]  ←── registry resolves domain/skill
      │         │
      │         ▼
@@ -286,12 +247,10 @@ User Intent
 |------|----|-------------|
 | `router` | `router` | Dispatches to sub-routers (registries) |
 | `router` | `domain` | Routes intents directly to a domain |
-| `router` | `pipeline` | Selects a pipeline for multi-phase workflows |
 | `router` | `skill` (planner) | Routes to planner when requirements exist but no plans |
 | `skill` (planner) | plan files | Generates ordered plan files from requirements |
 | `router` | plan files | Reads and executes plan steps sequentially |
 | plan step | `domain` | Each plan step declares a domain + skill to invoke |
-| `pipeline` | `domain` | Each phase declares a domain + skill |
 | `domain` | `skill` | Routes to the leaf skill that implements |
 | `router` / `domain` | `routing-table` | Reads routing logic (asset, loaded on demand) |
 | `router` / `domain` | `guidelines` | Reads constraints (asset, loaded on demand) |
@@ -300,18 +259,18 @@ User Intent
 
 ## Plan-Driven Workflows
 
-An alternative to static `type: pipeline` definitions. Instead of pre-defining a phase DAG, a **planner** dynamically generates plans from user requirements at runtime.
+For multi-phase or complex workflows, a **planner** dynamically generates plans from user requirements at runtime. Rather than relying on a fixed phase graph, the planner analyzes the specific requirements and produces a tailored sequence of plans — each scoped to a feature slice and executable via the domain registry.
 
-### When to Use Plans vs Pipelines
+### Characteristics
 
-| Aspect | Plan-Driven | Pipeline |
-|--------|-------------|----------|
-| Workflow definition | Dynamic — generated from requirements at runtime | Static — defined upfront as a phase DAG |
-| Adaptability | Planner adapts plan count and scope to the specific requirements | Fixed phases, same structure for every run |
-| Plan/phase count | Variable (1–15 plans per journey) | Fixed (defined in pipeline SKILL.md) |
-| Ordering | Sequential with explicit dependencies between plans | DAG — supports parallel phases |
-| Scope per unit | Feature-scoped — each plan is a vertical slice (build + logic + integration) | Phase-scoped — each phase targets a technical layer |
-| Best for | Complex, variable-scope work (e.g., building forms from diverse requirements) | Repeatable, fixed-structure workflows (e.g., CI/CD pipelines) |
+| Aspect | Description |
+|--------|-------------|
+| Workflow definition | Dynamic — generated from requirements at runtime |
+| Adaptability | Planner adapts plan count and scope to the specific requirements |
+| Plan count | Variable (1–15 plans per journey) |
+| Ordering | Sequential with explicit dependencies between plans |
+| Scope per plan | Feature-scoped — each plan is a vertical slice (build + logic + integration) |
+| Best for | Complex, variable-scope work (e.g., building forms from diverse requirements) |
 
 ### Plan Architecture
 
@@ -394,6 +353,5 @@ The planner uses a configurable strategy to decide how to decompose requirements
 2. **Need a dispatcher?** Use the [Skill Router Template](skill-router-template.md) — produces `type: router`.
 3. **Router getting long?** Offload routing logic to a [Routing Table](routing-table-template.md) (`type: routing-table`) and constraints to a [Guidelines](guidelines-template.md) file (`type: guidelines`).
 4. **Need to group skills?** Create domain routers (`type: domain`) — use a domain template if your skill tree has one, or adapt the generic router template.
-5. **Need dynamic multi-phase workflows?** Use a plan-driven approach — create a planner (`type: skill`) that generates plans from requirements. See [Plan-Driven Workflows](#plan-driven-workflows).
-6. **Need static multi-phase workflows?** Create pipeline definitions (`type: pipeline`) — use a pipeline template if your skill tree has one.
-7. **Building a leaf skill?** Just follow [agentskills.io](https://agentskills.io) — set `type: skill` and keep it under 500 lines.
+5. **Need multi-phase workflows?** Use a plan-driven approach — create a planner (`type: skill`) that generates plans from requirements. See [Plan-Driven Workflows](#plan-driven-workflows).
+6. **Building a leaf skill?** Just follow [agentskills.io](https://agentskills.io) — set `type: skill` and keep it under 500 lines.

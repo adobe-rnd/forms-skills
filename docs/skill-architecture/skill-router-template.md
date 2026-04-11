@@ -26,7 +26,6 @@ The `type` field in frontmatter declares the skill's architectural role. Always 
 |--------|----------|
 | `router` | Any SKILL.md that dispatches to sub-skills (orchestrators, registries, generic routers) |
 | `domain` | Domain router — groups related skills under a domain (use domain-template.md instead) |
-| `pipeline` | Pipeline definition — static multi-phase workflow DAG (use pipeline-template.md instead) |
 | `skill` | Leaf skill that does actual work (not a router — don't use this template). Also used for **planners** that dynamically generate plans from requirements — see [Plan-Driven Workflows](README.md#plan-driven-workflows) |
 
 ```
@@ -42,7 +41,7 @@ metadata:
 ---
 ```
 
-> **Note:** Generic routers use `type: router`. For domain-specific routers, use the domain template (`type: domain`). For static pipeline definitions, use the pipeline template (`type: pipeline`). For dynamic plan-driven workflows, pair this router with a planner (`type: skill`) — see [Plan-Driven Workflows](README.md#plan-driven-workflows). Leaf skills use `type: skill`.
+> **Note:** Generic routers use `type: router`. For domain-specific routers, use the domain template (`type: domain`). For plan-driven workflows, pair this router with a planner (`type: skill`) — see [Plan-Driven Workflows](README.md#plan-driven-workflows). Leaf skills use `type: skill`.
 
 ### Body
 
