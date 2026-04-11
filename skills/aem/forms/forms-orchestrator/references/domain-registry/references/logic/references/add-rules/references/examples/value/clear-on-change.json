@@ -1,0 +1,82 @@
+{
+  "_description": "Clear the state field when country field changes",
+  "_natural_language": "When country is changed, clear state",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Clear State on Country Change",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.addressSection.country",
+                  "displayName": "Country",
+                  "type": "AFCOMPONENT|FIELD|DROPDOWN|STRING",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/AddressSection/Country/",
+                  "name": "country",
+                  "parent": "$form.addressSection"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is changed"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": null
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "CLEAR_VALUE_STATEMENT",
+                          "items": [
+                            {
+                              "nodeName": "VALUE_FIELD",
+                              "value": {
+                                "id": "$form.addressSection.state",
+                                "displayName": "State",
+                                "type": "AFCOMPONENT|FIELD|DROPDOWN|STRING",
+                                "isDuplicate": false,
+                                "displayPath": "FORM/AddressSection/State/",
+                                "name": "state",
+                                "parent": "$form.addressSection"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

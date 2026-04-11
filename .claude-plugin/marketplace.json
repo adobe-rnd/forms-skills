@@ -16,6 +16,11 @@
       "name": "aem-project-management",
       "source": "./skills/aem/project-management",
       "description": "Project lifecycle management for AEM Edge Delivery Services"
+    },
+    {
+      "name": "aem-forms",
+      "source": "./skills/aem/forms",
+      "description": "Skills for building AEM Adaptive Forms through AI conversation"
     }
   ]
 }

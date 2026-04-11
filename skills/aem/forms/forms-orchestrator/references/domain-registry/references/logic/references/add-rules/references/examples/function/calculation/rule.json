@@ -1,0 +1,156 @@
+{
+  "_description": "Calculate total by calling sum function and set result to total field",
+  "_natural_language": "When Calculate button is clicked, set total to sum(item1, item2, item3)",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Calculate Total",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.calculateButton",
+                  "displayName": "Calculate Button",
+                  "type": "AFCOMPONENT|FIELD|BUTTON",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/Actions/",
+                  "name": "calculateButton",
+                  "parent": "$form.actions"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is clicked"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": null
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "SET_VALUE_STATEMENT",
+                          "items": [
+                            {
+                              "nodeName": "VALUE_FIELD",
+                              "value": {
+                                "id": "$form.total",
+                                "displayName": "Total",
+                                "type": "AFCOMPONENT|FIELD|NUMBER FIELD|NUMBER",
+                                "isDuplicate": false,
+                                "displayPath": "FORM/Summary/",
+                                "name": "total",
+                                "parent": "$form.summary"
+                              }
+                            },
+                            {
+                              "nodeName": "to",
+                              "value": null
+                            },
+                            {
+                              "nodeName": "EXPRESSION",
+                              "choice": {
+                                "nodeName": "FUNCTION_CALL",
+                                "parentNodeName": "EXPRESSION",
+                                "functionName": {
+                                  "id": "sum",
+                                  "displayName": "Sum",
+                                  "type": "AFCOMPONENT|FIELD|NUMBER FIELD|NUMBER",
+                                  "isDuplicate": false,
+                                  "displayPath": "",
+                                  "args": [
+                                    {
+                                      "type": "AFCOMPONENT|FIELD|NUMBER FIELD|NUMBER",
+                                      "name": "values",
+                                      "description": "Numbers to sum",
+                                      "isMandatory": true
+                                    }
+                                  ],
+                                  "impl": "$0($1)"
+                                },
+                                "params": [
+                                  {
+                                    "nodeName": "EXPRESSION",
+                                    "choice": {
+                                      "nodeName": "COMPONENT",
+                                      "value": {
+                                        "id": "$form.item1",
+                                        "displayName": "Item 1",
+                                        "type": "AFCOMPONENT|FIELD|NUMBER FIELD|NUMBER",
+                                        "isDuplicate": false,
+                                        "displayPath": "FORM/Items/",
+                                        "name": "item1",
+                                        "parent": "$form.items"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "nodeName": "EXPRESSION",
+                                    "choice": {
+                                      "nodeName": "COMPONENT",
+                                      "value": {
+                                        "id": "$form.item2",
+                                        "displayName": "Item 2",
+                                        "type": "AFCOMPONENT|FIELD|NUMBER FIELD|NUMBER",
+                                        "isDuplicate": false,
+                                        "displayPath": "FORM/Items/",
+                                        "name": "item2",
+                                        "parent": "$form.items"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "nodeName": "EXPRESSION",
+                                    "choice": {
+                                      "nodeName": "COMPONENT",
+                                      "value": {
+                                        "id": "$form.item3",
+                                        "displayName": "Item 3",
+                                        "type": "AFCOMPONENT|FIELD|NUMBER FIELD|NUMBER",
+                                        "isDuplicate": false,
+                                        "displayPath": "FORM/Items/",
+                                        "name": "item3",
+                                        "parent": "$form.items"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

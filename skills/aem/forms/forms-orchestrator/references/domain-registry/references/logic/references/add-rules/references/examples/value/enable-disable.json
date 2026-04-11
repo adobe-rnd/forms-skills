@@ -1,0 +1,144 @@
+{
+  "_description": "Enable adult options when age is greater than 17, otherwise disable them",
+  "_natural_language": "When age is changed, if age is greater than 17 then enable adultOptions, else disable adultOptions",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Enable Adult Options Based on Age",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.personalInfo.age",
+                  "displayName": "Age",
+                  "type": "AFCOMPONENT|FIELD|NUMBER FIELD|NUMBER",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/PersonalInfo/Age/",
+                  "name": "age",
+                  "parent": "$form.personalInfo"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is changed"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": {
+                      "nodeName": "COMPARISON_EXPRESSION",
+                      "items": [
+                        {
+                          "nodeName": "EXPRESSION",
+                          "choice": {
+                            "nodeName": "COMPONENT",
+                            "value": {
+                              "id": "$form.personalInfo.age",
+                              "displayName": "Age",
+                              "type": "AFCOMPONENT|FIELD|NUMBER FIELD|NUMBER",
+                              "isDuplicate": false,
+                              "displayPath": "FORM/PersonalInfo/Age/",
+                              "name": "age",
+                              "parent": "$form.personalInfo"
+                            }
+                          }
+                        },
+                        {
+                          "nodeName": "OPERATOR",
+                          "choice": {
+                            "nodeName": "GREATER_THAN",
+                            "value": null
+                          }
+                        },
+                        {
+                          "nodeName": "EXPRESSION",
+                          "choice": {
+                            "nodeName": "NUMERIC_LITERAL",
+                            "value": 17
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "ENABLE_STATEMENT",
+                          "items": [
+                            {
+                              "nodeName": "AFCOMPONENT",
+                              "value": {
+                                "id": "$form.adultOptions",
+                                "displayName": "Adult Options",
+                                "type": "AFCOMPONENT|PANEL",
+                                "isDuplicate": false,
+                                "displayPath": "FORM/Options/",
+                                "name": "adultOptions",
+                                "parent": "$form.options"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "nodeName": "Else",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "DISABLE_STATEMENT",
+                          "items": [
+                            {
+                              "nodeName": "AFCOMPONENT",
+                              "value": {
+                                "id": "$form.adultOptions",
+                                "displayName": "Adult Options",
+                                "type": "AFCOMPONENT|PANEL",
+                                "isDuplicate": false,
+                                "displayPath": "FORM/Options/",
+                                "name": "adultOptions",
+                                "parent": "$form.options"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
