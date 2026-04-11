@@ -32,9 +32,13 @@ Every skill is a directory with at minimum a `SKILL.md`:
 │       └── <template>.md
 ├── scripts/              # Executable code
 │   └── <script>.sh
-└── eval/                 # Test fixtures and evaluation plans
-    ├── eval-plan.md
-    └── fixtures/
+├── eval/                 # Test fixtures and evaluation plans
+│   ├── eval-plan.md
+│   └── fixtures/
+└── plans/                # Generated plan files (plan-driven workflows)
+    └── <journey>/
+        ├── 01-<title>.md
+        └── 02-<title>.md
 ```
 
 **Rules:**
@@ -51,14 +55,18 @@ In a multi-layer skill tree, each layer uses specific types:
 
 ```
 Level 0 (entry point)     → type: router       (orchestrator / gateway)
-Level 1 (registries)      → type: router       (pipeline registry, domain registry)
+Level 1 (registries)      → type: router       (domain registry)
+                          → type: skill         (planner — generates plans dynamically)
 Level 2 (grouping)        → type: domain        (domain routers)
-                          → type: pipeline      (workflow definitions)
+                          → type: pipeline      (static workflow definitions — alternative to plans)
 Level 3 (implementation)  → type: skill         (leaf skills — do the work)
 
 Supporting files at any level:
   assets/routing-table.md → type: routing-table
   assets/guidelines.md    → type: guidelines
+  assets/plan-template.md → type: plan-template  (plan-driven only)
+  references/*-plan.md    → type: plan-type       (plan-driven only)
+  references/*-strategy.md → type: strategy       (plan-driven only)
 ```
 
 | Level | Type | Routing? | Implementation? | Max Lines |
@@ -67,9 +75,13 @@ Supporting files at any level:
 | 1 | `router` | Yes | No | 100 |
 | 2 | `domain` | Yes | No | 100 |
 | 2 | `pipeline` | Yes (phases) | No | No limit (workflow spec) |
+| 1 | `skill` (planner) | No | Yes (generates plans) | 500 |
 | 3 | `skill` | No | Yes | 500 |
 | Any | `routing-table` | N/A | N/A | No limit |
 | Any | `guidelines` | N/A | N/A | No limit |
+| Any | `plan-template` | N/A | N/A | No limit |
+| Any | `plan-type` | N/A | N/A | No limit |
+| Any | `strategy` | N/A | N/A | No limit |
 
 ---
 
@@ -170,6 +182,65 @@ my-skill-tree/
         └── bin/
 ```
 
+### Plan-Driven Layout (alternative to pipeline registry)
+
+When using dynamic plan generation instead of static pipeline definitions:
+
+```
+my-skill-tree/
+├── .claude-plugin/
+│   └── plugin.json
+└── skills/
+    └── <orchestrator>/
+        ├── SKILL.md                          # type: router (gateway)
+        ├── assets/
+        │   ├── routing-table.md              # type: routing-table
+        │   └── guidelines.md                 # type: guidelines
+        │
+        ├── references/
+        │   ├── <planner>/
+        │   │   ├── SKILL.md                  # type: skill (plan generator)
+        │   │   ├── assets/
+        │   │   │   └── plan-template.md      # type: plan-template
+        │   │   └── references/
+        │   │       ├── default-strategy.md   # type: strategy
+        │   │       ├── structure-plan.md     # type: plan-type
+        │   │       ├── workflow-plan.md      # type: plan-type
+        │   │       ├── logic-plan.md         # type: plan-type
+        │   │       ├── integration-plan.md   # type: plan-type
+        │   │       └── infrastructure-plan.md # type: plan-type
+        │   │
+        │   └── <domain-registry>/
+        │       ├── SKILL.md                  # type: router (registry)
+        │       ├── assets/
+        │       │   ├── skills-catalog.md
+        │       │   ├── skill-resolution.md
+        │       │   └── contribution-guide.md
+        │       └── references/
+        │           ├── <domain-a>/
+        │           │   ├── SKILL.md          # type: domain
+        │           │   └── references/
+        │           │       └── <skill-1>/
+        │           │           └── SKILL.md  # type: skill (leaf)
+        │           └── <domain-b>/
+        │               ├── SKILL.md          # type: domain
+        │               └── references/
+        │                   └── ...           # type: skill (leaves)
+        │
+        └── plans/                            # Generated plan files (at runtime)
+            └── <journey>/
+                ├── 01-form-structure.md
+                ├── 02-workflow-branch-a.md
+                ├── 03-api-integration.md
+                └── 04-error-handling.md
+```
+
+Key differences from pipeline-based layout:
+- **No pipeline registry** — the planner is a single `type: skill`, not a registry of pipeline definitions
+- **Plans are generated at runtime** — `plans/` directory starts empty and is populated by the planner
+- **Plan type references** live under the planner, not as standalone pipeline definitions
+- **Strategy files** control decomposition — user can override with `plans/custom-strategy.md`
+
 ---
 
 ## Convention Summary
@@ -188,6 +259,10 @@ my-skill-tree/
 | **`assets/templates/`** | Templates for creating new items. Each template prescribes a fixed `type`. |
 | **`scripts/`** | Executable code. Self-contained, with error handling. |
 | **`eval/`** | Test plans and fixtures for evaluating skill quality. |
+| **`type: plan-template`** | Asset file. Schema/template for plan files generated by a planner. |
+| **`type: plan-type`** | Reference file. Defines spec patterns for a category of plans (structure, workflow, etc.). |
+| **`type: strategy`** | Reference file. Plan decomposition strategy (default or custom). |
+| **`plans/`** | Generated plan files. Created by the planner at runtime, executed by the orchestrator. |
 | **Directory name = `name` field** | Always. No exceptions. |
 
 ---
@@ -204,3 +279,7 @@ my-skill-tree/
 | Guidelines duplicated across skills | Drift, contradictions | Consolidate in `type: guidelines` asset at parent level |
 | `resources/` instead of `references/` + `assets/` | Non-standard naming, confuses the discovery model | Rename to standard directories |
 | Template without a fixed `type` | Users don't know what type the output file should be | Every template must prescribe a fixed `type` |
+| Plans with more than 10 steps | Too much scope in a single plan | Split into two plans along a natural boundary |
+| More than 15 plans per journey | Journey is too complex | Decompose the journey into sub-journeys |
+| Plan scope defined by skill domain instead of feature | Produces fragmented, hard-to-test increments | Scope plans by feature — each plan can invoke multiple skill domains |
+| Static pipeline used for variable-scope requirements | Pipeline phases can't adapt to different requirement sets | Use plan-driven approach with a planner instead |
