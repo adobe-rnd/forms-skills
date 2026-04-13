@@ -22,7 +22,7 @@ component-definition.json          component-models.json         component-filte
 │ }                    │      │                                  │ }                   │
 └──────────────────────┘      │   ┌─────────────────────┐       │ {                    │
                               └──►│ "id": "cards",      │       │   "id": "cards",     │
-                                  │ "components":["card"]│◄──────┤ }                    │
+                                  │ "components":["card"]│◄─────┤ }                    │
                                   └─────────────────────┘       └──────────────────────┘
 ```
 
