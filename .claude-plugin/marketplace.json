@@ -26,6 +26,11 @@
       "name": "aem-project-management",
       "source": "./skills/aem/project-management",
       "description": "Project lifecycle management for AEM Edge Delivery Services"
+    },
+    {
+      "name": "app-builder",
+      "source": "./skills/app-builder",
+      "description": "Development, customization, testing, and deployment skills for Adobe App Builder projects"
     }
   ]
 }

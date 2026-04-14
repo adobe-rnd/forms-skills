@@ -10,12 +10,17 @@ Repository of Adobe skills for AI coding agents.
 /plugin marketplace add adobe/skills
 /plugin install aem-edge-delivery-services@adobe-skills
 
+# Install AEM Project Management plugin (6 skills)
+/plugin install aem-project-management@adobe-skills
+
+# Install App Builder plugin (6 skills)
+/plugin install app-builder@adobe-skills
+
 # Install all AEM as a Cloud Service skills (create-component + workflow + dispatcher) in one command
 /plugin install aem-cloud-service@adobe-skills
 
 # Install all AEM 6.5 LTS skills (workflow + dispatcher + replication) in one command
 /plugin install aem-6-5-lts@adobe-skills
-/plugin install aem-project-management@adobe-skills
 ```
 
 ### Vercel Skills (npx skills)
@@ -23,6 +28,9 @@ Repository of Adobe skills for AI coding agents.
 ```bash
 # Install all AEM Edge Delivery Services skills
 npx skills add https://github.com/adobe/skills/tree/main/skills/aem/edge-delivery-services --all
+
+# Install all App Builder skills
+npx skills add https://github.com/adobe/skills/tree/main/skills/app-builder --all
 
 # Install all AEM as a Cloud Service skills (create-component + workflow + dispatcher) in one command
 npx skills add https://github.com/adobe/skills/tree/beta/skills/aem/cloud-service --all
@@ -179,6 +187,24 @@ Handover documentation and PDF generation for AEM Edge Delivery Services project
 | `whitepaper` | Create professional PDF whitepapers from Markdown |
 | `auth` | Authenticate with AEM Config Service API |
 
+### App Builder
+
+Development, customization, testing, and deployment skills for Adobe App Builder projects.
+
+**Skill chaining:**
+- **Actions path:** `appbuilder-project-init` → `appbuilder-action-scaffolder` → `appbuilder-testing` → `appbuilder-cicd-pipeline`
+- **UI path:** `appbuilder-project-init` → `appbuilder-ui-scaffolder` → `appbuilder-testing` → `appbuilder-cicd-pipeline`
+- **E2E path:** `appbuilder-ui-scaffolder` or `appbuilder-testing` → `appbuilder-e2e-testing` → `appbuilder-cicd-pipeline`
+
+| Skill | Description |
+|-------|-------------|
+| `appbuilder-project-init` | Initialize new Adobe App Builder projects and choose the right bootstrap path |
+| `appbuilder-action-scaffolder` | Scaffold, implement, deploy, and debug Adobe Runtime actions |
+| `appbuilder-ui-scaffolder` | Generate React Spectrum UI components for ExC Shell SPAs and AEM UI Extensions |
+| `appbuilder-testing` | Generate and run Jest unit, integration, and contract tests for actions and UI components |
+| `appbuilder-e2e-testing` | Playwright browser E2E tests for ExC Shell SPAs and AEM extensions |
+| `appbuilder-cicd-pipeline` | Set up CI/CD pipelines for GitHub Actions, Azure DevOps, and GitLab CI |
+
 ### Creativity & Design
 
 _Coming soon._
@@ -187,110 +213,108 @@ _Coming soon._
 
 ```
 skills/
-\-- aem/
-    |-- edge-delivery-services/
-    |   |-- .claude-plugin/
-    |   |   \-- plugin.json
-    |   \-- skills/
-    |       |-- content-driven-development/
-    |       |-- building-blocks/
-    |       \-- ...
-    |-- cloud-service/
-    |   |-- .claude-plugin/
-    |   |   \-- plugin.json
-    |   \-- skills/
-    |       |-- best-practices/
-    |       |   |-- README.md
-    |       |   |-- SKILL.md
-    |       |   \-- references/
-    |       |       |   |-- scheduler.md
-    |       |       |   |-- replication.md
-    |       |       |   |-- scr-to-osgi-ds.md
-    |       |       |   |-- resource-resolver-logging.md
-    |       |       |   \-- ...
-    |       \-- migration/
-    |           |-- README.md
-    |           |-- SKILL.md
-    |           |-- references/
-    |           \-- scripts/
-    |       |-- ensure-agents-md/
-    |       |   |-- SKILL.md          <-- bootstrap: creates AGENTS.md + CLAUDE.md if missing
-    |       |   \-- references/
-    |       |       |-- AGENTS.md.template
-    |       |       \-- module-catalog.md
-    |       |-- create-component/
-    |       |   |-- SKILL.md          <-- discovered by npx skills
-    |       |   |-- assets/
-    |       |   |   \-- field-type-mappings.md
-    |       |   \-- references/
-    |       |       |-- aem-conventions.md
-    |       |       |-- dialog-patterns.md
-    |       |       |-- htl-patterns.md
-    |       |       |-- model-patterns.md
-    |       |       |-- java-standards.md
-    |       |       |-- clientlib-patterns.md
-    |       |       |-- extending-core-components.md
-    |       |       |-- sling-servlet-standards.md
-    |       |       |-- core-components.md
-    |       |       |-- test-patterns.md
-    |       |       |-- no-hallucination-rules.md
-    |       |       \-- examples.md
-    |       |-- aem-workflow/
-    |       |   |-- SKILL.md          <-- discovered by npx skills (router)
-    |       |   |-- workflow-model-design/
-    |       |   |   |-- SKILL.md      <-- specialist (bundled inside aem-workflow)
-    |       |   |   \-- references/
-    |       |   |-- workflow-development/
-    |       |   |-- workflow-triggering/
-    |       |   |-- workflow-launchers/
-    |       |   |-- workflow-debugging/
-    |       |   |-- workflow-triaging/
-    |       |   \-- workflow-orchestrator/
-    |       \-- dispatcher/
-    |           |-- SKILL.md          <-- discovered by npx skills (router)
-    |           |-- config-authoring/
-    |           |   |-- SKILL.md      <-- specialist (bundled inside dispatcher)
-    |           |   \-- references/
-    |           |-- technical-advisory/
-    |           |-- incident-response/
-    |           |-- performance-tuning/
-    |           |-- security-hardening/
-    |           \-- workflow-orchestrator/
-    \-- 6.5-lts/
-        |-- .claude-plugin/
-        |   \-- plugin.json
-        \-- skills/
-            |-- aem-workflow/
-            |   |-- SKILL.md          <-- discovered by npx skills (router)
-            |   |-- workflow-model-design/
-            |   |-- workflow-development/
-            |   |-- workflow-triggering/
-            |   |-- workflow-launchers/
-            |   |-- workflow-debugging/
-            |   |-- workflow-triaging/
-            |   \-- workflow-orchestrator/
-            |-- dispatcher/
-            |   |-- SKILL.md          <-- discovered by npx skills (router)
-            |   |-- config-authoring/
-            |   |   |-- SKILL.md      <-- specialist (bundled inside dispatcher)
-            |   |   \-- references/
-            |   |-- technical-advisory/
-            |   |-- incident-response/
-            |   |-- performance-tuning/
-            |   |-- security-hardening/
-            |   \-- workflow-orchestrator/
-            |-- aem-replication/
-            |   |-- README.md
-            |   |-- SKILL.md          <-- discovered by npx skills (router)
-            |   |-- configure-replication-agent/
-            |   |   \-- SKILL.md      <-- specialist (bundled inside aem-replication)
-            |   |-- replicate-content/
-            |   |   \-- SKILL.md      <-- specialist (bundled inside aem-replication)
-            |   |-- replication-api/
-            |   |   \-- SKILL.md      <-- specialist (bundled inside aem-replication)
-            |   \-- troubleshoot-replication/
-            |       \-- SKILL.md      <-- specialist (bundled inside aem-replication)
-            \-- ensure-agents-md/
+├── aem/
+│   ├── edge-delivery-services/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   └── skills/
+│   │       ├── content-driven-development/
+│   │       ├── building-blocks/
+│   │       └── ...
+│   ├── project-management/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── fonts/
+│   │   ├── hooks/
+│   │   │   └── pdf-lifecycle.js
+│   │   ├── templates/
+│   │   │   └── whitepaper.typ
+│   │   └── skills/
+│   │       ├── handover/
+│   │       ├── authoring/
+│   │       ├── development/
+│   │       ├── admin/
+│   │       ├── whitepaper/
+│   │       └── auth/
+│   ├── cloud-service/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   └── skills/
+│   │       ├── best-practices/
+│   │       │   ├── README.md
+│   │       │   ├── SKILL.md
+│   │       │   └── references/
+│   │       ├── migration/
+│   │       │   ├── README.md
+│   │       │   ├── SKILL.md
+│   │       │   ├── references/
+│   │       │   └── scripts/
+│   │       ├── ensure-agents-md/
+│   │       │   ├── SKILL.md
+│   │       │   └── references/
+│   │       │       ├── AGENTS.md.template
+│   │       │       └── module-catalog.md
+│   │       ├── create-component/
+│   │       │   ├── SKILL.md
+│   │       │   ├── assets/
+│   │       │   └── references/
+│   │       ├── aem-workflow/
+│   │       │   ├── SKILL.md
+│   │       │   ├── workflow-model-design/
+│   │       │   ├── workflow-development/
+│   │       │   ├── workflow-triggering/
+│   │       │   ├── workflow-launchers/
+│   │       │   ├── workflow-debugging/
+│   │       │   ├── workflow-triaging/
+│   │       │   └── workflow-orchestrator/
+│   │       └── dispatcher/
+│   │           ├── SKILL.md
+│   │           ├── config-authoring/
+│   │           ├── technical-advisory/
+│   │           ├── incident-response/
+│   │           ├── performance-tuning/
+│   │           ├── security-hardening/
+│   │           └── workflow-orchestrator/
+│   └── 6.5-lts/
+│       ├── .claude-plugin/
+│       │   └── plugin.json
+│       └── skills/
+│           ├── aem-workflow/
+│           │   ├── SKILL.md
+│           │   ├── workflow-model-design/
+│           │   ├── workflow-development/
+│           │   ├── workflow-triggering/
+│           │   ├── workflow-launchers/
+│           │   ├── workflow-debugging/
+│           │   ├── workflow-triaging/
+│           │   └── workflow-orchestrator/
+│           ├── aem-replication/
+│           │   ├── README.md
+│           │   ├── SKILL.md
+│           │   ├── configure-replication-agent/
+│           │   ├── replicate-content/
+│           │   ├── replication-api/
+│           │   └── troubleshoot-replication/
+│           ├── ensure-agents-md/
+│           └── dispatcher/
+│               ├── SKILL.md
+│               ├── config-authoring/
+│               ├── technical-advisory/
+│               ├── incident-response/
+│               ├── performance-tuning/
+│               ├── security-hardening/
+│               └── workflow-orchestrator/
+└── app-builder/
+    ├── .claude-plugin/
+    │   └── plugin.json
+    └── skills/
+        ├── _shared/
+        ├── appbuilder-project-init/
+        ├── appbuilder-action-scaffolder/
+        ├── appbuilder-ui-scaffolder/
+        ├── appbuilder-testing/
+        ├── appbuilder-e2e-testing/
+        └── appbuilder-cicd-pipeline/
 ```
 
 ## Contributing
