@@ -22,10 +22,12 @@ class AemFdmClient:
         self.host = config.aem_host.rstrip("/")
         self.auth_header = config.auth_header
         self.session = requests.Session()
-        self.session.headers.update({
-            "Authorization": self.auth_header,
-            "Accept": "application/json",
-        })
+        self.session.headers.update(
+            {
+                "Authorization": self.auth_header,
+                "Accept": "application/json",
+            }
+        )
         self.session.timeout = 30
 
     def _request(self, path: str) -> Any:
@@ -147,7 +149,9 @@ class AemFdmClient:
                 if content and content.get("type") == "api-integration":
                     api_integration_fdms.append(key)
 
-        print(f"  Found {len(api_integration_fdms)} api-integration FDMs, fetching details...")
+        print(
+            f"  Found {len(api_integration_fdms)} api-integration FDMs, fetching details..."
+        )
 
         # Fetch each FDM individually to get inputJson
         apis = []
@@ -208,7 +212,11 @@ class AemFdmClient:
         """Parse inputJson string to extract API configuration."""
         if not input_json_str:
             # Fallback to content fields if inputJson not available
-            if not content.get("name") and not content.get("jcr:title") and not content.get("serviceEndPoint"):
+            if (
+                not content.get("name")
+                and not content.get("jcr:title")
+                and not content.get("serviceEndPoint")
+            ):
                 return None  # Not enough info
             return {
                 "name": content.get("name") or content.get("jcr:title") or "unknown",
@@ -234,7 +242,8 @@ class AemFdmClient:
                         params[param_name] = {
                             "type": param.get("type", "string"),
                             "required": param.get("required", False),
-                            "description": param.get("description") or f"{param.get('in', 'body')} parameter",
+                            "description": param.get("description")
+                            or f"{param.get('in', 'body')} parameter",
                             "default": param.get("defaultValue"),
                             "in": param.get("in", "body"),
                         }
@@ -256,13 +265,19 @@ class AemFdmClient:
             if swagger_spec:
                 self._enrich_from_swagger(swagger_spec, params, response)
 
+            # Detect body structure from inputMapping apiKeys
+            body_structure = self._detect_body_structure(params)
+
             return {
-                "name": input_json.get("displayName") or content.get("name") or "unknown",
+                "name": input_json.get("displayName")
+                or content.get("name")
+                or "unknown",
                 "description": f"{input_json.get('operationName') or input_json.get('displayName') or content.get('name')} API",
                 "endpoint": input_json.get("url") or content.get("serviceEndPoint", ""),
                 "method": input_json.get("method", "POST"),
                 "params": params,
                 "response": response,
+                "bodyStructure": body_structure,
                 "contentType": input_json.get("contentType", "application/json"),
                 "authType": input_json.get("authType", "None"),
                 "encryptionRequired": input_json.get("encryptionRequired", False),
@@ -272,6 +287,44 @@ class AemFdmClient:
         except json.JSONDecodeError as e:
             print(f"  Warning: Failed to parse inputJson: {e}")
             return None
+
+    @staticmethod
+    def _detect_body_structure(params: dict) -> str:
+        """Detect body wrapper structure from param apiKey prefixes.
+
+        Inspects the first dotted segment of body-param keys to determine
+        how the request body is wrapped.
+
+        Returns:
+            - "none" if body params have no dotted prefix (flat)
+            - A single wrapper name (e.g. "requestString", "RequestPayload")
+            - Comma-separated roots for multi-root bodies
+              (e.g. "requestContext,requestData")
+        """
+        roots: list[str] = []
+        seen: set[str] = set()
+        has_body_params = False
+
+        for key, config in params.items():
+            if config.get("in", "body") != "body":
+                continue
+            has_body_params = True
+            if "." in key:
+                root = key.split(".")[0]
+                if root not in seen:
+                    seen.add(root)
+                    roots.append(root)
+
+        if not has_body_params:
+            return "none"
+
+        if not roots:
+            return "none"
+
+        if len(roots) == 1:
+            return roots[0]
+
+        return ",".join(roots)
 
     def _enrich_from_swagger(
         self, swagger_spec: dict, params: dict, response: dict
@@ -301,7 +354,9 @@ class AemFdmClient:
                         # Update existing param or create new one
                         if param_name in params:
                             # Update required field from swagger
-                            params[param_name]["required"] = param.get("required", False)
+                            params[param_name]["required"] = param.get(
+                                "required", False
+                            )
                             if param.get("description"):
                                 params[param_name]["description"] = param["description"]
                         else:
@@ -309,7 +364,8 @@ class AemFdmClient:
                             params[param_name] = {
                                 "type": schema.get("type", "string"),
                                 "required": param.get("required", False),
-                                "description": param.get("description") or f"{param.get('in')} parameter",
+                                "description": param.get("description")
+                                or f"{param.get('in')} parameter",
                                 "in": param.get("in"),
                             }
                             if schema.get("default") is not None:
