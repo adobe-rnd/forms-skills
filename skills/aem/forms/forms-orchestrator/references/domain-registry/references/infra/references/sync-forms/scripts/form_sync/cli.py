@@ -309,6 +309,13 @@ def list_forms(
     help="Push to preview path defined by FORM_SYNC_PREVIEW_PATH env variable",
 )
 @click.option(
+    "--form-type",
+    "form_type",
+    type=click.Choice(["eds", "core_component"]),
+    default=None,
+    help="Form architecture: 'eds' (EDS/Franklin, default) or 'core_component' (Adaptive Form Core Components)",
+)
+@click.option(
     "--verbose", "-v", is_flag=True, help="Enable verbose output for debugging"
 )
 def push(
@@ -317,6 +324,7 @@ def push(
     suffix: str,
     force_new: bool,
     preview: bool,
+    form_type: str,
     verbose: bool,
 ):
     """Push a local form to AEM.
@@ -331,12 +339,14 @@ def push(
         form-sync push /content/forms/af/acroform --suffix -v2
         form-sync push /content/forms/af/acroform --new
         form-sync push /content/forms/af/acroform --preview
+        form-sync push /content/forms/af/acroform --form-type core_component
         form-sync push /content/forms/af/acroform --verbose
 
     \b
     Note: First push creates a new form with suffix. Subsequent pushes
     update the existing form. Use --new to create a new form instead.
     Use --preview to push to a separate preview path (requires FORM_SYNC_PREVIEW_PATH env).
+    Use --form-type core_component to create an Adaptive Form Core Component form instead of EDS/Franklin.
     """
     global _verbose
     _verbose = verbose
@@ -348,6 +358,11 @@ def push(
         click.echo("Loading configuration...")
         config = Config.from_env()
         log_verbose(f"AEM Host: {config.aem_host}")
+
+        # CLI --form-type overrides env var / default
+        if form_type is not None:
+            config.form_type = form_type
+        log_verbose(f"Form type: {config.form_type}")
 
         # Handle preview flag
         preview_path = None
@@ -424,7 +439,12 @@ def push(
 @click.option(
     "--verbose", "-v", is_flag=True, help="Enable verbose output for debugging"
 )
-def clear(form_path: str, verbose: bool):
+@click.option(
+    "--form-type", "form_type",
+    type=click.Choice(["eds", "core_component"]), default="eds",
+    help="Form architecture: 'eds' (default) or 'core_component'",
+)
+def clear(form_path: str, verbose: bool, form_type: str):
     """Clear a local form to empty state.
 
     \b
@@ -447,7 +467,7 @@ def clear(form_path: str, verbose: bool):
 
     from .metadata import MetadataManager
 
-    # Minimal form structure
+    # Minimal EDS/Franklin form structure
     EMPTY_FORM = {
         "jcr:primaryType": "nt:unstructured",
         "fieldType": "form",
@@ -455,6 +475,14 @@ def clear(form_path: str, verbose: bool):
         "fd:version": "2.1",
         "dorType": "none",
         "thankYouOption": "message",
+    }
+
+    # Minimal Core Component form structure
+    EMPTY_CC_FORM = {
+        "jcr:primaryType": "nt:unstructured",
+        "fieldType": "form",
+        "sling:resourceType": "mysite/components/adaptiveForm/formcontainer",
+        "fd:version": "2.1",
     }
 
     try:
@@ -497,11 +525,12 @@ def clear(form_path: str, verbose: bool):
             base_dir = Path("./repo")
 
         # Clear form.json (local_file already contains the relative path)
+        empty_structure = EMPTY_CC_FORM if form_type == "core_component" else EMPTY_FORM
         form_file = base_dir / form_metadata.local_file
         if form_file.exists():
             click.echo(f"Clearing form: {form_file}")
             with open(form_file, "w", encoding="utf-8") as f:
-                json.dump(EMPTY_FORM, f, indent=2)
+                json.dump(empty_structure, f, indent=2)
             click.echo(f"✓ Cleared {form_metadata.local_file}")
         else:
             click.secho(f"WARNING: Form file not found: {form_file}", fg="yellow")
