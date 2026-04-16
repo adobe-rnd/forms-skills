@@ -1,0 +1,41 @@
+{
+  "context": "Tests whether the agent correctly handles date defaults and dynamic date computation when no explicit dates are provided. The agent must use shell date commands rather than hardcoding dates, apply the correct default range (7 days) and correctly interpret 'last month' as a full calendar month ending before the current month.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Dynamic date computation",
+      "max_score": 20,
+      "description": "The script uses a shell command (e.g. `date`) to compute dates rather than hardcoding specific date strings like '2024-01-01'"
+    },
+    {
+      "name": "YYYY-MM-DD format",
+      "max_score": 15,
+      "description": "All date values passed to optel-query.jsh are in YYYY-MM-DD format (e.g. using `date +%Y-%m-%d` or equivalent format string)"
+    },
+    {
+      "name": "7-day default range",
+      "max_score": 15,
+      "description": "The first query covers a 7-day window (start date is 7 days before end date)"
+    },
+    {
+      "name": "Yesterday as default end date",
+      "max_score": 15,
+      "description": "The end date for the 7-day query is yesterday (not today), computed dynamically"
+    },
+    {
+      "name": "Last month start date",
+      "max_score": 10,
+      "description": "The start date for the 'last month' queries is the 1st day of the previous calendar month"
+    },
+    {
+      "name": "Last month end date",
+      "max_score": 10,
+      "description": "The end date for the 'last month' queries is the last day of the previous calendar month (not a fixed offset)"
+    },
+    {
+      "name": "facet-values for top pages",
+      "max_score": 15,
+      "description": "Uses --facet-values url option (not a custom query filter) to retrieve the top pages by traffic"
+    }
+  ]
+}
