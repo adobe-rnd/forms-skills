@@ -9,70 +9,23 @@ Repository of Adobe skills for AI coding agents.
 ```bash
 /plugin marketplace add adobe/skills
 /plugin install aem-edge-delivery-services@adobe-skills
-
-# Install AEM Project Management plugin (6 skills)
 /plugin install aem-project-management@adobe-skills
-
-# Install App Builder plugin (6 skills)
 /plugin install app-builder@adobe-skills
-
-# Install all AEM as a Cloud Service skills (create-component + workflow + dispatcher) in one command
 /plugin install aem-cloud-service@adobe-skills
-
-# Install all AEM 6.5 LTS skills (workflow + dispatcher + replication) in one command
 /plugin install aem-6-5-lts@adobe-skills
 ```
 
 ### Vercel Skills (npx skills)
 
 ```bash
-# Install all AEM Edge Delivery Services skills
-npx skills add https://github.com/adobe/skills/tree/main/skills/aem/edge-delivery-services --all
-
-# Install all App Builder skills
-npx skills add https://github.com/adobe/skills/tree/main/skills/app-builder --all
-
-# Install all AEM as a Cloud Service skills (create-component + workflow + dispatcher) in one command
-npx skills add https://github.com/adobe/skills/tree/beta/skills/aem/cloud-service --all
-
-# Install all AEM 6.5 LTS skills (workflow + dispatcher + replication) in one command
-npx skills add https://github.com/adobe/skills/tree/beta/skills/aem/6.5-lts --all
-
-# Install for a single agent (pick ONE flavor only)
-npx skills add https://github.com/adobe/skills/tree/beta/skills/aem/cloud-service -a cursor -y
-npx skills add https://github.com/adobe/skills/tree/beta/skills/aem/6.5-lts -a cursor -y
-
-# Install specific skill(s)
-npx skills add adobe/skills -s content-driven-development
-npx skills add adobe/skills -s content-driven-development building-blocks testing-blocks
-
-# List available skills
-npx skills add adobe/skills --list
-npx skills add https://github.com/adobe/skills/tree/beta/skills/aem/cloud-service --list
-npx skills add https://github.com/adobe/skills/tree/beta/skills/aem/6.5-lts --list
+npx skills add adobe/skills --all
 ```
 
 ### upskill (GitHub CLI Extension)
 
 ```bash
 gh extension install ai-ecoverse/gh-upskill
-
-# Install all AEM Edge Delivery Services skills
-gh upskill adobe/skills --path skills/aem/edge-delivery-services --all
-
-# Install all AEM as a Cloud Service skills (create-component + workflow + dispatcher)
-gh upskill adobe/skills --path skills/aem/cloud-service --all
-
-# Install all AEM 6.5 LTS skills (workflow + dispatcher + replication)
-gh upskill adobe/skills --path skills/aem/6.5-lts --all
-
-# Install a specific skill
-gh upskill adobe/skills --path skills/aem/edge-delivery-services --skill content-driven-development
-
-# List available skills
-gh upskill adobe/skills --path skills/aem/edge-delivery-services --list
-gh upskill adobe/skills --path skills/aem/cloud-service --list
-gh upskill adobe/skills --path skills/aem/6.5-lts --list
+gh upskill adobe/skills --all
 ```
 
 ## Available Skills
@@ -83,7 +36,35 @@ gh upskill adobe/skills --path skills/aem/6.5-lts --list
 
 ##### Developing with Edge Delivery Services
 
-See `skills/aem/edge-delivery-services/skills/` for the current concrete skill set.
+| Skill | Description |
+|-------|-------------|
+| `content-driven-development` | Orchestrates the CDD workflow for all code changes |
+| `analyze-and-plan` | Analyze requirements and define acceptance criteria |
+| `building-blocks` | Implement blocks and core functionality |
+| `testing-blocks` | Browser testing and validation |
+| `content-modeling` | Design author-friendly content models |
+| `code-review` | Self-review and PR review |
+
+##### Discovering Blocks
+
+| Skill | Description |
+|-------|-------------|
+| `block-inventory` | Survey available blocks in project and Block Collection |
+| `block-collection-and-party` | Search reference implementations |
+| `docs-search` | Search aem.live documentation |
+| `find-test-content` | Find existing content for testing |
+
+##### Migrating Content
+
+| Skill | Description |
+|-------|-------------|
+| `page-import` | Import webpages (orchestrator) |
+| `scrape-webpage` | Scrape and analyze webpage content |
+| `identify-page-structure` | Analyze page sections |
+| `page-decomposition` | Analyze content sequences |
+| `authoring-analysis` | Determine authoring approach |
+| `generate-import-html` | Generate structured HTML |
+| `preview-import` | Preview imported content |
 
 ### AEM as a Cloud Service — Create Component
 
