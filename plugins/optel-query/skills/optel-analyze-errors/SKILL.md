@@ -149,16 +149,17 @@ node skills/optel-analyze-errors/scripts/improved-error-similarity.jsh <input-fi
 ```
 
 **Parameters**:
-- `<input-file>`: Path to the error JSON file (e.g., `output/errors-jan26-2026.json`)
-- `<output-prefix>`: Prefix for output files (e.g., `errors-jan26`)
+- `<input-file>`: Path to the error JSON file (e.g., `output/my-run/errors.json`)
+- `<output-prefix>`: **Bare filename only — no directory component** (e.g., `errors-analysis`). The script automatically writes output files into the same directory as `<input-file>`, so passing a path here will produce a broken double-directory path.
 - `--threshold`: Optional similarity threshold (default: 0.6)
 
 **Example**:
 ```bash
-node skills/optel-analyze-errors/scripts/improved-error-similarity.jsh output/errors-jan26-2026.json errors-jan26
+# Output files land in output/my-run/ alongside the input
+node skills/optel-analyze-errors/scripts/improved-error-similarity.jsh output/my-run/errors.json errors-analysis
 
 # With custom threshold
-node skills/optel-analyze-errors/scripts/improved-error-similarity.jsh output/errors-jan26-2026.json errors-jan26 --threshold 0.7
+node skills/optel-analyze-errors/scripts/improved-error-similarity.jsh output/my-run/errors.json errors-analysis --threshold 0.7
 ```
 
 **What the utility does**:
