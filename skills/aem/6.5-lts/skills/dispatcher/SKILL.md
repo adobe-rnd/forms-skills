@@ -7,14 +7,7 @@ description: |
   in AEM 6.5 LTS and AMS environments.
 license: Apache-2.0
 compatibility: Requires Dispatcher MCP for AMS (`AEM_DEPLOYMENT_MODE=ams`) or AMS Dispatcher MCP SDK (pre-set to `ams`).
-allowed-tools:
-  - validate
-  - lint
-  - sdk
-  - trace_request
-  - inspect_cache
-  - monitor_metrics
-  - tail_logs
+allowed-tools: validate lint sdk trace_request inspect_cache monitor_metrics tail_logs
 metadata:
   mcp-tool-contract: core-7-tools
 ---

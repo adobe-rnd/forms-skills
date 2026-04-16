@@ -3,14 +3,7 @@ name: workflow-orchestrator
 description: Orchestrate complete lifecycle work for the Adobe Dispatcher Apache HTTP Server module and related HTTPD configuration in AEM as a Cloud Service, from design and implementation through validation, release readiness, and incident troubleshooting.
 license: Apache-2.0
 compatibility: Requires Dispatcher MCP configured for cloud variant (`AEM_DEPLOYMENT_MODE=cloud`).
-allowed-tools:
-  - validate
-  - lint
-  - sdk
-  - trace_request
-  - inspect_cache
-  - monitor_metrics
-  - tail_logs
+allowed-tools: validate lint sdk trace_request inspect_cache monitor_metrics tail_logs
 metadata:
   mcp-tool-contract: core-7-tools
 ---
