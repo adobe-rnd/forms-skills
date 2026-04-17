@@ -1,12 +1,12 @@
 {
   "agent": {
-    "provider": "anthropic",
-    "model": "claude-haiku-4-5-20251001",
+    "provider": "bedrock",
+    "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
     "maxTurns": 25
   },
   "judge": {
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6"
+    "provider": "bedrock",
+    "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
   },
   "retry": {
     "attempts": 2
