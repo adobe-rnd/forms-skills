@@ -1,0 +1,46 @@
+{
+  "context": "Tests whether the agent uses the correct facets for referrer/traffic-source queries (enter.source with checkpoint:[\"enter\"] for raw referrers, acquisitionSource for paid/email classification), applies minimal scope by omitting unrelated checkpoints and series, and distinguishes between raw referrer data and classified acquisition channels.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "enter.source for referrers",
+      "max_score": 15,
+      "description": "The referrer discovery query uses --facet-values enter.source (not --facet-values url or another facet)"
+    },
+    {
+      "name": "checkpoint enter filter",
+      "max_score": 15,
+      "description": "The referrer discovery query includes checkpoint:[\"enter\"] in its --query filter"
+    },
+    {
+      "name": "acquisitionSource for paid traffic",
+      "max_score": 15,
+      "description": "The paid traffic query uses acquisitionSource facet (not enter.source or checkpoint:[\"paid\"]) with a value like \"paid\""
+    },
+    {
+      "name": "acquisitionSource for Marketo email",
+      "max_score": 15,
+      "description": "The Marketo email query uses acquisitionSource with a value containing \"marketo\" (e.g. \"owned:email:marketo\")"
+    },
+    {
+      "name": "No unrelated checkpoints",
+      "max_score": 10,
+      "description": "The referrer query does NOT include additional checkpoint values beyond \"enter\" (e.g. no click, cwv, error checkpoints added)"
+    },
+    {
+      "name": "No series added",
+      "max_score": 15,
+      "description": "None of the three queries include a --series flag (visitor counts are requested, not performance metrics)"
+    },
+    {
+      "name": "Dynamic dates",
+      "max_score": 7,
+      "description": "Dates are computed dynamically using shell date commands, not hardcoded"
+    },
+    {
+      "name": "7-day range",
+      "max_score": 8,
+      "description": "The date range spans 7 days ending yesterday"
+    }
+  ]
+}

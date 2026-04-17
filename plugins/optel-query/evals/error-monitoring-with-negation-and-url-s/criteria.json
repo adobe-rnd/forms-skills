@@ -1,0 +1,46 @@
+{
+  "context": "Tests whether the agent uses the correct pattern for error queries (--facet-values error with checkpoint:[\"error\"] for discovery, and !checkpoint negation for error-free sessions), scopes queries to specific pages using the url facet, and avoids using the error facet without a checkpoint filter.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "checkpoint error filter",
+      "max_score": 15,
+      "description": "The error discovery query includes checkpoint:[\"error\"] in its --query filter"
+    },
+    {
+      "name": "facet-values error for discovery",
+      "max_score": 15,
+      "description": "The error discovery command uses --facet-values error (not just a filtered query) to enumerate what errors are present"
+    },
+    {
+      "name": "URL scoping on checkout/payment",
+      "max_score": 15,
+      "description": "Both queries include a url filter for the checkout and/or payment pages (values containing \"/checkout\" and/or \"/payment\")"
+    },
+    {
+      "name": "Negation for error-free sessions",
+      "max_score": 15,
+      "description": "The error-free query uses !checkpoint:[\"error\"] (negation on checkpoint) rather than a separate filter approach"
+    },
+    {
+      "name": "No series added",
+      "max_score": 10,
+      "description": "Neither query includes a --series flag (only page view counts are requested)"
+    },
+    {
+      "name": "No unfiltered error facet",
+      "max_score": 10,
+      "description": "The script does NOT use the error facet in a query without also including checkpoint:[\"error\"]"
+    },
+    {
+      "name": "Dynamic dates, 14-day range",
+      "max_score": 10,
+      "description": "Dates are computed dynamically using shell date commands and span 14 days ending yesterday"
+    },
+    {
+      "name": "Negation on supported facet",
+      "max_score": 10,
+      "description": "Negation (!) is only applied to a facet that supports it (url, userAgent, checkpoint, or error) — not to an unsupported facet like fill.source or enter.source"
+    }
+  ]
+}

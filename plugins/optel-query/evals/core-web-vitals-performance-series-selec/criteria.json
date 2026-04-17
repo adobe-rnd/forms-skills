@@ -1,0 +1,46 @@
+{
+  "context": "Tests whether the agent adds --series lcp,cls,inp only for the performance query (not the count query), uses a userAgent filter to scope to mobile visitors, and avoids adding series flags when only traffic volume is requested. Also checks that the count query uses --facet-values userAgent or a userAgent filter without performance series.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Performance series on CWV query",
+      "max_score": 15,
+      "description": "The performance query includes --series with lcp, cls, and inp (all three Core Web Vitals metrics)"
+    },
+    {
+      "name": "No series on count query",
+      "max_score": 15,
+      "description": "The traffic volume / device breakdown query does NOT include any --series flag"
+    },
+    {
+      "name": "userAgent mobile filter on CWV query",
+      "max_score": 10,
+      "description": "The performance query filters by userAgent:[\"mobile\"] (or equivalent) to scope to mobile visitors"
+    },
+    {
+      "name": "url filter on product page",
+      "max_score": 10,
+      "description": "Both queries include a url filter scoped to the product page"
+    },
+    {
+      "name": "facet-values for device breakdown",
+      "max_score": 15,
+      "description": "The device breakdown query uses --facet-values userAgent (or a userAgent filter) to distinguish mobile vs desktop, not a series flag"
+    },
+    {
+      "name": "No extra checkpoints on CWV query",
+      "max_score": 10,
+      "description": "The performance query does NOT add extra unneeded checkpoints beyond what is needed for CWV (e.g. no click, fill, or enter checkpoints added unnecessarily)"
+    },
+    {
+      "name": "lcp cls inp not mixed into count query",
+      "max_score": 10,
+      "description": "The words lcp, cls, or inp do NOT appear as series values in the count/traffic query"
+    },
+    {
+      "name": "Dynamic dates, 30-day range",
+      "max_score": 15,
+      "description": "Dates are computed dynamically using shell date commands and span 30 days ending yesterday"
+    }
+  ]
+}

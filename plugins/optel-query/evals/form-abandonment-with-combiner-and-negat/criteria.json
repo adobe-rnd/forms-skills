@@ -1,0 +1,46 @@
+{
+  "context": "Tests whether the agent correctly uses checkpoint:[\"fill\"] combined with !checkpoint:[\"formsubmit\"] to identify form abandonment, uses --facet-values fill.source to enumerate touched fields, and uses --series formBlockLoadTime for form performance — applying negation only on the checkpoint facet (which supports it) and not attempting negation on fill.source (which does not).",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "checkpoint fill for form interactions",
+      "max_score": 15,
+      "description": "The abandonment query includes checkpoint:[\"fill\"] in its --query filter"
+    },
+    {
+      "name": "Negation for no-submit",
+      "max_score": 15,
+      "description": "The abandonment query uses !checkpoint:[\"formsubmit\"] to exclude sessions where the form was submitted"
+    },
+    {
+      "name": "Negation on checkpoint only",
+      "max_score": 10,
+      "description": "Negation (!) is applied to checkpoint, not to fill.source or any other facet that does not support negation"
+    },
+    {
+      "name": "facet-values fill.source for field enumeration",
+      "max_score": 15,
+      "description": "The field enumeration query uses --facet-values fill.source (not a filter query) to discover which form fields are being filled"
+    },
+    {
+      "name": "formBlockLoadTime series",
+      "max_score": 15,
+      "description": "The form performance query includes --series formBlockLoadTime"
+    },
+    {
+      "name": "No series on abandonment query",
+      "max_score": 10,
+      "description": "The form abandonment count query does NOT include a --series flag"
+    },
+    {
+      "name": "url filter on contact page",
+      "max_score": 10,
+      "description": "At least one query includes a url filter scoped to the contact page"
+    },
+    {
+      "name": "Dynamic dates, 14-day range",
+      "max_score": 10,
+      "description": "Dates are computed dynamically using shell date commands and span 14 days ending yesterday"
+    }
+  ]
+}
