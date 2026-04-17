@@ -1,0 +1,19 @@
+{
+  "name": "@adobe/forms-evals-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Skill-local evals runner for AEM Forms skills.",
+  "bin": {
+    "forms-evals": "./run.js"
+  },
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
