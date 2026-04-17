@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "required": ["id", "description", "userMessage", "workspace", "agent", "validators", "rubric"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "userMessage": { "type": "string", "minLength": 1 },
+    "workspace": {
+      "type": "object",
+      "required": ["fixture"],
+      "additionalProperties": false,
+      "properties": {
+        "fixture": { "type": "string", "minLength": 1 }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "required": ["maxTurns", "allowedTools"],
+      "additionalProperties": false,
+      "properties": {
+        "maxTurns": { "type": "integer", "minimum": 1 },
+        "allowedTools": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "mockedTools": { "type": "object" }
+      }
+    },
+    "validators": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": { "type": "string", "enum": ["file_exists", "file_contains", "file_not_contains", "json_path_equals", "command_passes"] },
+          "required": { "type": "boolean" },
+          "name": { "type": "string" }
+        }
+      }
+    },
+    "rubric": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "required": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
