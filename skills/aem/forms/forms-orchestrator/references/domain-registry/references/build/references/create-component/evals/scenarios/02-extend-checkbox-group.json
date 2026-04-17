@@ -1,0 +1,21 @@
+{
+  "id": "02-extend-checkbox-group",
+  "description": "Agent extends a multi-value base (checkbox-group) with a custom widget; exercises child-subscription patterns documented in references/subscribe-api.md.",
+  "userMessage": "Create a custom `chip-selector` component that extends checkbox-group and renders each option as a toggleable chip. Use fd:viewType `chip-selector`.",
+  "workspace": { "fixture": "form-repo" },
+  "agent": {
+    "maxTurns": 25,
+    "allowedTools": ["bash", "Read", "Write", "Edit", "Glob", "Grep"]
+  },
+  "validators": [
+    { "type": "file_exists", "path": "code/blocks/form/components/chip-selector/chip-selector.js" },
+    { "type": "file_contains", "path": "code/blocks/form/mappings.js", "pattern": "chip-selector" },
+    { "type": "file_contains", "path": "code/blocks/form/components/chip-selector/chip-selector.js", "pattern": "listenChanges\\s*:\\s*true" }
+  ],
+  "rubric": [
+    { "id": "extends-checkbox-group", "description": "The scaffolder is invoked with --base checkbox-group (not --base text-input or another unrelated base).", "required": true },
+    { "id": "handles-child-subscriptions", "description": "The agent acknowledges or implements child subscriptions — either by reading references/subscribe-api.md, by iterating child inputs in decorate(), or by setting up per-child listeners. Evidence may be in code or tool calls.", "required": true },
+    { "id": "uses-listen-changes", "description": "The component's subscribe call includes `{ listenChanges: true }` as required by the skill's critical rules.", "required": true },
+    { "id": "consults-subscribe-api-ref", "description": "The agent reads references/subscribe-api.md during the session.", "required": false }
+  ]
+}
