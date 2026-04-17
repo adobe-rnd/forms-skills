@@ -1,5 +1,5 @@
 import { readFile, readdir, writeFile, stat, mkdir } from 'node:fs/promises';
-import { execSync } from 'node:child_process';
+import { execSync, execFileSync } from 'node:child_process';
 import path from 'node:path';
 
 async function walkMd(dir, acc = []) {
@@ -77,12 +77,11 @@ export function buildToolDispatch({ workspace, allowedTools, mockedTools }) {
           return 'ok: edited';
         }
         case 'Glob': {
-          const out = execSync(`find . -path './node_modules' -prune -o -name '${input.pattern.replaceAll("'", "\\'")}' -print`, { cwd: workspace, stdio: 'pipe' });
+          const out = execFileSync('find', ['.', '-path', './node_modules', '-prune', '-o', '-name', String(input.pattern), '-print'], { cwd: workspace, stdio: 'pipe', maxBuffer: 8 * 1024 * 1024 });
           return out.toString().slice(0, 32_000);
         }
         case 'Grep': {
-          const pattern = String(input.pattern).replace(/'/g, "'\\''");
-          const out = execSync(`grep -rIn --exclude-dir=node_modules '${pattern}' .`, { cwd: workspace, stdio: 'pipe' });
+          const out = execFileSync('grep', ['-rIn', '--exclude-dir=node_modules', String(input.pattern), '.'], { cwd: workspace, stdio: 'pipe', maxBuffer: 8 * 1024 * 1024 });
           return out.toString().slice(0, 32_000);
         }
         default:
