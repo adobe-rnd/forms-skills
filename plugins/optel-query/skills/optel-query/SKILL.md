@@ -12,7 +12,7 @@ Translates natural language into structured RUM queries and executes them via th
 Load on demand — do not load all at once:
 - [`references/facets.md`](references/facets.md) — all 13 facets, combiners, negation support, examples
 - [`references/checkpoints.md`](references/checkpoints.md) — all checkpoint types and source/target properties
-- [`references/series.md`](references/series.md) — available metrics series (lcp, cls, inp, formBlockLoadTime, timeOnPage)
+- [`references/series.md`](references/series.md) — available metrics series (lcp, cls, inp, ttfb, formBlockLoadTime, timeOnPage)
 - [`references/examples.md`](references/examples.md) — worked examples for common patterns
 
 ## Workflow
@@ -126,8 +126,8 @@ Build the **smallest** query that answers the question. Expand only when the use
 **Verify every facet's combiner in `references/facets.md` before using it.**
 
 Combiner types:
-- **`some` (OR within values)**: `userAgent`, `error`, `click.source`, `click.target`, `fill.source`, `loadresource.source`, `viewmedia.target`
-- **`every` (AND within values)**: `url`, `checkpoint`, `navigate.source`, `enter.source`, `viewblock.source`
+- **`some` (OR within values)**: `userAgent`, `error`, `click.source`, `click.target`, `fill.source`, `loadresource.source`, `viewmedia.target`, `enter.source`
+- **`every` (AND within values)**: `url`, `checkpoint`, `navigate.source`, `viewblock.source`
 
 Different facets always combine with **AND** across each other.
 
