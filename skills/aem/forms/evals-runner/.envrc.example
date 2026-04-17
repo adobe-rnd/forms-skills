@@ -1,1 +1,7 @@
-export AWS_PROFILE=forms-evals
+# Bedrock bearer token (long-lived API key). Copy to .envrc (gitignored)
+# and paste the real token.
+export AWS_BEARER_TOKEN_BEDROCK=...
+export AWS_REGION=us-west-2
+
+# Alternative: use a named AWS profile with SigV4 creds instead.
+# export AWS_PROFILE=forms-evals
