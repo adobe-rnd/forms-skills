@@ -1,0 +1,10 @@
+{
+  "name": "form-repo-fixture",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Minimal EDS forms fixture for evals. Not a real publishable package.",
+  "scripts": {
+    "create:custom-component": "node scripts/create-custom-component.js"
+  }
+}
