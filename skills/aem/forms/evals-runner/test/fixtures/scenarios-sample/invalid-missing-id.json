@@ -1,0 +1,8 @@
+{
+  "description": "Missing id",
+  "userMessage": "x",
+  "workspace": { "fixture": "form-repo" },
+  "agent": { "maxTurns": 5, "allowedTools": ["bash"] },
+  "validators": [],
+  "rubric": [{ "id": "a", "description": "b" }]
+}

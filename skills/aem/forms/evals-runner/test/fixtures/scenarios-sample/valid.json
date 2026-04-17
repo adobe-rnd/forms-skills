@@ -1,0 +1,9 @@
+{
+  "id": "valid-scenario",
+  "description": "A valid scenario",
+  "userMessage": "do a thing",
+  "workspace": { "fixture": "form-repo" },
+  "agent": { "maxTurns": 5, "allowedTools": ["bash"] },
+  "validators": [],
+  "rubric": [{ "id": "does-the-thing", "description": "Agent does the thing." }]
+}
