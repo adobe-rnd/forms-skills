@@ -1,8 +1,8 @@
 {
-  "name": "@anthropic-ai/skills",
+  "name": "@aemforms/forms-skills-tools",
   "version": "0.1.0",
   "private": true,
-  "description": "Adobe skills for AI coding agents",
+  "description": "Dev tooling for the aem-forms skillpack (validate, evals)",
   "scripts": {
     "validate": "find skills -name SKILL.md -exec dirname {} \\; | xargs -I {} skills-ref validate {}",
     "evals": "crispy-garbanzo --plugin skills/aem/forms"
