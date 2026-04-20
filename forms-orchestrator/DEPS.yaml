@@ -1,0 +1,10 @@
+skillpack: "1.0"
+
+dependencies:
+  forms-shared: "*"
+  forms-analysis: "*"
+  forms-build: "*"
+  forms-context: "*"
+  forms-infra: "*"
+  forms-integration: "*"
+  forms-logic: "*"

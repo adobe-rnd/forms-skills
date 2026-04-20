@@ -27,7 +27,7 @@ jobs:
         id: aem_forms_changed
         run: |
           BASE="${{ github.event.pull_request.base.sha || 'HEAD~1' }}"
-          if git diff "$BASE"...HEAD --name-only | grep -qE "^(skills/|\.claude-plugin/)"; then
+          if git diff "$BASE"...HEAD --name-only | grep -qE "^(forms-[^/]+/|\.claude-plugin/)"; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -40,7 +40,7 @@ jobs:
       - name: Check evals report
         if: steps.aem_forms_changed.outputs.changed == 'true'
         run: |
-          REPORT="skills/aem/forms/evals-report.json"
+          REPORT="evals-report.json"
 
           # Fail if report is missing
           if [ ! -f "$REPORT" ]; then
@@ -60,7 +60,7 @@ jobs:
           # Report is present and fresh — print summary and exit 0
           node --input-type=module <<'EOF'
           import { readFileSync } from 'fs';
-          const r = JSON.parse(readFileSync('skills/aem/forms/evals-report.json', 'utf8'));
+          const r = JSON.parse(readFileSync('evals-report.json', 'utf8'));
           const { summary, skills, timestamp } = r;
           console.log(`\nEvals report (${new Date(timestamp).toUTCString()})`);
           console.log(`${'─'.repeat(50)}`);

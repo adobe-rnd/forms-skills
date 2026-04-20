@@ -40,32 +40,28 @@ The **forms-orchestrator** routes intents through a 6-step algorithm — it gene
 ## Repository Structure
 
 ```
-skills/
-└── aem/
-    └── forms/
-        ├── .claude-plugin/
-        │   └── plugin.json
-        ├── pyproject.toml
-        ├── forms-orchestrator/
-        │   ├── SKILL.md
-        │   ├── assets/
-        │   ├── scripts/              ← CLI tools (accessed via ${CLAUDE_PLUGIN_ROOT}/forms-orchestrator/scripts/)
-        │   └── references/
-        │       ├── planner/
-        │       └── domain-registry/
-        │           └── references/
-        │               ├── analysis/
-        │               ├── build/
-        │               ├── logic/
-        │               ├── integration/
-        │               ├── infra/
-        │               └── context/
-        └── tests/
+forms-skills/
+├── .claude-plugin/plugin.json     ← plugin identity (aem-forms)
+├── .github/
+│   ├── workflows/validate.yml
+│   ├── CONTRIBUTING.md
+│   └── CODE_OF_CONDUCT.md
+├── forms-shared/                  ← shared runtime + api-manager
+├── forms-orchestrator/            ← entry point router
+├── forms-analysis/                ← analysis domain
+├── forms-build/                   ← build domain
+├── forms-context/                 ← context domain
+├── forms-infra/                   ← infra domain
+├── forms-integration/             ← integration domain
+├── forms-logic/                   ← logic domain
+├── pyproject.toml
+├── package.json
+└── README.md
 ```
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding or updating skills. Join [#agentskills](https://adobe.enterprise.slack.com/archives/C0APTKDNPEY) on Adobe Slack for questions and discussion.
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines on adding or updating skills. Join [#agentskills](https://adobe.enterprise.slack.com/archives/C0APTKDNPEY) on Adobe Slack for questions and discussion.
 
 ## Resources
 

@@ -1,0 +1,4 @@
+skillpack: "1.0"
+
+dependencies:
+  forms-shared: "*"
