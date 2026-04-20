@@ -1,0 +1,38 @@
+{
+  "id": "01-custom-function-entry-point",
+  "description": "Agent creates a custom function and wires it so the AEM visual rule editor can find it. The agent must: (1) set customFunctionsPath in form.json pointing to the JS file, (2) use the function-declaration + export {} pattern (not inline export function), and (3) include a JSDoc @name tag. Regression test for the functions.js entry point documentation fix.",
+  "userMessage": "Add a custom function `calculateAge` to this form. It should take an ISO date-of-birth string and return the person's age in whole years. Make sure it appears in the AEM visual rule editor so it can be used in rules.",
+  "workspace": { "fixture": "form-repo" },
+  "agent": {
+    "maxTurns": 20,
+    "allowedTools": ["Read", "Write", "Edit", "Glob", "Grep"]
+  },
+  "validators": [
+    { "type": "file_contains", "required": true, "path": "form.json", "pattern": "customFunctionsPath" },
+    { "type": "command_passes", "required": true, "command": "grep -r 'calculateAge' code/blocks/form/scripts/ --include='*.js' -l" },
+    { "type": "command_passes", "required": true, "command": "grep -r 'export.*calculateAge' code/blocks/form/scripts/ --include='*.js'" },
+    { "type": "command_passes", "required": true, "command": "grep -r '@name' code/blocks/form/scripts/ --include='*.js'" }
+  ],
+  "rubric": [
+    {
+      "id": "sets-custom-functions-path",
+      "required": true,
+      "description": "The agent sets `customFunctionsPath` in form.json pointing to the JS file it created. This is the sole runtime entry point AEM uses to load custom functions — without it, the function will never appear in the rule editor."
+    },
+    {
+      "id": "uses-declaration-export-pattern",
+      "required": true,
+      "description": "The function is written as a regular `function calculateAge(...) {}` declaration followed by `export { calculateAge }` at the end of the file. The agent does NOT use `export function calculateAge` (inline export), which the AEM parser does not recognise."
+    },
+    {
+      "id": "includes-jsdoc-name-tag",
+      "required": true,
+      "description": "The function has a JSDoc comment with a `@name` tag (e.g. `@name calculateAge Calculate Age`). Without @name, the function does not appear in the visual rule editor."
+    },
+    {
+      "id": "scope-param-if-globals-used",
+      "required": false,
+      "description": "If the function accepts a globals/scope parameter, it is the last argument and annotated with `@param {scope} globals`. Pure utility functions that take no globals parameter are exempt."
+    }
+  ]
+}

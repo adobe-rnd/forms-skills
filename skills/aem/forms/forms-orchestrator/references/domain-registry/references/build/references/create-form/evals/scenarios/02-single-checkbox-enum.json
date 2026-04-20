@@ -1,0 +1,32 @@
+{
+  "id": "02-single-checkbox-enum",
+  "description": "Agent adds a single checkbox field to form.json and correctly includes enum and enumNames. A single checkbox requires a 1-element enum array so AEM knows what value to record when checked — omitting it causes AEM to ignore the checked state. Regression test for the checkbox enum documentation fix.",
+  "userMessage": "Add a terms-and-conditions acceptance checkbox to the existing form.json. Name it `accept_terms`, label it 'I agree to the Terms and Conditions'. When the user checks it, its value should be `true`.",
+  "workspace": { "fixture": "form-repo" },
+  "agent": {
+    "maxTurns": 15,
+    "allowedTools": ["Read", "Write", "Edit", "Glob", "Grep"]
+  },
+  "validators": [
+    { "type": "file_contains", "required": true, "path": "form.json", "pattern": "accept_terms" },
+    { "type": "file_contains", "required": true, "path": "form.json", "pattern": "\"checkbox\"" },
+    { "type": "file_contains", "required": true, "path": "form.json", "pattern": "\"enum\"" }
+  ],
+  "rubric": [
+    {
+      "id": "uses-checkbox-not-group",
+      "required": true,
+      "description": "The field uses fieldType `checkbox` (single boolean toggle), not `checkbox-group`. A single acceptance checkbox is not a multiple-selection group."
+    },
+    {
+      "id": "includes-enum-array",
+      "required": true,
+      "description": "The accept_terms field includes an `enum` array (e.g. [\"true\"]) and an `enumNames` array in form.json. A checkbox without enum means AEM cannot record a meaningful checked value and will ignore the checked state."
+    },
+    {
+      "id": "enum-matches-checked-value",
+      "required": false,
+      "description": "The enum array contains the string `\"true\"` (or an equivalent non-empty truthy string) as its single entry, matching the user's requirement that the value when checked is `true`."
+    }
+  ]
+}

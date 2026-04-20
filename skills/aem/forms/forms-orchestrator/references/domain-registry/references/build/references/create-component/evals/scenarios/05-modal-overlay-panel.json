@@ -1,0 +1,40 @@
+{
+  "id": "05-modal-overlay-panel",
+  "description": "Agent creates a confirm-modal component extending panel. Visibility behaviour must be driven by the subscribe callback reacting to the visible property — not by direct CSS/DOM manipulation outside the model. Exercises the Modal / Overlay Components section from SKILL.md.",
+  "userMessage": "Create a custom `confirm-modal` component that extends `panel`. When the panel's `visible` property becomes true, add a `modal--open` CSS class to `fieldDiv`; when it becomes false, remove it. Use fd:viewType `confirm-modal`. Add a confirm-modal field to the existing `form.json`.",
+  "workspace": { "fixture": "form-repo" },
+  "agent": {
+    "maxTurns": 25,
+    "allowedTools": ["bash", "Read", "Write", "Edit", "Glob", "Grep"]
+  },
+  "validators": [
+    { "type": "file_exists", "required": true, "path": "code/blocks/form/components/confirm-modal/confirm-modal.js" },
+    { "type": "file_exists", "required": true, "path": "code/blocks/form/components/confirm-modal/confirm-modal.css" },
+    { "type": "file_contains", "required": true, "path": "code/blocks/form/mappings.js", "pattern": "confirm-modal" },
+    { "type": "file_contains", "required": true, "path": "code/blocks/form/components/confirm-modal/confirm-modal.js", "pattern": "listenChanges\\s*:\\s*true" },
+    { "type": "file_contains", "required": true, "path": "code/blocks/form/components/confirm-modal/confirm-modal.js", "pattern": "visible" },
+    { "type": "json_path_equals", "required": true, "path": "form.json", "property": "fd:viewType", "expected": "confirm-modal" }
+  ],
+  "rubric": [
+    {
+      "id": "uses-panel-base",
+      "required": true,
+      "description": "The scaffold command is invoked with --base panel (not --base text-input or any other base type)."
+    },
+    {
+      "id": "reacts-via-subscribe-visible",
+      "required": true,
+      "description": "The decorate() function detects visibility changes through the subscribe callback by checking propertyName === 'visible' inside the change event handler — it does NOT toggle display/visibility via direct DOM style manipulation or CSS class changes outside of the subscribe callback."
+    },
+    {
+      "id": "extends-not-replaces",
+      "required": true,
+      "description": "decorate() extends the existing fieldDiv rather than clearing innerHTML or rebuilding it from scratch."
+    },
+    {
+      "id": "registers-in-mappings",
+      "required": true,
+      "description": "The fd:viewType 'confirm-modal' is added to the customComponents array in mappings.js."
+    }
+  ]
+}
