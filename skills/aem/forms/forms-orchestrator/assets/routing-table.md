@@ -16,6 +16,11 @@ User Intent
                    │ workspace exists
                    ▼
 ┌────────────────────────────────────────┐
+│  Step 1.5: Pre-Flight Check             │──→ eds-code-sync test (skip if mid-execution)
+└──────────────────┬─────────────────────┘
+                   │ connectivity OK
+                   ▼
+┌────────────────────────────────────────┐
 │  Step 2: Active Plan Check              │──→ 🔵 Active plan? → resume → execute steps
 └──────────────────┬─────────────────────┘
                    │ no active plan
@@ -53,6 +58,26 @@ User Intent
 | Workspace exists | Proceed to Step 2 |
 
 > This gate ensures no skill ever runs without a configured workspace. It is non-negotiable.
+
+---
+
+## Step 1.5 — Pre-Flight Connectivity Check
+
+**Priority:** Runs immediately after workspace is confirmed. **Skip if** Step 2 finds an `🔵 Active` plan (don't interrupt mid-execution work to re-check).
+
+Run:
+
+```bash
+"${CLAUDE_PLUGIN_ROOT}/forms-orchestrator/scripts/eds-code-sync" test
+```
+
+| Result | Action |
+|--------|--------|
+| ✅ Passes | Proceed to Step 2 |
+| ❌ 401 Unauthorized | Tell user: "Your AEM bearer token has expired. Regenerate from AEM Developer Console → Integrations → Local Token, paste into `.env` as `AEM_TOKEN`, and let me know when done." Wait — do not proceed. |
+| ❌ Other failure | Diagnose from error output (wrong host, bad GitHub token, network unreachable). Report with specific action required. Do not proceed until resolved. |
+
+> Front-loading this check prevents wasted work when credentials expire between sessions — a common failure mode.
 
 ---
 

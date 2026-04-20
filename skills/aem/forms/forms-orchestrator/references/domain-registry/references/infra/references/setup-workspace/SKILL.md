@@ -88,14 +88,28 @@ Then write `<name>/CLAUDE.md` using the resolved path (substitute `<plugin-root>
 
 When working with AEM Forms skills in this workspace, always read skill files from the path above. Do NOT read from any source code repository or any other path. Never assume skill file paths — verify they exist under the plugin root first.
 
+## Session Pre-Flight
+
+At the start of every new session, run this before any form work:
+
+```bash
+"${CLAUDE_PLUGIN_ROOT}/forms-orchestrator/scripts/eds-code-sync" test
+```
+
+This verifies AEM auth and GitHub access in one shot. Do not proceed until it passes:
+
+- **401 Unauthorized** — AEM bearer token expired. Regenerate from AEM Developer Console → Integrations → Local Token, paste into `.env` as `AEM_TOKEN`.
+- **GitHub error** — token invalid or repo name wrong. Check `GITHUB_TOKEN` and `GITHUB_REPO` in `.env`.
+- **Network error** — wrong `AEM_HOST` or no internet. Verify the URL and connectivity.
+
+Most mid-session failures trace back to a credential problem that was already present at session start but went undetected.
+
 ## Workspace Setup Checklist
 
-For AEM EDS form workflows, always follow this order:
-1. Verify the plugin is loaded — run `/reload-plugins` if skills are not responding.
-2. Verify workspace credentials are filled in (`.env` has non-placeholder values).
-3. Verify AEM and GitHub connectivity before starting form generation.
-
-Do not skip setup verification. Most session failures trace back to one of these three steps.
+After the pre-flight passes, verify in order:
+1. Plugin is loaded — run `/reload-plugins` if skills are not responding.
+2. Credentials are filled in — `.env` has no `<paste-...>` placeholder values.
+3. Connectivity passes — `eds-code-sync test` returns success (covered by pre-flight above).
 
 ## Deployment Checklist
 
@@ -113,6 +127,39 @@ When implementing form UI components, prefer component-based approaches over dir
 
 Use `constraintMessages` carefully in `form.json` and validate the schema before writing. For validation rules, test with a small subset first — never apply bulk rules without incremental validation.
 ```
+
+**Then create `<name>/.claude/settings.json` with Claude Code hooks:**
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'file=$(jq -r \".tool_input.file_path // empty\" <<< \"$CLAUDE_HOOK_INPUT\" 2>/dev/null); [[ \"$file\" == *package-lock.json ]] && { echo \"Blocked: do not modify package-lock.json\" >&2; exit 2; } || exit 0'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cmd=$(jq -r \".tool_input.command // empty\" <<< \"$CLAUDE_HOOK_INPUT\" 2>/dev/null); if echo \"$cmd\" | grep -q \"git commit\"; then lint_dir=\"$CLAUDE_PROJECT_DIR/code\"; if [ -f \"$lint_dir/package.json\" ]; then cd \"$lint_dir\" && npm run lint || exit 2; fi; fi'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+These hooks:
+- **Block `package-lock.json` writes** — exits 2 (blocked) if any Write or Edit targets a `package-lock.json` file.
+- **Run lint before `git commit`** — intercepts Bash `git commit` calls, runs `npm run lint` in `code/` if `package.json` exists there, and blocks the commit (exit 2) if lint fails.
 
 Confirm to the user:
 > "Created workspace at `<cwd>/<name>`. Now let's configure your credentials."
@@ -269,6 +316,8 @@ Confirm to the user:
 <workspace-name>/
 ├── .env                           # Credentials (AEM + GitHub) — never commit
 ├── CLAUDE.md                      # Claude Code guidance: plugin path, checklists, conventions
+├── .claude/
+│   └── settings.json              # Claude Code hooks: blocks package-lock.json edits, runs lint before git commit
 ├── metadata.json                  # Tracks synced forms (auto-managed by form-sync)
 ├── sandbox.json                   # Git sandbox config (repo URL, branch, allowed paths)
 ├── .agent/                        # Agent memory — handover, history, session log
@@ -377,3 +426,23 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 | `sandbox.json` not found | Missing config | Create `sandbox.json` in workspace root — run `git-sandbox example-config` for a starter |
 | Forms not appearing after pull | Wrong DAM path | Use `form-sync list <dam-path>` to discover correct paths first |
 | `.env` committed to git | Security risk | Add `.env` to `.gitignore` immediately; rotate all exposed credentials |
+
+## Headless Workspace Validation
+
+To validate an already-configured workspace non-interactively (e.g. from a CI script or at the start of a session), run Claude in print mode from the workspace directory:
+
+```bash
+claude -p "Validate my AEM EDS Forms workspace. Check:
+1. The aem-forms plugin is installed — list all available skills.
+2. The .env file exists and has non-placeholder values for AEM_HOST, AEM_TOKEN, GITHUB_URL, GITHUB_REPO, GITHUB_TOKEN.
+3. Run '\${CLAUDE_PLUGIN_ROOT}/forms-orchestrator/scripts/eds-code-sync' test to verify AEM and GitHub connectivity.
+Report a status table with columns: Check | Status (PASS/FAIL) | Action needed." \
+  --allowedTools "Read,Bash,Glob,Grep"
+```
+
+This is useful for:
+- **Session start** — paste once to confirm the workspace is healthy before starting work
+- **CI pre-flight** — run before automated form generation to surface expired tokens or missing credentials early
+- **Debugging** — if a session is behaving unexpectedly, re-run this to rule out environment problems
+
+The command exits non-zero if Claude encounters an error, so it can be gated in scripts. Credentials are read from `.env` and never printed.
