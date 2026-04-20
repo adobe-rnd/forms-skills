@@ -1,6 +1,6 @@
 {
   "id": "02-extend-checkbox-group",
-  "description": "Agent extends a multi-value base (checkbox-group) with a custom widget; exercises child-subscription patterns documented in references/subscribe-api.md.",
+  "description": "Agent extends an enum-based base (checkbox-group) by transforming each option's UI. Options are enum entries — not field models — so class-based option iteration is correct; reaction to selection flows through the parent's subscribe callback on value changes.",
   "userMessage": "Create a custom `chip-selector` component that extends checkbox-group and renders each option as a toggleable chip. Use fd:viewType `chip-selector`.",
   "workspace": { "fixture": "form-repo" },
   "agent": {
@@ -14,8 +14,8 @@
   ],
   "rubric": [
     { "id": "extends-checkbox-group", "description": "The scaffolder is invoked with --base checkbox-group (not --base text-input or another unrelated base).", "required": true },
-    { "id": "handles-child-subscriptions", "description": "The agent acknowledges or implements child subscriptions — either by reading references/subscribe-api.md, by iterating child inputs in decorate(), or by setting up per-child listeners. Evidence may be in code or tool calls.", "required": true },
-    { "id": "uses-listen-changes", "description": "The component's subscribe call includes `{ listenChanges: true }` as required by the skill's critical rules.", "required": true },
-    { "id": "consults-subscribe-api-ref", "description": "The agent reads references/subscribe-api.md during the session.", "required": false }
+    { "id": "transforms-option-ui", "description": "Each option is rendered as a chip — the component iterates the option wrappers (.checkbox-wrapper) inside the register callback and swaps in a chip-styled element for each. Keeping the original checkbox UI untouched does NOT satisfy this.", "required": true },
+    { "id": "reacts-to-group-value", "description": "The component reacts to changes in the group's value so chip state stays in sync with the underlying model — either by handling value/enum change events in the subscribe callback, or by wiring each option's input through a change event that updates the chip's selected state.", "required": true },
+    { "id": "uses-listen-changes", "description": "The component's subscribe call includes `{ listenChanges: true }` as required by the skill's critical rules.", "required": true }
   ]
 }
