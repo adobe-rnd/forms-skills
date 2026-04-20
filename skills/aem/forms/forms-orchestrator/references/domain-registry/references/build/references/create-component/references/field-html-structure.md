@@ -241,9 +241,9 @@ All simple input types share the same structure, differing only in wrapper class
 
 **Key selectors:**
 - Legend: `fieldDiv.querySelector('legend')`
-- Child fields: `fieldDiv.querySelectorAll(':scope > .field-wrapper')`
 - Add button: `fieldDiv.querySelector('.add')`
 - Remove button: `fieldDiv.querySelector('.remove')`
+- Child field wrapper (by child model id): `fieldDiv.querySelector('[data-id="${child.id}"]')` — resolve children through `model.items`, **not** through class selectors. See SKILL.md Rule 7 and `subscribe-api.md § Child component subscriptions`.
 
 ---
 
