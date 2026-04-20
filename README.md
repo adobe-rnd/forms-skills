@@ -7,11 +7,7 @@ Repository of Adobe AEM Forms skills for AI coding agents.
 ### Claude Code Plugins
 
 ```bash
-# Add the Adobe Skills marketplace
-/plugin marketplace add adobe/skills
-
-# Install AEM Forms plugin
-/plugin install aem-forms@adobe-skills
+/plugin install github:adobe/forms-skills
 ```
 
 ## Available Skills

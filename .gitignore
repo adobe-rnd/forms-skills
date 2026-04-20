@@ -45,8 +45,5 @@ Thumbs.db
 # ── Temporary Files ──────────────────────────────────────
 drafts/tmp/
 
-.gitignore
-./forms-skills-issues.md
 docs/
-# forms-enhancements/
 .claude/

@@ -121,20 +121,20 @@ The plugin bundles its own Python virtual environment — you don't install any 
 ### Claude Code
 
 ```
-/plugin install aem-forms@adobe-skills
+/plugin install github:adobe/forms-skills
 ```
 
 ### Vercel Skills (npx)
 
 ```
 # Install all skills
-npx skills add adobe/skills --path skills/aem/forms --all
+npx skills add adobe/forms-skills --all
 
 # Or install a single skill
-npx skills add adobe/skills --path skills/aem/forms --skill create-form
+npx skills add adobe/forms-skills --skill create-form
 
 # List what's available
-npx skills add adobe/skills --path skills/aem/forms --list
+npx skills add adobe/forms-skills --list
 ```
 
 Python dependencies are installed automatically on first use.
@@ -170,10 +170,10 @@ Everything you need to work on the plugin code — add skills, modify scripts, a
 
 ```
 git clone <repo-url>
-cd skills/aem/forms
+cd forms-skills
 
 # Run the setup script — creates .venv at project root, installs everything
-./forms-orchestrator/scripts/setup.sh
+./skills/aem/forms/forms-orchestrator/scripts/setup.sh
 ```
 
 The script will:
@@ -196,16 +196,16 @@ source .venv/bin/activate
 
 ```bash
 # Validate plugin structure against the agentskills.io spec
-npx check-plugin skills/aem/forms
+npx check-plugin .
 ```
 
-This checks that every skill path registered in `plugin.json` has a valid `SKILL.md` with `name` and `description` frontmatter. The `check-plugin` command ships with [`crispy-garbanzo`](../../../../anirudhaggar_adobe/crispy-garbanzo) — run `npm install` once to make it available.
+This checks that every skill path registered in `plugin.json` has a valid `SKILL.md` with `name` and `description` frontmatter. The `check-plugin` command ships with `@aemforms/crispy-garbanzo` — run `npm install` once to make it available.
 
 See `forms-orchestrator/assets/error-handling.md` for CLI tool error patterns and recovery.
 
 ## 3. Run Evals
 
-Skill-level evals use the [`crispy-garbanzo`](../../../../anirudhaggar_adobe/crispy-garbanzo) runner, installed as a `file:` dependency.
+Skill-level evals use the [`@aemforms/crispy-garbanzo`](https://artifactory.corp.adobe.com/ui/native/npm-aem-release-local/%40aemforms/crispy-garbanzo) runner.
 
 Evals run against AWS Bedrock — set up credentials once before running:
 
@@ -235,12 +235,14 @@ Per-skill config, scenarios, and baselines live in `<skill>/evals/`. Shared AEM 
 ## Repository Structure
 
 ```
-forms/
-├── pyproject.toml                  # Python packaging — deps, entry points
-├── README.md                      # This file
+forms-skills/                       # repo root — also the aem-forms plugin
 ├── .claude-plugin/
 │   └── plugin.json                # Plugin metadata and skill registry
-├── forms-orchestrator/
+├── package.json
+├── skills/aem/forms/
+│   ├── pyproject.toml             # Python packaging — deps, entry points
+│   ├── README.md                  # This file
+│   ├── forms-orchestrator/
 │   ├── SKILL.md                   # forms-orchestrator — entry point (type: router)
 │   ├── assets/
 │   │   ├── guidelines.md          # Orchestrator constraints & conventions
@@ -288,7 +290,7 @@ forms/
 │               ├── integration/   # SKILL.md + references/{manage-apis}
 │               ├── infra/         # SKILL.md + references/{setup-workspace, sync-forms, sync-eds-code, git-sandbox}
 │               └── context/       # SKILL.md + references/{manage-context}
-└── tutorial.md                     # End-to-end walkthrough: build a Contact Us form
+│   └── tutorial.md                # End-to-end walkthrough: build a Contact Us form
 ```
 
 Every level follows the [agentskills.io specification](https://agentskills.io/specification): `SKILL.md` (required) + `scripts/` + `references/` + `assets/` (optional).
@@ -326,8 +328,8 @@ These tools live inside individual skill directories at `forms-orchestrator/refe
 5. If the skill has a **Python** package, add its `scripts/` path to the `PYTHONPATH` block in `forms-orchestrator/scripts/python3` (the central Python wrapper manages all package paths — no individual script should set `PYTHONPATH`).
 6. If the skill has a **Python** package, add its `scripts/` path to `pyproject.toml` under `[tool.setuptools.packages.find]` `where`.
 7. Register it in `forms-orchestrator/references/domain-registry/assets/skills-catalog.md`.
-8. Register it in `.claude-plugin/plugin.json` under the `skills` array.
-9. Run `bash tests/test_plugin_structure.sh` to verify.
+8. Register it in `.claude-plugin/plugin.json` (repo root) under the `skills` array.
+9. Run `npx check-plugin .` from the repo root to verify.
 
 ---
 
