@@ -9,7 +9,7 @@ Complete catalog of valid field types for form.json.
 | Text display | `plain-text` | `core/fd/components/form/text/v1/text` | name, label |
 | Text input | `text-input` | `core/fd/components/form/textinput/v1/textinput` | name, label, required, pattern, placeholder |
 | Number | `number-input` | `core/fd/components/form/numberinput/v1/numberinput` | name, label, min, max, step |
-| Date | `date-input` | `core/fd/components/form/datepicker/v1/datepicker` | name, label, min, max — **`$value` at runtime is ISO 8601 `YYYY-MM-DD`** (not the display format) |
+| Date | `date-input` | `core/fd/components/form/datepicker/v1/datepicker` | name, label, min, max, **displayFormat** (controls the picker's visual display, e.g. `MM/DD/YYYY`) — model value `$value` is always ISO `YYYY-MM-DD` regardless of display format |
 | Email | `email` | `core/fd/components/form/emailinput/v1/emailinput` | name, label, required, pattern |
 | File upload | `file-input` | `core/fd/components/form/fileinput/v2/fileinput` | name, label, accept, maxSize |
 | Dropdown | `drop-down` | `core/fd/components/form/dropdown/v1/dropdown` | name, label, enum, enumNames |
@@ -53,6 +53,35 @@ Options use parallel arrays:
 - `enumNames` — human-readable display labels
 - Arrays must be same length
 - Minimum 2 options for radio/checkbox groups
+
+## Date Field Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `minimum` | string | Earliest allowed date (ISO `YYYY-MM-DD`) |
+| `maximum` | string | Latest allowed date (ISO `YYYY-MM-DD`) |
+| `displayFormat` | string | Visual format shown in the picker UI, e.g. `MM/DD/YYYY` or `YYYY-MM-DD`. **This is the only way to change what the user sees.** Defaults to `MM/DD/YY`. |
+
+**Critical: two separate concerns**
+
+| Concern | How to control it | What NOT to do |
+|---------|------------------|----------------|
+| What the user sees in the date picker | Set `displayFormat` in `form.json` | Do not write a custom function to format the display — it has no effect on the picker UI |
+| What your rules/functions receive as `$value` | Always ISO `YYYY-MM-DD` — no configuration needed | Do not attempt to set a `date-input.$value` to a formatted string like `"12/25/2024"` — the model rejects non-ISO values |
+
+Example — picker that shows `DD/MM/YYYY` to the user but stores ISO internally:
+
+```json
+"birth_date": {
+  "fieldType": "date-input",
+  "sling:resourceType": "core/fd/components/form/datepicker/v1/datepicker",
+  "name": "birth_date",
+  "jcr:title": "Date of Birth",
+  "displayFormat": "DD/MM/YYYY"
+}
+```
+
+In a custom function, `globals.form.birth_date.$value` is always `"YYYY-MM-DD"` regardless of `displayFormat`.
 
 ## Number Field Properties
 

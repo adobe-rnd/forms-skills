@@ -61,23 +61,27 @@ export { validateEmail };
 
 ## 3. Data Transformation
 
+> **Date display format is a component property, not a function concern.**
+> The date picker's visual display (e.g. `MM/DD/YY` vs `YYYY-MM-DD`) is controlled by the `displayFormat` property set on the `date-input` field in `form.json` — **not** by a custom function. Writing a `formatDate` function and setting its result back on a `date-input` field will fail: `date-input.$value` only accepts ISO `YYYY-MM-DD`; any other format is rejected by the model.
+>
+> Use a formatting function only when you need to display a date in a **separate read-only text field** — for example, to show a derived date string alongside the real date picker.
+
 ```javascript
 /**
- * Formats a date to MM/DD/YYYY format
- * @name formatDate Format Date
- * @param {date} inputDate - Date to format
- * @returns {string} Formatted date string
+ * Formats an ISO date value for display in a plain-text or text-input field.
+ * Do NOT use this to set the value of a date-input field — use ISO YYYY-MM-DD for that.
+ * @name formatDateForDisplay Format Date For Display
+ * @param {string} isoDate - ISO date string from a date-input field (YYYY-MM-DD)
+ * @returns {string} Formatted date string for display only
  */
-function formatDate(inputDate) {
-    if (!inputDate) return '';
-    var date = new Date(inputDate);
-    var month = String(date.getMonth() + 1).padStart(2, '0');
-    var day = String(date.getDate()).padStart(2, '0');
-    var year = date.getFullYear();
-    return month + '/' + day + '/' + year;
+function formatDateForDisplay(isoDate) {
+    if (!isoDate) return '';
+    var parts = isoDate.split('-');
+    if (parts.length !== 3) return isoDate;
+    return parts[1] + '/' + parts[2] + '/' + parts[0]; // MM/DD/YYYY
 }
 
-export { formatDate };
+export { formatDateForDisplay };
 ```
 
 ---

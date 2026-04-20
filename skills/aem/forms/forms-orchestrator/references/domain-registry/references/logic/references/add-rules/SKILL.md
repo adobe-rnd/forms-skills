@@ -240,37 +240,7 @@ In rules: use DISPATCH_EVENT action. In custom functions: use `globals.functions
 
 ## Event-Driven UI Patterns
 
-Use DISPATCH_EVENT to decouple form logic from UI components (toasts, modals, loading overlays). The UI component listens for the event and renders itself; business rules only dispatch — they never manipulate UI directly.
-
-### Toast notifications
-
-```
-# Rule on any field or button:
-Target:  globals.form
-Event:   custom:showToast
-Payload: { message: "...", type: "success" | "error" | "info" }
-```
-
-The `showToast` custom function (defined in the infrastructure plan) listens for `custom:showToast` on `fd:custom:showToast` and renders the toast:
-
-```javascript
-// infrastructure/functions.js
-function showToast(message, type, globals) {
-    const toast = document.createElement('div');
-    toast.className = `form-toast form-toast--${type}`;
-    toast.textContent = message;
-    document.querySelector('.form-wrapper')?.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
-export { showToast };
-```
-
-In a rule, trigger it via FUNCTION_CALL or DISPATCH_EVENT:
-
-```javascript
-// From a custom function
-globals.functions.dispatchEvent(globals.form, 'custom:showToast', { message: 'Saved!', type: 'success' });
-```
+Use DISPATCH_EVENT to decouple form logic from UI components. Business rules only dispatch events — they never manipulate UI directly. The UI component (a custom component or a hidden panel) listens for the event and updates itself.
 
 ### Modal / overlay
 

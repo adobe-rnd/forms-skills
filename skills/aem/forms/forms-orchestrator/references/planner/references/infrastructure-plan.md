@@ -72,8 +72,6 @@ Shared functions consumed by multiple plans.
 
 | Function Name | Purpose | Parameters | Returns |
 |---------------|---------|------------|---------|
-| `showSuccessToast` | Display success notification | `message` | void |
-| `showErrorToast` | Display error notification | `message` | void |
 | `handleApiResponse` | Central error router | `response`, `globals` | void |
 | `handleSessionTimeout` | Relogin flow | `globals` | void |
 | `clearSessionData` | Storage cleanup | — | void |
@@ -92,7 +90,6 @@ Field-level transforms applied on input (e.g., uppercase, trim, format enforceme
 ## Typical Steps to Execute
 
 1. **Create utility functions** using `create-function`:
-   - Toast notification helpers (success, error)
    - Central API response handler
    - Session timeout handler with relogin modal
    - Data sanitization functions (uppercase, trim)
