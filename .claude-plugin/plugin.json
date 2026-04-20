@@ -1,0 +1,44 @@
+{
+  "name": "aem-forms",
+  "version": "0.1.0",
+  "description": "Skills for building AEM Adaptive Forms through AI conversation — create, validate, and deploy forms via natural language",
+  "author": {
+    "name": "Adobe"
+  },
+  "repository": "https://github.com/adobe/skills",
+  "license": "Apache-2.0",
+  "skills": [
+    "./skills/aem/forms/forms-orchestrator",
+    "./skills/aem/forms/forms-orchestrator/references/planner",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/infra",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/infra/references/setup-workspace",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/infra/references/sync-forms",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/infra/references/sync-eds-code",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/infra/references/git-sandbox",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/analysis",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/analysis/references/analyze-requirements",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/analysis/references/analyze-v1-form",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/analysis/references/create-screen-doc",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/analysis/references/review-screen-doc",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/build",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/build/references/scaffold-form",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/build/references/create-form",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/build/references/create-component",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/logic",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/logic/references/add-rules",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/logic/references/create-function",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/logic/references/optimize-rules",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/integration",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/integration/references/manage-apis",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/context",
+    "./skills/aem/forms/forms-orchestrator/references/domain-registry/references/context/references/manage-context"
+  ],
+  "keywords": [
+    "adobe",
+    "aem",
+    "forms",
+    "adaptive-forms",
+    "edge-delivery-services"
+  ]
+}
