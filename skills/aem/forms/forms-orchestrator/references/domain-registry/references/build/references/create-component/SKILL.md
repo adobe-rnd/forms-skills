@@ -37,6 +37,9 @@ You create custom form components by extending out-of-the-box (OOTB) field types
 4. **`decorate()` extends, not replaces** — `fieldDiv` already contains the base field's HTML; modify it, don't rebuild from scratch
 5. **Refer to HTML structures** — use [references/field-html-structure.md](references/field-html-structure.md) to understand the DOM you receive in `decorate()`
 6. **Always use `{ listenChanges: true }`** — all new components must use the recommended subscribe pattern (see [references/subscribe-api.md](references/subscribe-api.md))
+7. **Match the child pattern to the base type** — behavior depends on whether the base has child **field models** or enum **options**:
+   - **Panel/container bases** (`panel`, custom containers — `model.items` is populated, each child wrapper has `data-id`): find children via `model.items`, resolve each wrapper with `element.querySelector('[data-id="${child.id}"]')`, and call `subscribe()` on that wrapper. Do **not** locate child field wrappers with class selectors, and do **not** attach DOM event listeners to child internals to detect field state — react through child `subscribe` callbacks.
+   - **Enum-based bases** (`checkbox-group`, `radio-group`, `drop-down` — options have `id` but no `data-id`, no `model.items`): options are enum entries, not field models. Iterate option wrappers (`.checkbox-wrapper`, `.radio-wrapper`, `<option>`) to transform option UI, and react to selection via the parent field's `value`/`enum` change through `subscribe(fieldDiv, ..., { listenChanges: true })`.
 
 ## Workflow
 
@@ -91,8 +94,9 @@ Use the `subscribe` function from `rules/index.js` with `{ listenChanges: true }
 
 | If the component... | Pattern |
 |---------------------|---------|
-| Reacts to own field value/enum/visible changes | `{ listenChanges: true }` (recommended for all new components) |
-| Watches child items inside a panel | `{ listenChanges: true }` on parent + `subscribe()` on each child wrapper element |
+| Reacts to its own field value/enum/visible changes | `subscribe(fieldDiv, formId, cb, { listenChanges: true })` |
+| Extends an enum-based base (`checkbox-group`, `radio-group`, `drop-down`) to customize option UI | Iterate option wrappers (`.checkbox-wrapper`, `.radio-wrapper`, `<option>`) inside the `'register'` callback to transform their DOM; react to group `value`/`enum` changes via the parent `subscribe` callback. Options have no child field models, so `subscribe()` per option does not apply. |
+| Extends a panel/container base with child **field** models (`model.items` populated) | `subscribe` on parent, then inside `'register'` find each child via `model.items` and call `subscribe(childWrapper, ...)` on the child's `[data-id]` wrapper. Do **not** locate child field wrappers with class selectors. |
 
 Key implementation points:
 - Access custom properties via `fieldJson.properties.<propName>`
@@ -214,8 +218,49 @@ export default function decorate(fieldDiv, fieldJson, container, formId) {
 - `fieldDiv` is the already-rendered HTML of the base field type — extend it, don't replace it
 - `fieldJson.properties` contains custom authoring properties defined in `_<fd:viewType>.json`
 - Always use `{ listenChanges: true }` for new components
-- For panel/container components with children, call `subscribe()` on each child wrapper inside the `'register'` callback — see [references/subscribe-api.md](references/subscribe-api.md) for the child pattern
+- When the base has child **field** models (`model.items` populated — panel/container), drive child behavior through `subscribe()` on each child's `[data-id]` wrapper (see child template below)
+- When the base is enum-based (`checkbox-group`, `radio-group`, `drop-down`), options are not field models — iterate option wrappers to transform option UI
 - Refer to [references/field-html-structure.md](references/field-html-structure.md) for the exact HTML structure of each base type
+
+### Child subscription template (panel/container components with `model.items`)
+
+```js
+subscribe(fieldDiv, formId, (_fieldDiv, model, eventType) => {
+  if (eventType === 'register') {
+    model.items?.forEach((child) => {
+      const childWrapper = fieldDiv.querySelector(`[data-id="${child.id}"]`);
+      if (!childWrapper) return;
+      subscribe(childWrapper, formId, (_el, _childModel, childEvent, childPayload) => {
+        if (childEvent === 'register') {
+          // one-time child setup
+        } else if (childEvent === 'change') {
+          childPayload?.changes?.forEach((change) => {
+            if (change?.propertyName === 'value') {
+              // react to child value change via model, not DOM events
+            }
+          });
+        }
+      }, { listenChanges: true });
+    });
+  }
+}, { listenChanges: true });
+```
+
+**Anti-patterns for panel/container components (do not do this when children are field models):**
+
+```js
+// WRONG: class-based lookup of child FIELD wrappers in a panel
+fieldDiv.querySelectorAll('.field-wrapper').forEach((childFieldEl) => {
+  // bypasses model.items + [data-id] lookup
+});
+
+// WRONG: listening to DOM events on child field internals to detect field state
+fieldDiv.querySelectorAll('input').forEach((input) => {
+  input.addEventListener('change', () => { /* read value from model, via child subscribe instead */ });
+});
+```
+
+These anti-patterns **do not apply** to enum-based bases — iterating `.checkbox-wrapper`, `.radio-wrapper`, or `<option>` is correct for `checkbox-group`, `radio-group`, and `drop-down` extensions because those options are not field models.
 
 ## Examples
 
@@ -241,6 +286,71 @@ npm run create:custom-component -- --name card-choice --base radio-group
 
 Then register: add `'card-choice'` to `customComponents` in `mappings.js`.
 
+## Modal / Overlay Components
+
+Modal and overlay panels are custom components backed by `panel` as the base type. They are initially hidden in `form.json` and shown/hidden by rules or custom functions. Use `create-component` to attach CSS + JS behavior to a standard panel.
+
+### Pattern overview
+
+1. **Model the modal as a hidden panel** in `form.json`:
+
+```json
+"confirmModal": {
+  "fieldType": "panel",
+  "sling:resourceType": "core/fd/components/form/panelcontainer/v1/panelcontainer",
+  "fd:viewType": "confirm-modal",
+  "name": "confirmModal",
+  "jcr:title": "Confirm",
+  "visible": false
+}
+```
+
+2. **Scaffold and register:**
+
+```bash
+npm run create:custom-component -- --name confirm-modal --base panel
+```
+
+Add `'confirm-modal'` to `customComponents` in `mappings.js`.
+
+3. **Implement `decorate()`** — add a backdrop, apply CSS transitions, and wire the close gesture:
+
+```js
+import { subscribe } from '../../rules/index.js';
+
+export default function decorate(fieldDiv, fieldJson, container, formId) {
+  fieldDiv.classList.add('modal-panel');
+
+  // Backdrop — click outside to close
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.addEventListener('click', () => {
+    // Dispatch a close event; the rule wired to the close button handles hiding
+    fieldDiv.dispatchEvent(new CustomEvent('modal:close', { bubbles: true }));
+  });
+  fieldDiv.prepend(backdrop);
+
+  subscribe(fieldDiv, formId, (_el, _model, eventType, payload) => {
+    if (eventType === 'change') {
+      payload?.changes?.forEach((change) => {
+        if (change?.propertyName === 'visible') {
+          // Sync backdrop visibility with panel visibility
+          backdrop.style.display = change.currentValue ? 'block' : 'none';
+        }
+      });
+    }
+  }, { listenChanges: true });
+
+  return fieldDiv;
+}
+```
+
+4. **Style** `confirm-modal.css` — position the panel as a fixed overlay and style the backdrop.
+
+5. **Wire visibility rules** in `add-rules` — use SHOW_STATEMENT / HIDE_STATEMENT on the modal panel from any trigger (button click, API error, custom event).
+
+> **Key point:** Showing/hiding is always done via the form model (rules or `globals.functions.setProperty`), never by toggling CSS `display` directly. The `subscribe` callback on the `visible` property is how the component learns it was shown/hidden so it can sync any secondary DOM (like the backdrop).
+
 ## Troubleshooting
 
 | Problem | Solution |
@@ -250,6 +360,9 @@ Then register: add `'card-choice'` to `customComponents` in `mappings.js`.
 | Invalid base_type error | Use only valid base types from the table above |
 | Styles not loading | Ensure CSS file name matches `<fd:viewType>.css` exactly |
 | Using `model.subscribe()` on children | Use `subscribe(childEl, formId, cb, { listenChanges: true })` from `rules/index.js` instead |
+| For panel/container bases: locating child **field** wrappers by class selectors | Use `model.items` + `element.querySelector('[data-id="${child.id}"]')`, then `subscribe()` on the wrapper. (Does **not** apply to enum-based bases — see next row.) |
+| For panel/container bases: reading child field values via DOM `change` listeners on child `<input>` elements | Read child values from the child's `subscribe` callback `payload.changes` instead — don't attach listeners to child field internals |
+| For `checkbox-group` / `radio-group` extensions: trying `subscribe()` on each `.checkbox-wrapper` / `.radio-wrapper` | Options are enum entries, not field models (no `data-id`). Iterate option wrappers to transform UI; react to selection via the parent's `subscribe` callback on `value`/`enum` changes |
 | Forgetting `npm run build:json` | New properties won't appear in authoring — run after adding/modifying JSON schema |
 | Change event not propagating | Dispatch `new Event('change', { bubbles: true })` on the underlying input |
 | Infinite loop on value change | Guard `model.value` updates with value comparison — don't set inside a value change handler unconditionally |

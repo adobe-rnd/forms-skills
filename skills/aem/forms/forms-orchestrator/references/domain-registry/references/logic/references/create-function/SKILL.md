@@ -202,6 +202,8 @@ To find the right client: `api-manager list | grep -i <keyword>` or `api-manager
 
 AEM runtime loads **only the form-level `customFunctionsPath`**. Fragment-level scripts are for authoring only. At runtime, ALL functions — from all fragments at every nesting level — must be reachable from the single form-level script via the import chain.
 
+> **Entry point:** The file pointed to by the root form's `customFunctionsPath` is the sole runtime entry point. By convention this file is named `functions.js` (e.g. `blocks/form/scripts/form/functions.js`), but the actual filename that matters is whatever value is in `customFunctionsPath` — AEM ignores all other JS files in the scripts tree unless they are imported transitively from this one file.
+
 ### The Full Chain (3 levels)
 
 ```

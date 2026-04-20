@@ -154,10 +154,10 @@ Algorithm:
    ```
 
 4. **Push to AEM:**
-   <!-- Always include a deploy step (user may defer at checkpoint) -->
-   ```
-   form-sync push <aem-content-path>
-   ```
+   <!-- Always ASK before pushing — never push silently. Token may be expired. -->
+   > "Ready to push to AEM? (yes / skip — you can push manually later with `form-sync push <aem-content-path>`)"
+   - If **yes**: run `form-sync push <aem-content-path>` and confirm success.
+   - If **no** / **skip**: note that push is pending and move on.
 
 ## Acceptance Criteria
 
@@ -208,7 +208,7 @@ These rules govern all plans regardless of type.
 | **Execution** | Plans execute sequentially. Each plan declares its dependencies via `Depends on`. |
 | **Max per journey** | 15 plans. If more are needed, the journey is too complex — decompose it. |
 | **File path** | `plans/<journey>/NN-<short-title>.md` |
-| **Validate + Deploy** | Every plan ends with a validate step and a deploy step. The user may defer deployment at the post-plan checkpoint. |
+| **Validate + Deploy** | Every plan ends with a validate step and a deploy step. Always ask the user before pushing — never push silently. The user may defer deployment at the checkpoint. |
 | **Dependency declaration** | Always state what each dependency provides, not just its number. e.g., `Plan 01 (panel skeleton)` not just `Plan 01`. |
 | **Acceptance criteria** | Every criterion must be independently testable. Prefer specific observable behaviors over vague statements. |
 | **Specification tables** | Use tables for structured data (field specs, rule definitions, API mappings). Use trees for hierarchical structures (panel layout). Use pseudocode for algorithms. |

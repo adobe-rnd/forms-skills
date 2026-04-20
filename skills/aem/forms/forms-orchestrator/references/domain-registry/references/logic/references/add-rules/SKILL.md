@@ -238,6 +238,76 @@ Any event dispatched on `globals.form` is visible to the **entire form tree** �
 
 In rules: use DISPATCH_EVENT action. In custom functions: use `globals.functions.dispatchEvent`.
 
+## Event-Driven UI Patterns
+
+Use DISPATCH_EVENT to decouple form logic from UI components (toasts, modals, loading overlays). The UI component listens for the event and renders itself; business rules only dispatch — they never manipulate UI directly.
+
+### Toast notifications
+
+```
+# Rule on any field or button:
+Target:  globals.form
+Event:   custom:showToast
+Payload: { message: "...", type: "success" | "error" | "info" }
+```
+
+The `showToast` custom function (defined in the infrastructure plan) listens for `custom:showToast` on `fd:custom:showToast` and renders the toast:
+
+```javascript
+// infrastructure/functions.js
+function showToast(message, type, globals) {
+    const toast = document.createElement('div');
+    toast.className = `form-toast form-toast--${type}`;
+    toast.textContent = message;
+    document.querySelector('.form-wrapper')?.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+export { showToast };
+```
+
+In a rule, trigger it via FUNCTION_CALL or DISPATCH_EVENT:
+
+```javascript
+// From a custom function
+globals.functions.dispatchEvent(globals.form, 'custom:showToast', { message: 'Saved!', type: 'success' });
+```
+
+### Modal / overlay
+
+```
+# Rule to show modal:
+Target:  <modalPanel>
+Action:  SHOW_STATEMENT
+
+# Rule to hide on button click:
+Target:  <closeButton>   Trigger: is clicked
+Action:  HIDE_STATEMENT(<modalPanel>)
+```
+
+Model a modal as a **hidden panel** in `form.json`:
+
+```json
+"sessionTimeoutModal": {
+  "fieldType": "panel",
+  "sling:resourceType": "core/fd/components/form/panelcontainer/v1/panelcontainer",
+  "name": "sessionTimeoutModal",
+  "jcr:title": "Session Timeout",
+  "visible": false,
+  "fields": {
+    "timeoutMessage": { "fieldType": "plain-text", "value": "Your session has expired." },
+    "reloginButton":  { "fieldType": "button", "name": "reloginButton", "jcr:title": "Log in again" }
+  }
+}
+```
+
+Show it from a custom function when a 401 is detected:
+
+```javascript
+globals.functions.setProperty(globals.form.sessionTimeoutModal, { visible: true });
+```
+
+Hide it on button click via a direct rule (SHOW_STATEMENT / HIDE_STATEMENT) — no custom function needed.
+
 ## Repeatable Panel Population
 
 **Array of objects:** Set value to an array where keys match component IDs inside the repeatable panel:

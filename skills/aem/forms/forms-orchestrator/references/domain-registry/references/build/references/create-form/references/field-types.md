@@ -9,13 +9,13 @@ Complete catalog of valid field types for form.json.
 | Text display | `plain-text` | `core/fd/components/form/text/v1/text` | name, label |
 | Text input | `text-input` | `core/fd/components/form/textinput/v1/textinput` | name, label, required, pattern, placeholder |
 | Number | `number-input` | `core/fd/components/form/numberinput/v1/numberinput` | name, label, min, max, step |
-| Date | `date-input` | `core/fd/components/form/datepicker/v1/datepicker` | name, label, min, max |
+| Date | `date-input` | `core/fd/components/form/datepicker/v1/datepicker` | name, label, min, max — **`$value` at runtime is ISO 8601 `YYYY-MM-DD`** (not the display format) |
 | Email | `email` | `core/fd/components/form/emailinput/v1/emailinput` | name, label, required, pattern |
 | File upload | `file-input` | `core/fd/components/form/fileinput/v2/fileinput` | name, label, accept, maxSize |
 | Dropdown | `drop-down` | `core/fd/components/form/dropdown/v1/dropdown` | name, label, enum, enumNames |
 | Radio group | `radio-group` | `core/fd/components/form/radiobutton/v1/radiobutton` | name, label, enum, enumNames |
 | Checkbox group | `checkbox-group` | `core/fd/components/form/checkboxgroup/v1/checkboxgroup` | name, label, enum, enumNames |
-| Single checkbox | `checkbox` | `core/fd/components/form/checkbox/v1/checkbox` | name, label |
+| Single checkbox | `checkbox` | `core/fd/components/form/checkbox/v1/checkbox` | name, label, **enum** (1-element array — required so AEM knows the checked value), **enumNames** (1-element array — display label for checked state) |
 | Panel/Section | `panel` | `core/fd/components/form/panelcontainer/v1/panelcontainer` | title, fields |
 | Button | `button` | `core/fd/components/form/button/v1/button` | name, label, type |
 | Fragment | `panel` | `core/fd/components/form/fragment/v1/fragment` | name, fragmentPath, minOccur |
@@ -84,10 +84,12 @@ Options use parallel arrays:
 - Field names: **unique**, **snake_case**
 - All fields must have `jcr:title`
 - Radio/checkbox groups: **minimum 2 options**
+- Single `checkbox`: requires `enum` (1-element array with the checked value, e.g. `["true"]`) and `enumNames` (1-element label); omitting them causes AEM to ignore the checked state
 - Pattern: valid JavaScript regex
 - Min < max (minLength ≤ maxLength, minimum ≤ maximum)
-- Dates: ISO 8601 format
+- Dates: ISO 8601 format; `$value` at runtime is always `YYYY-MM-DD` regardless of display locale
 - Dropdowns use `enum` (values) + `enumNames` (display labels)
+- `plain-text` fields display static text — use `value` property for content, not `jcr:title` (which is a label, not rendered as content)
 
 ## Layout: Colspan
 

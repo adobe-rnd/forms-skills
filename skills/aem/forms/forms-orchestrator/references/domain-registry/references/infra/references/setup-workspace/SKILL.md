@@ -69,6 +69,51 @@ Then immediately write the absolute path into `<name>/.env` as the first entry:
 FORMS_WORKSPACE=<cwd>/<name>
 ```
 
+**Then create `CLAUDE.md` in the workspace root.**
+
+First, resolve the plugin root path:
+
+```bash
+echo "${CLAUDE_PLUGIN_ROOT}"
+```
+
+Then write `<name>/CLAUDE.md` using the resolved path (substitute `<plugin-root>` with the actual value printed above):
+
+```markdown
+# AEM Forms Workspace
+
+## Plugin
+
+**AEM Forms plugin root:** `<plugin-root>`
+
+When working with AEM Forms skills in this workspace, always read skill files from the path above. Do NOT read from any source code repository or any other path. Never assume skill file paths — verify they exist under the plugin root first.
+
+## Workspace Setup Checklist
+
+For AEM EDS form workflows, always follow this order:
+1. Verify the plugin is loaded — run `/reload-plugins` if skills are not responding.
+2. Verify workspace credentials are filled in (`.env` has non-placeholder values).
+3. Verify AEM and GitHub connectivity before starting form generation.
+
+Do not skip setup verification. Most session failures trace back to one of these three steps.
+
+## Deployment Checklist
+
+Before deploying to AEM, always verify:
+1. Bearer token is valid — regenerate from AEM Developer Console → Integrations → Local Token if you get 401.
+2. Files are placed in the correct directory paths (check `AEM_WRITE_PATHS`).
+3. `package-lock.json` is not modified — never commit lockfile changes.
+4. Run `npm run lint` and fix all violations before committing.
+
+## Code Style
+
+When implementing form UI components, prefer component-based approaches over direct DOM manipulation. Ask the user before choosing between design alternatives (dropdown vs autocomplete, toast patterns, wizard layouts, etc.).
+
+## Form Validation
+
+Use `constraintMessages` carefully in `form.json` and validate the schema before writing. For validation rules, test with a small subset first — never apply bulk rules without incremental validation.
+```
+
 Confirm to the user:
 > "Created workspace at `<cwd>/<name>`. Now let's configure your credentials."
 
@@ -223,6 +268,7 @@ Confirm to the user:
 ```
 <workspace-name>/
 ├── .env                           # Credentials (AEM + GitHub) — never commit
+├── CLAUDE.md                      # Claude Code guidance: plugin path, checklists, conventions
 ├── metadata.json                  # Tracks synced forms (auto-managed by form-sync)
 ├── sandbox.json                   # Git sandbox config (repo URL, branch, allowed paths)
 ├── .agent/                        # Agent memory — handover, history, session log
