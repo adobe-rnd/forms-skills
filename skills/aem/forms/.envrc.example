@@ -1,0 +1,24 @@
+# ── Evals only ───────────────────────────────────────────────────────────────
+# These variables are ONLY required to run skill evals (npm run evals).
+# They are NOT needed for normal forms development or workspace setup.
+#
+# Configure the provider in each skill's evals/evals.config.json, then set
+# the matching credentials here.
+#
+# Setup:
+#   cp .envrc.example .envrc
+#   # fill in credentials for your chosen provider, then:
+#   direnv allow
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── AWS Bedrock ───────────────────────────────────────────────────────────────
+# Option A: bearer token (long-lived API key)
+export AWS_BEARER_TOKEN_BEDROCK=<paste-your-bedrock-token-here>
+export AWS_REGION=us-west-2
+
+# Option B: named AWS profile with SigV4 credentials
+# export AWS_PROFILE=forms-evals
+# export AWS_REGION=us-west-2
+
+# ── Anthropic (alternative provider) ─────────────────────────────────────────
+# export ANTHROPIC_API_KEY=<paste-your-anthropic-api-key-here>

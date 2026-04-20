@@ -27,6 +27,8 @@ htmlcov/
 .env
 .env.*
 !.env.example
+.envrc
+!.envrc.example
 
 # ── OS Files ─────────────────────────────────────────────
 .DS_Store
@@ -44,3 +46,7 @@ Thumbs.db
 drafts/tmp/
 
 .gitignore
+./forms-skills-issues.md
+docs/
+# forms-enhancements/
+.claude/

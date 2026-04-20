@@ -159,7 +159,6 @@ skills/
     │   ├── .claude-plugin/
     │   │   └── plugin.json
     │   ├── pyproject.toml
-    │   ├── setup.sh
     │   ├── forms-orchestrator/
     │   │   ├── SKILL.md
     │   │   ├── assets/

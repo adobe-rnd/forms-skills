@@ -10,6 +10,7 @@ Skills plugin that gives AI coding agents (Claude Code, etc.) the knowledge and 
 
 - [How It Works](#how-it-works)
 - [User Guide](#user-guide) _(install, set up workspace, start building)_
+- [Tutorial](tutorial.md) _(build a complete form end-to-end)_
 - [Developer Guide](#developer-guide) _(work on the plugin itself)_
 
 ---
@@ -184,7 +185,6 @@ After setup, activate the venv in any new shell:
 
 ```
 source .venv/bin/activate
-# (The root ./setup.sh wrapper also works — it forwards to forms-orchestrator/scripts/setup.sh)
 ```
 
 | Flag | What it does |
@@ -194,23 +194,49 @@ source .venv/bin/activate
 
 ## 2. Run Tests
 
-```
-source .venv/bin/activate
-
-# Validate plugin structure (14 skill entries, all SKILL.md files, script directories, Python packages)
-bash tests/test_plugin_structure.sh
+```bash
+# Validate plugin structure against the agentskills.io spec
+npx check-plugin skills/aem/forms
 ```
 
-There's also a manual end-to-end test plan in `tests/e2e-test-plan.md` (30–45 min, covers analyze → create → rules → functions → validate) and an error-handling guide in `tests/error-handling-guide.md` for CLI tool error patterns and recovery.
+This checks that every skill path registered in `plugin.json` has a valid `SKILL.md` with `name` and `description` frontmatter. The `check-plugin` command ships with [`crispy-garbanzo`](../../../../anirudhaggar_adobe/crispy-garbanzo) — run `npm install` once to make it available.
 
-Individual skills may also have `eval/` directories for skill-level testing.
+See `forms-orchestrator/assets/error-handling.md` for CLI tool error patterns and recovery.
+
+## 3. Run Evals
+
+Skill-level evals use the [`crispy-garbanzo`](../../../../anirudhaggar_adobe/crispy-garbanzo) runner, installed as a `file:` dependency.
+
+Evals run against AWS Bedrock — set up credentials once before running:
+
+```bash
+cp skills/aem/forms/.envrc.example skills/aem/forms/.envrc
+# fill in AWS_BEARER_TOKEN_BEDROCK and AWS_REGION, then:
+direnv allow
+```
+
+```bash
+# One-time setup
+npm install
+
+# Run a skill's evals
+npx crispy-garbanzo --skill <path-to-skill-dir>
+
+# Example — create-component
+npx crispy-garbanzo \
+  --skill skills/aem/forms/forms-orchestrator/references/domain-registry/references/build/references/create-component
+
+# Approve current results as the new baseline
+npx crispy-garbanzo --skill <path> --approve
+```
+
+Per-skill config, scenarios, and baselines live in `<skill>/evals/`. Shared AEM fixtures (e.g. `form-repo`) ship with `crispy-garbanzo` under `fixtures/aem/`.
 
 ## Repository Structure
 
 ```
 forms/
 ├── pyproject.toml                  # Python packaging — deps, entry points
-├── setup.sh                       # Wrapper → forms-orchestrator/scripts/setup.sh
 ├── README.md                      # This file
 ├── .claude-plugin/
 │   └── plugin.json                # Plugin metadata and skill registry
@@ -218,7 +244,8 @@ forms/
 │   ├── SKILL.md                   # forms-orchestrator — entry point (type: router)
 │   ├── assets/
 │   │   ├── guidelines.md          # Orchestrator constraints & conventions
-│   │   └── routing-table.md       # 6-step routing algorithm
+│   │   ├── routing-table.md       # 6-step routing algorithm
+│   │   └── error-handling.md      # Tool error reporting & agent recovery patterns
 │   ├── scripts/                   # Shared CLI wrappers + tool backends
 │   │   ├── setup.sh               # Environment setup (creates .venv at project root)
 │   │   ├── _resolve-workspace     # Workspace resolution helper (sourced by all tools)
@@ -261,11 +288,7 @@ forms/
 │               ├── integration/   # SKILL.md + references/{manage-apis}
 │               ├── infra/         # SKILL.md + references/{setup-workspace, sync-forms, sync-eds-code, git-sandbox}
 │               └── context/       # SKILL.md + references/{manage-context}
-└── tests/
-    ├── README.md
-    ├── test_plugin_structure.sh
-    ├── e2e-test-plan.md
-    └── error-handling-guide.md
+└── tutorial.md                     # End-to-end walkthrough: build a Contact Us form
 ```
 
 Every level follows the [agentskills.io specification](https://agentskills.io/specification): `SKILL.md` (required) + `scripts/` + `references/` + `assets/` (optional).

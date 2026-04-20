@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v6
         with:
@@ -20,3 +22,56 @@ jobs:
       - run: npm ci
 
       - run: npm run validate
+
+      - name: Check if aem-forms skills changed
+        id: aem_forms_changed
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || 'HEAD~1' }}"
+          if git diff "$BASE"...HEAD --name-only | grep -q "^skills/aem/forms/"; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check plugin structure
+        if: steps.aem_forms_changed.outputs.changed == 'true'
+        run: npx check-plugin skills/aem/forms
+
+      - name: Check evals report
+        if: steps.aem_forms_changed.outputs.changed == 'true'
+        run: |
+          REPORT="skills/aem/forms/evals-report.json"
+
+          # Fail if report is missing
+          if [ ! -f "$REPORT" ]; then
+            echo "❌ evals-report.json is missing."
+            echo "   Run 'npm run evals' locally and commit the report before raising a PR."
+            exit 1
+          fi
+
+          # Fail if report is stale (not updated in this PR / branch)
+          BASE="${{ github.event.pull_request.base.sha || 'HEAD~1' }}"
+          if ! git diff "$BASE"...HEAD --name-only | grep -q "^$REPORT$"; then
+            echo "❌ evals-report.json is stale — it was not updated in this branch."
+            echo "   Run 'npm run evals' locally and commit the updated report."
+            exit 1
+          fi
+
+          # Report is present and fresh — print summary and exit 0
+          node --input-type=module <<'EOF'
+          import { readFileSync } from 'fs';
+          const r = JSON.parse(readFileSync('skills/aem/forms/evals-report.json', 'utf8'));
+          const { summary, skills, timestamp } = r;
+          console.log(`\nEvals report (${new Date(timestamp).toUTCString()})`);
+          console.log(`${'─'.repeat(50)}`);
+          console.log(`  ${summary.passed}/${summary.total} scenarios passed  (${summary.pass_rate}%)\n`);
+          for (const s of skills) {
+            const icon = s.verdict === 'pass' ? '✅' : '❌';
+            console.log(`  ${icon}  ${s.skill.padEnd(30)} ${s.passed}/${s.total}`);
+            if (s.verdict === 'fail') {
+              for (const sc of s.scenarios.filter(x => x.verdict === 'fail'))
+                console.log(`       └─ ❌ ${sc.id}`);
+            }
+          }
+          console.log(`\nℹ️  Review the summary above. Merge at your discretion.`);
+          EOF
