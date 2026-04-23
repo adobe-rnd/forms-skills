@@ -68,7 +68,7 @@ User Intent
 Run:
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/eds-code-sync" test
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync" test
 ```
 
 | Result | Action |
