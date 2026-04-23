@@ -16,7 +16,7 @@
 set -e
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PROJECT_ROOT="$(cd "$PLUGIN_ROOT/.." && pwd)"
+PROJECT_ROOT="$(cd "$PLUGIN_ROOT/../.." && pwd)"
 VENV_PYTHON="$PROJECT_ROOT/.venv/bin/python3"
 
 # Bootstrap the venv if it doesn't exist yet
@@ -34,12 +34,12 @@ fi
 
 # ── Set PYTHONPATH for all plugin Python packages ────────────────────────────
 PLUGIN_PYTHONPATH="$PLUGIN_ROOT/scripts"
-PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/forms-infra/references/sync-forms/scripts"
-PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/forms-infra/references/sync-eds-code/scripts"
-PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/forms-infra/references/git-sandbox/scripts"
-PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/forms-build/references/create-form/scripts"
-PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/forms-build/references/scaffold-form/scripts"
-PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/forms-integration/references/manage-apis/scripts"
+PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-infra/references/sync-forms/scripts"
+PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-infra/references/sync-eds-code/scripts"
+PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-infra/references/git-sandbox/scripts"
+PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-build/references/create-form/scripts"
+PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-build/references/scaffold-form/scripts"
+PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-integration/references/manage-apis/scripts"
 export PYTHONPATH="$PLUGIN_PYTHONPATH${PYTHONPATH:+:$PYTHONPATH}"
 
 exec "$VENV_PYTHON" "$@"
