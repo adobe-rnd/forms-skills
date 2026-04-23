@@ -4,7 +4,7 @@
   "private": true,
   "description": "Dev tooling for the aem-forms skillpack (validate, evals)",
   "scripts": {
-    "validate": "find forms-* -name SKILL.md -not -path '*/.venv/*' -exec dirname {} \\; | xargs -I {} skills-ref validate {}",
+    "validate": "find skills/ -name SKILL.md -not -path '*/.venv/*' -exec dirname {} \\; | xargs -I {} skills-ref validate {}",
     "evals": "crispy-garbanzo --plugin ."
   },
   "devDependencies": {
