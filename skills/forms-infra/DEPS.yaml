@@ -1,4 +1,4 @@
-skillpack: "1.0"
-
-dependencies:
-  forms-shared: "*"
+# skillpack: "1.0"
+#
+# dependencies:
+#   other-skill: "^1.0.0"
