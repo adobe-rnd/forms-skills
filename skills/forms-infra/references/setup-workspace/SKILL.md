@@ -93,7 +93,7 @@ When working with AEM Forms skills in this workspace, always read skill files fr
 At the start of every new session, run this before any form work:
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/eds-code-sync" test
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync" test
 ```
 
 This verifies AEM auth and GitHub access in one shot. Do not proceed until it passes:
@@ -267,7 +267,7 @@ If any are missing, tell the user exactly what to install and from where.
 Run from the workspace:
 
 ```
-"${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/eds-code-sync" test
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync" test
 ```
 
 This verifies both AEM and GitHub access. If it fails:
@@ -281,7 +281,7 @@ This verifies both AEM and GitHub access. If it fails:
 Once connectivity is confirmed, pull the latest EDS form code from the GitHub repo into the workspace's `code/` directory:
 
 ```
-"${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/eds-code-sync" sync
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync" sync
 ```
 
 This clones the repository configured in `GITHUB_REPO` and maps the relevant EDS form files (blocks, components, custom functions, API clients) into the local `code/` folder using the default file mapping.
@@ -435,7 +435,7 @@ To validate an already-configured workspace non-interactively (e.g. from a CI sc
 claude -p "Validate my AEM EDS Forms workspace. Check:
 1. The aem-forms plugin is installed — list all available skills.
 2. The .env file exists and has non-placeholder values for AEM_HOST, AEM_TOKEN, GITHUB_URL, GITHUB_REPO, GITHUB_TOKEN.
-3. Run '\${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/eds-code-sync' test to verify AEM and GitHub connectivity.
+3. Run '\${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync' test to verify AEM and GitHub connectivity.
 Report a status table with columns: Check | Status (PASS/FAIL) | Action needed." \
   --allowedTools "Read,Bash,Glob,Grep"
 ```

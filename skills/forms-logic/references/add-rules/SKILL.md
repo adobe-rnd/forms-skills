@@ -131,7 +131,7 @@ Wait for user to approve or request changes before proceeding.
 
 ```bash
 # Get component tree with qualified names
-"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-transform" <form>.form.json
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-transform" <form>.form.json
 
 # Check existing rules on target field
 cat <form>.rule.json | jq '.[] | select(.componentName == "<fieldName>")'
@@ -148,13 +148,13 @@ If similar rules exist, inform user and ask if they want to proceed.
 
 ```bash
 # Parse custom functions
-"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/parse-functions" <path-to-functions.js>
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/parse-functions" <path-to-functions.js>
 
 # List available APIs
-"${CLAUDE_PLUGIN_ROOT}/forms-shared/scripts/api-manager" list
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-shared/scripts/api-manager" list
 
 # Show API details
-"${CLAUDE_PLUGIN_ROOT}/forms-shared/scripts/api-manager" show <apiName> --json
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-shared/scripts/api-manager" show <apiName> --json
 ```
 
 Do NOT ask the user which API to use if you can find it by searching.
@@ -168,7 +168,7 @@ Build the rule following the grammar. See [references/grammar-reference.md](refe
 ### Step 6: VALIDATE (Mandatory)
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-validate" <rule.json>
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-validate" <rule.json>
 ```
 
 **STOP if errors. Fix before proceeding. NEVER save invalid rules.**
@@ -176,7 +176,7 @@ Build the rule following the grammar. See [references/grammar-reference.md](refe
 ### Step 7: Save to Rule Store
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-save" <rule.json> \
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-save" <rule.json> \
   --rule-store <form>.rule.json \
   --form <form>.form.json
 ```
@@ -192,7 +192,7 @@ If save fails, see [references/troubleshooting.md](references/troubleshooting.md
 For rules with custom functions, run `rule-transform` and trace the **exact qualified path** for every field the function will access. Fragment references add hidden nesting.
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-transform" <form>.form.json
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-transform" <form>.form.json
 ```
 
 Example: `accountSelectionWrapper` looks direct but is actually at `wrapper.accountSelectionPanel.accountSelectionWrapper`. Wrong paths cause NPE at runtime.
@@ -203,14 +203,14 @@ Replace `// TODO` stubs with real logic. See [references/apis.md](references/api
 
 **Do NOT change function signatures. Do NOT re-run save-rule.**
 
-For API calls, discover first: `"${CLAUDE_PLUGIN_ROOT}/forms-shared/scripts/api-manager" list | grep -i <keyword>`
+For API calls, discover first: `"${CLAUDE_PLUGIN_ROOT}/skills/forms-shared/scripts/api-manager" list | grep -i <keyword>`
 
 ### Step 9: Re-save Existing Rules
 
 Regenerate `fd:events` for all rules in a rule store:
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-save" resave \
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-save" resave \
   --rule-store <form>.rule.json --form <form>.form.json
 ```
 

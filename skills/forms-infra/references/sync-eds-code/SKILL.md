@@ -68,7 +68,7 @@ When a plan or phase modifies EDS code (files in the `code/` directory), follow 
 Before pushing, validate the EDS code using the CLI:
 
 ```
-"${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/eds-code-sync" validate --verbose
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync" validate --verbose
 ```
 
 This clones the EDS repository, applies your local `code/` changes on top, runs `npm ci` and `npm run lint`, and reports any errors.
@@ -82,7 +82,7 @@ If validation fails, fix the issues in the `code/` directory and re-run `validat
 ### 2. Push changes and open a PR
 
 ```
-"${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/eds-code-sync" push --branch <plan-name-or-feature> --pr
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync" push --branch <plan-name-or-feature> --pr
 ```
 
 Use a descriptive branch name derived from the plan or feature (e.g., `plan-03-business-rules`, `add-prefill-logic`).
@@ -98,7 +98,7 @@ Wait for the user to confirm the merge. Do not proceed to the next plan until th
 Once the user confirms the merge, re-sync the local `code/` directory:
 
 ```
-"${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/eds-code-sync" sync
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync" sync
 ```
 
 This pulls the merged main branch so the workspace reflects the latest state — including any review changes the user or reviewers may have made during the PR.
