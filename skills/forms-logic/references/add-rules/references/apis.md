@@ -72,8 +72,8 @@ globals.functions.importData([
 
 Discover APIs before writing code:
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/forms-shared/scripts/api-manager" list | grep -i <keyword>
-"${CLAUDE_PLUGIN_ROOT}/forms-shared/scripts/api-manager" show <apiName> --json
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-shared/scripts/api-manager" list | grep -i <keyword>
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-shared/scripts/api-manager" show <apiName> --json
 ls refs/apis/generated/api-clients/<apiName>.js
 ```
 

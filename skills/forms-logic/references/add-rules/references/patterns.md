@@ -9,7 +9,7 @@
 | **NEVER pass field references as function args** | Access fields via `globals.fragment.<fieldName>` inside the function body. The visual rule `params` array is always `[]`. |
 | **NEVER use $parent references** | `$parent` doesn't resolve. Use events for cross-fragment communication (see below). |
 | **No DOM access in custom functions** | Only `globals`/`scope` — never `document.querySelector`, `window`, or jQuery. |
-| **Validate before saving** | Run `"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-validate" rule.json`. Fix errors before proceeding. |
+| **Validate before saving** | Run `"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-validate" rule.json`. Fix errors before proceeding. |
 | **Use template for rule JSON** | Always start from `templates/` — never write rule JSON from scratch. |
 
 ---
@@ -42,6 +42,6 @@ This replaces `$parent` references entirely.
 
 See [grammar-reference.md](grammar-reference.md) for full JSON structure, valid nodeNames, and trigger events.
 
-**Source of truth:** `"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-grammar"`
+**Source of truth:** `"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-grammar"`
 
 **Key rules:** CONDITION needs `"nested": false`. Empty condition = `"choice": null`. Literal tokens = `"value": null`. FUNCTION_CALL uses `functionName` (object) + `params` (array).

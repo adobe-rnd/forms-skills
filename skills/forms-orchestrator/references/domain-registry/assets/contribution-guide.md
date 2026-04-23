@@ -62,9 +62,9 @@ When a skill needs to invoke a CLI tool (e.g., `eds-code-sync`, `rule-validate`,
 ### Always use `${CLAUDE_PLUGIN_ROOT}`
 
 ```
-"${CLAUDE_PLUGIN_ROOT}/forms-shared/scripts/<tool-name>" <args>
-"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/<tool-name>" <args>
-"${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/<tool-name>" <args>
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-shared/scripts/<tool-name>" <args>
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/<tool-name>" <args>
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/<tool-name>" <args>
 ```
 
 ### Rules
@@ -80,7 +80,7 @@ When a skill needs to invoke a CLI tool (e.g., `eds-code-sync`, `rule-validate`,
 
 ```
 # ✅ Correct — uses CLAUDE_PLUGIN_ROOT with forms-orchestrator segment
-"${CLAUDE_PLUGIN_ROOT}/forms-infra/scripts/eds-code-sync" sync
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync" sync
 
 # ❌ Wrong — missing forms-orchestrator segment
 "${CLAUDE_PLUGIN_ROOT}/scripts/eds-code-sync" sync

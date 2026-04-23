@@ -6,7 +6,7 @@ If `rule-save` returns an error:
 
 ```bash
 # Run with DEBUG for stack trace
-DEBUG=true "${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-save" <rule.json> --rule-store ... --form ...
+DEBUG=true "${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-save" <rule.json> --rule-store ... --form ...
 ```
 
 | Error | Likely Cause | Fix |
@@ -17,8 +17,8 @@ DEBUG=true "${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-save" <rule.json> --r
 
 ### Validate Against Grammar
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-grammar" | jq '.SET_VARIABLE'
-"${CLAUDE_PLUGIN_ROOT}/forms-logic/scripts/rule-grammar" | jq '.DISPATCH_EVENT'
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-grammar" | jq '.SET_VARIABLE'
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-grammar" | jq '.DISPATCH_EVENT'
 ```
 
 ### Compare With Working Rules
