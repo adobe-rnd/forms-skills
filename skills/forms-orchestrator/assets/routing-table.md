@@ -133,7 +133,7 @@ The Planner uses a default generation strategy but supports user customization. 
 
 **Priority:** Fifth — handles one-off tasks that don't need plans.
 
-Route to the **Domain Registry** at `references/domain-registry/SKILL.md`. The registry has an Intent → Domain Routing table.
+**Read** `references/domain-registry/SKILL.md`. The registry has an Intent → Domain Routing table. Do not invoke it as a skill — use the Read tool to access its content.
 
 | Outcome | Action |
 |---------|--------|
@@ -191,7 +191,8 @@ For the current step, read:
      │
      ▼
 Resolve skill via Domain Registry
-  (references/domain-registry/SKILL.md → references/domain-registry/references/<domain>/SKILL.md)
+  Read references/domain-registry/SKILL.md → Read references/domain-registry/references/<domain>/SKILL.md
+  (use Read tool — these are reference files, not invocable skills)
      │
      ▼
 Execute the skill
@@ -206,7 +207,7 @@ To resolve a plan step to an executable skill:
 
 1. Read the step's skill declaration from the plan file
 2. Look up the skill in the Domain Registry's Skills Catalog → find which domain owns it
-3. Route to the domain's router SKILL.md → the domain router invokes the specific skill
+3. Read the domain's router SKILL.md → the domain router's routing table identifies the specific skill to invoke
 
 If a step declares a skill that doesn't exist in the Domain Registry's catalog, **halt and report the error**. Do not guess or substitute.
 

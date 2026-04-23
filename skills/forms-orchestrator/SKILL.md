@@ -63,7 +63,7 @@ Full step-by-step logic, decision tables, and precedence rules: **[`assets/routi
 | Registry | File | What It Does |
 |----------|------|-------------|
 | **Planner** | [`references/planner/SKILL.md`](references/planner/SKILL.md) | Generates plans from user requirements (journey docs, screenshots, Screen.md, etc.) using a default or custom strategy |
-| **Domain Registry** | [`references/domain-registry/SKILL.md`](references/domain-registry/SKILL.md) | Catalogs domains and skills, matches intents to domains, resolves plan step targets to executable skills |
+| **Domain Registry** | [`references/domain-registry/SKILL.md`](references/domain-registry/SKILL.md) | Catalogs domains and skills, matches intents to domains, resolves plan step targets to executable skills. **Read this file — do not invoke it as a skill.** |
 
 Plan files live in `plans/<journey>/`. Domain skill trees live in `references/domain-registry/references/`.
 
@@ -84,8 +84,8 @@ All orchestrator constraints, conventions, file locations, workspace resolution,
 | Plan template | `references/planner/assets/plan-template.md` |
 | Planner | `references/planner/SKILL.md` |
 | Plan files | `plans/<journey>/NN-<title>.md` |
-| Domain registry | `references/domain-registry/SKILL.md` |
-| Domain routers | `references/domain-registry/references/<domain>/SKILL.md` |
+| Domain registry (read) | `references/domain-registry/SKILL.md` |
+| Domain routers (read)  | `references/domain-registry/references/<domain>/SKILL.md` |
 | Domain template | `references/domain-registry/assets/templates/domain-template.md` |
 | Skills catalog & intent routing | `references/domain-registry/assets/skills-catalog.md` |
 | Domain contribution guide | `references/domain-registry/assets/contribution-guide.md` |
