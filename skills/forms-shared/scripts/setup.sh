@@ -42,9 +42,9 @@ info() { echo -e "${CYAN}ℹ${RESET} $*"; }
 # ── Resolve paths ────────────────────────────────────────────────────────────
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPTS_DIR/.." && pwd)"
-PROJECT_ROOT="$(cd "$PLUGIN_ROOT/.." && pwd)"
+PROJECT_ROOT="$(cd "$PLUGIN_ROOT/../.." && pwd)"
 VENV_PATH="$PROJECT_ROOT/.venv"
-BRIDGE_DIR="$PROJECT_ROOT/forms-logic/scripts/rule_coder/bridge"
+BRIDGE_DIR="$PROJECT_ROOT/skills/forms-logic/scripts/rule_coder/bridge"
 
 # ── Parse CLI arguments ──────────────────────────────────────────────────────
 FORCE=false
