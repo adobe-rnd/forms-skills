@@ -26,10 +26,48 @@ node skills/optel-query/scripts/optel-query.jsh <domain> <start> <end> [opts]
 
 ## Environment
 
-Set in SLICC's UI or via your shell:
+### SLICC
 
-- `DOMAINKEY_FILE` — path to a JSON map `{"<domain>": "<key>"}`. Required for the query script; it reads this before every query and writes new admin-fetched keys back.
-- `RUM_ADMIN_KEY` — optional. If set, the script will try to fetch a missing domain key via the admin API.
+Open **Settings → Environment Variables** in SLICC's UI and add:
+
+| Variable | Value |
+|---|---|
+| `DOMAINKEY_FILE` | Absolute path to your keys file, e.g. `/home/user/.rum/domainkeys.json` |
+| `RUM_ADMIN_KEY` | *(optional)* Your RUM admin token |
+
+The keys file must exist before you run a query. Create it with at least an empty object if you have no keys yet — the script will populate it on first use when `RUM_ADMIN_KEY` is set:
+
+```bash
+echo '{}' > ~/.rum/domainkeys.json
+```
+
+### Shell (Claude Code / local)
+
+```bash
+# Create the keys file once (skip if it already exists)
+mkdir -p ~/.rum
+echo '{}' > ~/.rum/domainkeys.json
+
+# Export for the current session
+export DOMAINKEY_FILE=~/.rum/domainkeys.json
+export RUM_ADMIN_KEY=<your-admin-token>   # optional
+```
+
+To make them permanent, add both `export` lines to your `~/.zshrc` (or `~/.bashrc`).
+
+#### Key file format
+
+```json
+{
+  "example.com": "abc123...",
+  "another-site.com": "xyz789..."
+}
+```
+
+The script reads this file before every query. When `RUM_ADMIN_KEY` is set and a domain is missing, the script fetches the key from the admin API and writes it back automatically.
+
+- `DOMAINKEY_FILE` — **required**. Path to the JSON domain-key map described above.
+- `RUM_ADMIN_KEY` — optional. If set, the script will fetch a missing domain key via the admin API and cache it in `DOMAINKEY_FILE`.
 
 ## Usage
 
