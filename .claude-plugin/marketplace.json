@@ -4,23 +4,63 @@
     "name": "Adobe"
   },
   "metadata": {
-    "description": "Official Adobe skills for AI coding agents"
+    "description": "Official Adobe Skills for AI Agents",
+    "version": "1.0.0"
   },
   "plugins": [
     {
+      "name": "adobe-for-creativity",
+      "source": "./plugins/creative-cloud/adobe-for-creativity",
+      "description": "Harness Adobe's creative AI-powered tools to edit images, automate design workflows, and bring creative visions to life — from background removal to vectorization and professional retouching.",
+      "version": "1.0.0",
+      "category": "creative-cloud",
+      "keywords": [
+        "adobe",
+        "creative-cloud",
+        "image-editing",
+        "design"
+      ],
+      "author": {
+        "name": "Adobe"
+      },
+      "homepage": "https://github.com/adobe/skills",
+      "repository": "https://github.com/adobe/skills",
+      "license": "Apache-2.0"
+    },
+    {
+      "name": "stardust",
+      "source": "./plugins/stardust",
+      "description": "Design-phase skills for static-HTML design projects: brand extraction, palette picking from a curated library, page briefings, wireframes, and branded HTML prototypes. Platform-agnostic output."
+    },
+    {
       "name": "aem-edge-delivery-services",
-      "source": "./skills/aem/edge-delivery-services",
+      "source": "./plugins/aem/edge-delivery-services",
       "description": "Skills for AEM Edge Delivery Services development"
     },
     {
+      "name": "aem-cloud-service",
+      "source": "./plugins/aem/cloud-service",
+      "description": "All AEM as a Cloud Service skills: component development and Dispatcher, workflows"
+    },
+    {
+      "name": "aem-6-5-lts",
+      "source": "./plugins/aem/6.5-lts",
+      "description": "All AEM 6.5 LTS skills: Dispatcher, workflows for AEM 6.5 LTS and AMS environment"
+    },
+    {
       "name": "aem-project-management",
-      "source": "./skills/aem/project-management",
+      "source": "./plugins/aem/project-management",
       "description": "Project lifecycle management for AEM Edge Delivery Services"
     },
     {
       "name": "aem-forms",
       "source": "./skills/aem/forms",
       "description": "Skills for building AEM Adaptive Forms through AI conversation"
+    },
+    {
+      "name": "app-builder",
+      "source": "./plugins/app-builder",
+      "description": "Development, customization, testing, and deployment skills for Adobe App Builder projects"
     }
   ]
 }

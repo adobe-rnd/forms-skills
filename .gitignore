@@ -43,4 +43,9 @@ Thumbs.db
 # ── Temporary Files ──────────────────────────────────────
 drafts/tmp/
 
-.gitignore
+# Release artifacts
+*.skill
+dist/
+
+# OMC state
+.omc/
