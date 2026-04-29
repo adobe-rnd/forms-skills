@@ -1,0 +1,34 @@
+{
+  "id": "routing-compound-intent",
+  "type": "llm",
+  "description": "Compound request (add field + add rule) does field addition first, then proceeds with rule creation",
+  "userMessage": "Add a phone number field to /content/forms/af/default-site/contact-us1 and make it required when email_address is filled",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [
+        { "siteId": "default-site", "title": "Default Site", "path": "/content/forms/af/default-site" }
+      ]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-contact-us.json",
+    "get-aem-page-content-definition": "@fixtures/definition-slim.json",
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "field-addition-before-rule",
+      "description": "The model performs the field addition (patch-aem-page-content for the phone field) before attempting the rule creation",
+      "required": true
+    },
+    {
+      "id": "re-fetches-after-patch",
+      "description": "After the field-addition patch, the model calls get-aem-page-content again to get the post-patch content model before building the rule — it does not reuse the pre-patch model",
+      "required": false
+    },
+    {
+      "id": "applies-required-rule",
+      "description": "The model ultimately applies a validation rule (fd:validate or similar) making the phone field required conditionally when email_address is filled",
+      "required": false
+    }
+  ]
+}

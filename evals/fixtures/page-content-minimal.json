@@ -1,0 +1,43 @@
+{
+  "eTag": "\"etag1\"",
+  "data": {
+    "id": "jcr:content",
+    "componentType": "core/fd/components/page/v2/page",
+    "properties": { "jcr:title": "Contact Us" },
+    "items": {
+      "0": {
+        "capi-key": "0",
+        "capi-index": 0,
+        "id": "guideContainer",
+        "componentType": "core/fd/components/form/container/v2/container",
+        "properties": { "fieldType": "form", "jcr:title": "Demo Form" },
+        "items": {
+          "0:0": {
+            "capi-key": "0:0",
+            "capi-index": 0,
+            "id": "full_name",
+            "componentType": "forms-components-examples/components/form/textinput",
+            "properties": { "name": "full_name", "fieldType": "text-input", "jcr:title": "Name" },
+            "items": {}
+          },
+          "0:1": {
+            "capi-key": "0:1",
+            "capi-index": 1,
+            "id": "address",
+            "componentType": "forms-components-examples/components/form/textinput",
+            "properties": { "name": "address", "fieldType": "text-input", "jcr:title": "Address" },
+            "items": {}
+          },
+          "0:2": {
+            "capi-key": "0:2",
+            "capi-index": 2,
+            "id": "email_address",
+            "componentType": "forms-components-examples/components/form/emailinput",
+            "properties": { "name": "email_address", "fieldType": "email", "jcr:title": "Email" },
+            "items": {}
+          }
+        }
+      }
+    }
+  }
+}

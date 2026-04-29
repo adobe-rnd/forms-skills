@@ -1,0 +1,89 @@
+{
+  "eTag": "\"abc123etag\"",
+  "data": {
+    "id": "jcr:content",
+    "componentType": "core/fd/components/page/v2/page",
+    "properties": {
+      "jcr:mixinTypes": [
+        "mix:referenceable"
+      ],
+      "jcr:description": "Open an HDFC savings or current account online",
+      "sling:configRef": "/conf/forms/demo-site/demo-page/",
+      "jcr:title": "Contact Us",
+      "cq:template": "/conf/core-components-examples/settings/wcm/templates/af-blank-v2"
+    },
+    "items": {
+      "0": {
+        "capi-key": "0",
+        "capi-index": 0,
+        "id": "guideContainer",
+        "componentType": "core/fd/components/form/container/v2/container",
+        "properties": {
+          "actionType": "franklin",
+          "jcr:title": "Demo Form",
+          "thankYouMessage": "Thank you!",
+          "thankYouOption": "message",
+          "fieldType": "form",
+          "fd:submitAction": "rest"
+        },
+        "items": {
+          "0:0": {
+            "capi-key": "0:0",
+            "capi-index": 0,
+            "id": "full_name",
+            "componentType": "forms-components-examples/components/form/textinput",
+            "properties": {
+              "autocomplete": "name",
+              "dorColspan": 12,
+              "name": "full_name",
+              "jcr:title": "Name",
+              "fieldType": "text-input",
+              "required": true
+            },
+            "items": {
+              "0:0:0": {
+                "capi-key": "0:0:0",
+                "capi-index": 0,
+                "id": "fd:rules",
+                "componentType": "fd:rules",
+                "properties": {
+                  "fd:change": [
+                    "{\"nodeName\": \"ROOT\", \"items\": [{\"nodeName\": \"STATEMENT\", \"choice\": {\"nodeName\": \"EVENT_SCRIPTS\", \"items\": [{\"nodeName\": \"EVENT_CONDITION\", \"choice\": {\"nodeName\": \"EVENT_AND_COMPARISON\", \"items\": [{\"nodeName\": \"EVENT_AND_COMPARISON_LEFT_HAND_EXPRESSION\", \"choice\": {\"nodeName\": \"COMPONENT\", \"value\": {\"id\": \"$form.full_name\"}}}, {\"nodeName\": \"EVENT_AND_COMPARISON_OPERATOR\", \"choice\": {\"nodeName\": \"EQUALS_TO\", \"value\": null}}, {\"nodeName\": \"PRIMITIVE_EXPRESSION\", \"choice\": {\"nodeName\": \"STRING_LITERAL\", \"value\": \"rishi\"}}]}, \"nested\": false}, {\"nodeName\": \"Then\", \"value\": null}, {\"nodeName\": \"BLOCK_STATEMENTS\", \"items\": [{\"nodeName\": \"BLOCK_STATEMENT\", \"choice\": {\"nodeName\": \"SET_VALUE_STATEMENT\", \"items\": [{\"nodeName\": \"COMPONENT\", \"value\": {\"id\": \"$form.address\"}}, {\"nodeName\": \"to\", \"value\": null}, {\"nodeName\": \"EXPRESSION\", \"choice\": {\"nodeName\": \"STRING_LITERAL\", \"value\": \"123 Main St\"}}]}}]}]}}], \"enabled\": true, \"isValid\": true, \"version\": 1}"
+                  ]
+                },
+                "items": {}
+              },
+              "0:0:1": {
+                "capi-key": "0:0:1",
+                "capi-index": 1,
+                "id": "fd:events",
+                "componentType": "fd:events",
+                "properties": {
+                  "change": [
+                    "if($field == 'rishi', dispatchEvent(address, 'custom:setProperty', {value : '123 Main St'}), {})"
+                  ]
+                },
+                "items": {}
+              }
+            }
+          },
+          "0:1": {
+            "capi-key": "0:1",
+            "capi-index": 1,
+            "id": "address",
+            "componentType": "forms-components-examples/components/form/textinput",
+            "properties": {
+              "autocomplete": "street-address",
+              "dorColspan": 12,
+              "name": "address",
+              "jcr:title": "Address",
+              "fieldType": "text-input",
+              "required": true
+            },
+            "items": {}
+          }
+        }
+      }
+    }
+  }
+}

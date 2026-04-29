@@ -1,0 +1,29 @@
+{
+  "id": "workflow-apply-rule-patch-script",
+  "type": "llm",
+  "description": "When applying a rule, model calls apply-rule-patch.bundle.js with --content-model-file to build patch ops — not an inline node -e one-liner or manual patch construction",
+  "userMessage": "Make the address field in /content/forms/af/default-site/contact-us1 visible only when full_name is 'US'",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [
+        { "siteId": "default-site", "title": "Default Site", "path": "/content/forms/af/default-site" }
+      ]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-clean.json",
+    "get-aem-page-content-definition": "@fixtures/definition-textinput.json",
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "uses-apply-rule-patch-script",
+      "description": "Model calls apply-rule-patch.bundle.js with --content-model-file and --merged-rule-file to build patch ops — does NOT construct patch ops manually or use an inline node -e one-liner",
+      "required": true
+    },
+    {
+      "id": "patches-content-model",
+      "description": "Model calls patch-aem-page-content with the ops output from apply-rule-patch",
+      "required": true
+    }
+  ]
+}

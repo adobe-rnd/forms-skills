@@ -1,0 +1,15 @@
+{
+  "id": "resolve-insert-position-before-submit",
+  "description": "Inserts before submit button when one exists in the panel",
+  "script": "forms-content-update/scripts/resolve-insert-position.bundle.js",
+  "args": {
+    "--content-model": "@fixtures/content-model-registration.json",
+    "--panel-capi-key": "0"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": {
+    "pointer": "/items/0/items/3",
+    "nextIndex": 3,
+    "insertBefore": "submit"
+  }
+}

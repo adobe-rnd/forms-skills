@@ -1,0 +1,15 @@
+{
+  "id": "get-component-def-textinput",
+  "description": "Extracts textinput component profile with fields and requiredKeys from definition",
+  "script": "forms-content-generate/scripts/get-component-def.bundle.js",
+  "args": {
+    "--definition": "@fixtures/definition-slim.json",
+    "--component-type": "forms-components-examples/components/form/textinput"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": {
+    "componentType": "/apps/forms-components-examples/components/form/textinput",
+    "title": "Textinput",
+    "requiredKeys": ["./name", "./fieldType"]
+  }
+}

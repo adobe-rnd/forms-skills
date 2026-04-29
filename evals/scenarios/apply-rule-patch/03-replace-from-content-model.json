@@ -1,0 +1,17 @@
+{
+  "id": "apply-rule-patch-replace-from-content-model",
+  "description": "When --content-model-file is used and fd:rules already exists under the field, generates a replace op (no separate find-field call needed)",
+  "script": "forms-content-update/scripts/apply-rule-patch.bundle.js",
+  "args": {
+    "--merged-rule-file": "fixture:merged-rule-visible.json",
+    "--content-model-file": "fixture:content-model-with-rule-refs.json",
+    "--field-pointer": "/items/0/items/1"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": [
+    {
+      "op": "replace",
+      "path": "/items/0/items/1/items/0/properties"
+    }
+  ]
+}

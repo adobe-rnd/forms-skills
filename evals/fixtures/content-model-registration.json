@@ -1,0 +1,84 @@
+{
+  "id": "jcr:content",
+  "componentType": "core/wcm/components/page/v2/page",
+  "properties": {
+    "jcr:description": "Open an HDFC savings or current account online",
+    "jcr:title": "Registration Form",
+    "cq:template": "/conf/core-components-examples/settings/wcm/templates/af-blank-v2"
+  },
+  "items": {
+    "0": {
+      "capi-key": "0",
+      "capi-index": 0,
+      "id": "guideContainer",
+      "componentType": "core/fd/components/form/container/v2/container",
+      "properties": {
+        "actionType": "franklin",
+        "jcr:title": "Demo Form",
+        "thankYouMessage": "Thank you!",
+        "thankYouOption": "message",
+        "fieldType": "form",
+        "fd:submitAction": "rest"
+      },
+      "items": {
+        "0:0": {
+          "capi-key": "0:0",
+          "capi-index": 0,
+          "id": "name",
+          "componentType": "forms-components-examples/components/form/textinput",
+          "properties": {
+            "visible": false,
+            "dorColspan": 12,
+            "name": "name",
+            "jcr:title": "Name",
+            "fieldType": "text-input"
+          },
+          "items": {}
+        },
+        "0:1": {
+          "capi-key": "0:1",
+          "capi-index": 1,
+          "id": "gender",
+          "componentType": "forms-components-examples/components/form/dropdown",
+          "properties": {
+            "enumNames": ["Male", "Female", "Other"],
+            "dorColspan": 12,
+            "name": "gender",
+            "jcr:title": "Gender",
+            "fieldType": "drop-down",
+            "required": true,
+            "enum": ["M", "F", "O"]
+          },
+          "items": {}
+        },
+        "0:2": {
+          "capi-key": "0:2",
+          "capi-index": 2,
+          "id": "address",
+          "componentType": "forms-components-examples/components/form/textinput",
+          "properties": {
+            "dorColspan": 12,
+            "name": "address",
+            "jcr:title": "Address",
+            "fieldType": "text-input",
+            "enabled": false
+          },
+          "items": {}
+        },
+        "0:3": {
+          "capi-key": "0:3",
+          "capi-index": 3,
+          "id": "submit",
+          "componentType": "forms-components-examples/components/form/actions/submit",
+          "properties": {
+            "dorColspan": 12,
+            "name": "submit",
+            "jcr:title": "Submit",
+            "fieldType": "button"
+          },
+          "items": {}
+        }
+      }
+    }
+  }
+}

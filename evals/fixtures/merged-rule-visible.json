@@ -1,0 +1,5 @@
+{
+  "fd:rules": {
+    "fd:visible": ["{\"nodeName\":\"ROOT\",\"items\":[{\"nodeName\":\"STATEMENT\",\"choice\":{\"nodeName\":\"SHOW_EXPRESSION\",\"items\":[{\"nodeName\":\"PRIMITIVE_EXPRESSION\",\"choice\":{\"nodeName\":\"STRING_LITERAL\",\"value\":\"true\"}}]}}],\"enabled\":true,\"isValid\":true,\"version\":1}"]
+  }
+}

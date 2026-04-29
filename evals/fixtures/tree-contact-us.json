@@ -1,0 +1,60 @@
+{
+  "success": true,
+  "treeJson": {
+    "id": "$form",
+    "name": "guideContainer",
+    "displayName": "Demo Form",
+    "type": "FORM",
+    "fieldType": "form",
+    "path": "",
+    "items": [
+      {
+        "id": "$form.full_name",
+        "name": "full_name",
+        "displayName": "Name",
+        "type": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+        "fieldType": "text-input",
+        "path": "",
+        "items": [
+          {
+            "id": "$form.full_name.fd:rules",
+            "name": "fd:rules",
+            "displayName": "fd:rules",
+            "type": "AFCOMPONENT|FIELD",
+            "fieldType": "",
+            "path": "",
+            "items": []
+          },
+          {
+            "id": "$form.full_name.fd:events",
+            "name": "fd:events",
+            "displayName": "fd:events",
+            "type": "AFCOMPONENT|FIELD",
+            "fieldType": "",
+            "path": "",
+            "items": []
+          }
+        ]
+      },
+      {
+        "id": "$form.address",
+        "name": "address",
+        "displayName": "Address",
+        "type": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+        "fieldType": "text-input",
+        "path": "",
+        "items": []
+      },
+      {
+        "id": "$form.email_address",
+        "name": "email_address",
+        "displayName": "Email Address",
+        "type": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+        "fieldType": "email",
+        "path": "",
+        "items": []
+      }
+    ]
+  },
+  "outputPath": "/tmp/treeJson-70951.json"
+}

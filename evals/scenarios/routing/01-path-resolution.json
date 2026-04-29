@@ -1,0 +1,34 @@
+{
+  "id": "routing-path-resolution",
+  "type": "llm",
+  "description": "When user gives a JCR path, orchestrator calls get-aem-pages(publishPath) to resolve it — never passes path as pageId directly",
+  "userMessage": "Add a phone number field to /content/forms/af/default-site/contact-us1",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [
+        { "siteId": "default-site", "title": "Default Site", "path": "/content/forms/af/default-site" }
+      ]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-contact-us.json",
+    "get-aem-page-content-definition": "@fixtures/definition-telephoneinput.json",
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "calls-get-aem-pages-with-publish-path",
+      "description": "The model calls get-aem-pages with publishPath='/content/forms/af/default-site/contact-us1' (or a prefix of it) to resolve the pageId — it does NOT call get-aem-page-content with the raw JCR path as the pageId",
+      "required": true
+    },
+    {
+      "id": "resolves-page-id",
+      "description": "After get-aem-pages returns, the model uses the resolved pageId (urn:aemconnection:...) for subsequent get-aem-page-content or patch-aem-page-content calls",
+      "required": true
+    },
+    {
+      "id": "routes-to-add-field",
+      "description": "The model proceeds to add a phone/telephone field (calls get-aem-page-content or patch-aem-page-content), not just asking for clarification",
+      "required": false
+    }
+  ]
+}

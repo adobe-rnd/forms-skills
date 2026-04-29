@@ -1,0 +1,7 @@
+{
+  "fd:rules": {
+    "fd:visible": ["someAst"],
+    "visible": "someFormula"
+  },
+  "fd:events": {}
+}

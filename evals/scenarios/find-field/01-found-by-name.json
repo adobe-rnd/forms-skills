@@ -1,0 +1,17 @@
+{
+  "id": "find-field-found",
+  "description": "Find field by name returns capiKey, pointer, qualifiedId",
+  "script": "forms-content-update/scripts/find-field.bundle.js",
+  "args": {
+    "--content-model": "@fixtures/content-model-contact-us.json",
+    "--name": "full_name"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": {
+    "found": true,
+    "capiKey": "0:0",
+    "pointer": "/items/0/items/0",
+    "qualifiedId": "$form.full_name",
+    "isPanel": false
+  }
+}

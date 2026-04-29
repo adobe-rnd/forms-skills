@@ -1,0 +1,344 @@
+{
+  "componentDefinitions": [
+    {
+      "title": "Dropdown",
+      "componentType": "/apps/forms-components-examples/components/form/dropdown",
+      "componentSuperType": "core/fd/components/form/dropdown/v1/dropdown",
+      "fields": [
+        {
+          "name": "./dataRef",
+          "label": "Bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./hideTitle",
+          "label": "./hideTitle",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./placeholder",
+          "label": "Placeholder text",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./name",
+          "label": "Name",
+          "component": "textfield",
+          "valueType": "string",
+          "required": true,
+          "multi": false
+        },
+        {
+          "name": "./description",
+          "label": "Help text",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./enum",
+          "label": "Data value",
+          "component": "textfield",
+          "valueType": "string",
+          "required": true,
+          "description": "Specify the content to submit, when the option is selected.",
+          "multi": false
+        },
+        {
+          "name": "./tooltipVisible",
+          "label": "./tooltipVisible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "description": "Select the option to display the short description around the component and no tooltip text when a user hovers over the component.",
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./typeIndex",
+          "label": "Save value as",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "String",
+              "value": "0"
+            },
+            {
+              "name": "Number",
+              "value": "1"
+            },
+            {
+              "name": "Boolean",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "name": "./visible@TypeHint",
+          "label": "./visible@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./enabled@TypeHint",
+          "label": "./enabled@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./readOnly@TypeHint",
+          "label": "./readOnly@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./tooltip",
+          "label": "Short description",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "description": "Provide the text to display as a tooltip when a user hovers on the field.",
+          "multi": false
+        },
+        {
+          "name": "./fieldType",
+          "label": "./fieldType",
+          "component": "select",
+          "valueType": "string",
+          "required": true,
+          "multi": false,
+          "options": [
+            {
+              "name": "Drop Down",
+              "value": "drop-down"
+            }
+          ]
+        },
+        {
+          "name": "./assistPriority",
+          "label": "Text for screen readers",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "",
+              "value": ""
+            },
+            {
+              "name": "Custom Text",
+              "value": "custom"
+            },
+            {
+              "name": "Description",
+              "value": "description"
+            },
+            {
+              "name": "Title",
+              "value": "label"
+            },
+            {
+              "name": "Name",
+              "value": "name"
+            },
+            {
+              "name": "None",
+              "value": "none"
+            }
+          ],
+          "default": "custom"
+        },
+        {
+          "name": "./enabled",
+          "label": "./enabled",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./default",
+          "label": "./default",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./multiSelect@TypeHint",
+          "label": "./multiSelect@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./fd:viewType",
+          "label": "./fd:viewType",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./dorColspan",
+          "label": "Number of columns to use to display the field in a Document of Record",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "description": "It is supported only for column layout in Document of Record.",
+          "multi": false
+        },
+        {
+          "name": "./mandatoryMessage",
+          "label": "Error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when required field is left empty.",
+          "multi": false
+        },
+        {
+          "name": "./dorBindRef",
+          "label": "Document of Record bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "description": "You can specify a Document of Record Bind Reference to link an adaptive form field with a document of record field. When you fill any value in the linked field of an adaptive form, the value is also displayed in the linked field of the corresponding document of a record.",
+          "multi": false
+        },
+        {
+          "name": "./enumNames",
+          "label": "./enumNames",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./unboundFormElement@TypeHint",
+          "label": "./unboundFormElement@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./custom",
+          "label": "Custom text",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./visible",
+          "label": "./visible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./multiSelect",
+          "label": "./multiSelect",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./readOnly",
+          "label": "./readOnly",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./validateExpMessage",
+          "label": "Script validation message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Displayed when validation script fails.",
+          "multi": false
+        },
+        {
+          "name": "./dorExclusion",
+          "label": "./dorExclusion",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./unboundFormElement",
+          "label": "./unboundFormElement",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./type",
+          "label": "./type",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./isTitleRichText",
+          "label": "./isTitleRichText",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./required",
+          "label": "Required",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        }
+      ]
+    }
+  ]
+}

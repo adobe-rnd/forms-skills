@@ -1,0 +1,15 @@
+{
+  "id": "validate-patch-valid-number",
+  "description": "Replace maxLength with a number passes validation",
+  "script": "forms-content-update/scripts/validate-patch.bundle.js",
+  "args": {
+    "--content-model": "@fixtures/content-model-registration.json",
+    "--definition": "@fixtures/definition-slim.json",
+    "--ops": "[{\"op\":\"replace\",\"path\":\"/items/0/items/0/properties/maxLength\",\"value\":50}]"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": {
+    "valid": true,
+    "errors": []
+  }
+}

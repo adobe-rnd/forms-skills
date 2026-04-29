@@ -1,0 +1,11 @@
+{
+  "id": "validate-merge-valid",
+  "description": "Merged rule with both AST (fd:visible) and compiled formula (visible) passes",
+  "script": "forms-rule-creator/scripts/validate-merge.bundle.js",
+  "positionalArgs": ["fixture:merged-rule-valid.json"],
+  "expectedExitCode": 0,
+  "expectedOutput": {
+    "valid": true,
+    "errors": []
+  }
+}

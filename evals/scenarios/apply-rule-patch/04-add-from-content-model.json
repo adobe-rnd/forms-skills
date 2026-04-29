@@ -1,0 +1,21 @@
+{
+  "id": "apply-rule-patch-add-from-content-model",
+  "description": "When --content-model-file is used and no fd:rules exists under the field, generates an add op (no separate find-field call needed)",
+  "script": "forms-content-update/scripts/apply-rule-patch.bundle.js",
+  "args": {
+    "--merged-rule-file": "fixture:merged-rule-visible.json",
+    "--content-model-file": "fixture:content-model-no-rules.json",
+    "--field-pointer": "/items/0/items/0"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": [
+    {
+      "op": "add",
+      "path": "/items/0/items/0/items/0",
+      "value": {
+        "id": "fd:rules",
+        "componentType": "fd:rules"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "validate-rule-invalid-grammar",
+  "description": "SET_VALUE_STATEMENT using COMPONENT at position 0 instead of VALUE_FIELD fails grammar validation",
+  "script": "forms-rule-creator/scripts/validate-rule.bundle.js",
+  "positionalArgs": ["fixture:rule-ast-change-valid.json"],
+  "args": {
+    "--tree": "fixture:tree-contact-us.json",
+    "--storage-path": "fd:change"
+  },
+  "expectedExitCode": 1,
+  "expectedOutput": {
+    "valid": false,
+    "errors": [
+      { "code": "GRAMMAR_SEQUENCE_MISMATCH" }
+    ]
+  }
+}

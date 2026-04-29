@@ -1,0 +1,2661 @@
+{
+  "componentDefinitions": [
+    {
+      "title": "Submit",
+      "componentType": "/apps/forms-components-examples/components/form/actions/submit",
+      "componentSuperType": "core/fd/components/form/actions/submit/v2/submit",
+      "fields": [
+        {
+          "name": "./dataRef",
+          "label": "Bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./unboundFormElement@TypeHint",
+          "label": "./unboundFormElement@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./custom",
+          "label": "Custom text",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./name",
+          "label": "Name",
+          "component": "textfield",
+          "valueType": "string",
+          "required": true,
+          "multi": false
+        },
+        {
+          "name": "./visible",
+          "label": "./visible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./description",
+          "label": "Help text",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./tooltipVisible",
+          "label": "./tooltipVisible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "description": "Select the option to display the short description around the component and no tooltip text when a user hovers over the component.",
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./visible@TypeHint",
+          "label": "./visible@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./enabled@TypeHint",
+          "label": "./enabled@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./readOnly@TypeHint",
+          "label": "./readOnly@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./tooltip",
+          "label": "Short description",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "description": "Provide the text to display as a tooltip when a user hovers on the field.",
+          "multi": false
+        },
+        {
+          "name": "./dorExclusion",
+          "label": "./dorExclusion",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./value",
+          "label": "Value",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "description": "Value of button.",
+          "multi": false
+        },
+        {
+          "name": "./fieldType",
+          "label": "./fieldType",
+          "component": "select",
+          "valueType": "string",
+          "required": true,
+          "multi": false,
+          "options": [
+            {
+              "name": "Button",
+              "value": "button"
+            }
+          ]
+        },
+        {
+          "name": "./assistPriority",
+          "label": "Text for screen readers",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "",
+              "value": ""
+            },
+            {
+              "name": "Custom Text",
+              "value": "custom"
+            },
+            {
+              "name": "Description",
+              "value": "description"
+            },
+            {
+              "name": "Title",
+              "value": "label"
+            },
+            {
+              "name": "Name",
+              "value": "name"
+            },
+            {
+              "name": "None",
+              "value": "none"
+            }
+          ],
+          "default": "custom"
+        },
+        {
+          "name": "./unboundFormElement",
+          "label": "./unboundFormElement",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./isTitleRichText",
+          "label": "./isTitleRichText",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./enabled",
+          "label": "./enabled",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./default",
+          "label": "Default",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "description": "Default value of button.",
+          "multi": false
+        },
+        {
+          "name": "./fd:viewType",
+          "label": "./fd:viewType",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./dorColspan",
+          "label": "Number of columns to use to display the field in a Document of Record",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "description": "It is supported only for column layout in Document of Record.",
+          "multi": false
+        },
+        {
+          "name": "./icon",
+          "label": "Icon",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "description": "Icon identifier for displaying an icon in the button.",
+          "multi": false
+        },
+        {
+          "name": "./dorBindRef",
+          "label": "Document of Record bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "description": "You can specify a Document of Record Bind Reference to link an adaptive form field with a document of record field. When you fill any value in the linked field of an adaptive form, the value is also displayed in the linked field of the corresponding document of a record.",
+          "multi": false
+        }
+      ]
+    },
+    {
+      "title": "Dropdown",
+      "componentType": "/apps/forms-components-examples/components/form/dropdown",
+      "componentSuperType": "core/fd/components/form/dropdown/v1/dropdown",
+      "fields": [
+        {
+          "name": "./dataRef",
+          "label": "Bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./hideTitle",
+          "label": "./hideTitle",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./placeholder",
+          "label": "Placeholder text",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./name",
+          "label": "Name",
+          "component": "textfield",
+          "valueType": "string",
+          "required": true,
+          "multi": false
+        },
+        {
+          "name": "./description",
+          "label": "Help text",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./enum",
+          "label": "Data value",
+          "component": "textfield",
+          "valueType": "string",
+          "required": true,
+          "description": "Specify the content to submit, when the option is selected.",
+          "multi": false
+        },
+        {
+          "name": "./tooltipVisible",
+          "label": "./tooltipVisible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "description": "Select the option to display the short description around the component and no tooltip text when a user hovers over the component.",
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./typeIndex",
+          "label": "Save value as",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "String",
+              "value": "0"
+            },
+            {
+              "name": "Number",
+              "value": "1"
+            },
+            {
+              "name": "Boolean",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "name": "./visible@TypeHint",
+          "label": "./visible@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./enabled@TypeHint",
+          "label": "./enabled@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./readOnly@TypeHint",
+          "label": "./readOnly@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./tooltip",
+          "label": "Short description",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "description": "Provide the text to display as a tooltip when a user hovers on the field.",
+          "multi": false
+        },
+        {
+          "name": "./fieldType",
+          "label": "./fieldType",
+          "component": "select",
+          "valueType": "string",
+          "required": true,
+          "multi": false,
+          "options": [
+            {
+              "name": "Drop Down",
+              "value": "drop-down"
+            }
+          ]
+        },
+        {
+          "name": "./assistPriority",
+          "label": "Text for screen readers",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "",
+              "value": ""
+            },
+            {
+              "name": "Custom Text",
+              "value": "custom"
+            },
+            {
+              "name": "Description",
+              "value": "description"
+            },
+            {
+              "name": "Title",
+              "value": "label"
+            },
+            {
+              "name": "Name",
+              "value": "name"
+            },
+            {
+              "name": "None",
+              "value": "none"
+            }
+          ],
+          "default": "custom"
+        },
+        {
+          "name": "./enabled",
+          "label": "./enabled",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./default",
+          "label": "./default",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./multiSelect@TypeHint",
+          "label": "./multiSelect@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./fd:viewType",
+          "label": "./fd:viewType",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./dorColspan",
+          "label": "Number of columns to use to display the field in a Document of Record",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "description": "It is supported only for column layout in Document of Record.",
+          "multi": false
+        },
+        {
+          "name": "./mandatoryMessage",
+          "label": "Error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when required field is left empty.",
+          "multi": false
+        },
+        {
+          "name": "./dorBindRef",
+          "label": "Document of Record bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "description": "You can specify a Document of Record Bind Reference to link an adaptive form field with a document of record field. When you fill any value in the linked field of an adaptive form, the value is also displayed in the linked field of the corresponding document of a record.",
+          "multi": false
+        },
+        {
+          "name": "./enumNames",
+          "label": "./enumNames",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./unboundFormElement@TypeHint",
+          "label": "./unboundFormElement@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./custom",
+          "label": "Custom text",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./visible",
+          "label": "./visible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./multiSelect",
+          "label": "./multiSelect",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./readOnly",
+          "label": "./readOnly",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./validateExpMessage",
+          "label": "Script validation message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Displayed when validation script fails.",
+          "multi": false
+        },
+        {
+          "name": "./dorExclusion",
+          "label": "./dorExclusion",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./unboundFormElement",
+          "label": "./unboundFormElement",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./type",
+          "label": "./type",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./isTitleRichText",
+          "label": "./isTitleRichText",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./required",
+          "label": "Required",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "title": "Emailinput",
+      "componentType": "/apps/forms-components-examples/components/form/emailinput",
+      "componentSuperType": "core/fd/components/form/emailinput/v1/emailinput",
+      "fields": [
+        {
+          "name": "./dataRef",
+          "label": "Bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./hideTitle",
+          "label": "./hideTitle",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./placeholder",
+          "label": "Placeholder text",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./name",
+          "label": "Name",
+          "component": "textfield",
+          "valueType": "string",
+          "required": true,
+          "multi": false
+        },
+        {
+          "name": "./minLength",
+          "label": "Minimum number of characters",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./description",
+          "label": "Help text",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./tooltipVisible",
+          "label": "./tooltipVisible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "description": "Select the option to display the short description around the component and no tooltip text when a user hovers over the component.",
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./visible@TypeHint",
+          "label": "./visible@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./enabled@TypeHint",
+          "label": "./enabled@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./readOnly@TypeHint",
+          "label": "./readOnly@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./tooltip",
+          "label": "Short description",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "description": "Provide the text to display as a tooltip when a user hovers on the field.",
+          "multi": false
+        },
+        {
+          "name": "./fieldType",
+          "label": "./fieldType",
+          "component": "select",
+          "valueType": "string",
+          "required": true,
+          "multi": false,
+          "options": [
+            {
+              "name": "Email Input",
+              "value": "email"
+            }
+          ]
+        },
+        {
+          "name": "./validatePictureClauseMessage",
+          "label": "Error Message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./assistPriority",
+          "label": "Text for screen readers",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "",
+              "value": ""
+            },
+            {
+              "name": "Custom Text",
+              "value": "custom"
+            },
+            {
+              "name": "Description",
+              "value": "description"
+            },
+            {
+              "name": "Title",
+              "value": "label"
+            },
+            {
+              "name": "Name",
+              "value": "name"
+            },
+            {
+              "name": "None",
+              "value": "none"
+            }
+          ],
+          "default": "custom"
+        },
+        {
+          "name": "./enabled",
+          "label": "./enabled",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./pattern",
+          "label": "Pattern",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "description": "Regular Expression is permitted.",
+          "multi": false
+        },
+        {
+          "name": "./default",
+          "label": "Default value",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./fd:viewType",
+          "label": "./fd:viewType",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./dorColspan",
+          "label": "Number of columns to use to display the field in a Document of Record",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "description": "It is supported only for column layout in Document of Record.",
+          "multi": false
+        },
+        {
+          "name": "./mandatoryMessage",
+          "label": "Error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when required field is left empty.",
+          "multi": false
+        },
+        {
+          "name": "./dorBindRef",
+          "label": "Document of Record bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "description": "You can specify a Document of Record Bind Reference to link an adaptive form field with a document of record field. When you fill any value in the linked field of an adaptive form, the value is also displayed in the linked field of the corresponding document of a record.",
+          "multi": false
+        },
+        {
+          "name": "./autocomplete",
+          "label": "Autofill attribute",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "",
+              "value": ""
+            },
+            {
+              "name": "off",
+              "value": "off"
+            },
+            {
+              "name": "on",
+              "value": "on"
+            },
+            {
+              "name": "email",
+              "value": "email"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "name": "./maxLength",
+          "label": "Maximum Number of characters",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./unboundFormElement@TypeHint",
+          "label": "./unboundFormElement@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./custom",
+          "label": "Custom text",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./visible",
+          "label": "./visible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./readOnly",
+          "label": "./readOnly",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./validateExpMessage",
+          "label": "Script validation message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Displayed when validation script fails.",
+          "multi": false
+        },
+        {
+          "name": "./minLengthMessage",
+          "label": "Minimum characters error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when less than minimum characters are entered.",
+          "multi": false
+        },
+        {
+          "name": "./displayPatternType",
+          "label": "Type",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./dorExclusion",
+          "label": "./dorExclusion",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./displayFormat",
+          "label": "Format",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "description": "The format in which the value will be displayed to the user.",
+          "multi": false
+        },
+        {
+          "name": "./unboundFormElement",
+          "label": "./unboundFormElement",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./isTitleRichText",
+          "label": "./isTitleRichText",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./required",
+          "label": "Required",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./formatMessage@ValueFrom",
+          "label": "./formatMessage@ValueFrom",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "./validatePictureClauseMessage"
+        },
+        {
+          "name": "./maxLengthMessage",
+          "label": "Maximum characters error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when more than maximum characters are entered.",
+          "multi": false
+        },
+        {
+          "name": "./displayValueExpression",
+          "label": "./displayValueExpression",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        }
+      ]
+    },
+    {
+      "title": "Textinput",
+      "componentType": "/apps/forms-components-examples/components/form/textinput",
+      "componentSuperType": "core/fd/components/form/textinput/v1/textinput",
+      "fields": [
+        {
+          "name": "./dataRef",
+          "label": "Bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./hideTitle",
+          "label": "./hideTitle",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./placeholder",
+          "label": "Placeholder text",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./validationPatternType",
+          "label": "Type",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./name",
+          "label": "Name",
+          "component": "textfield",
+          "valueType": "string",
+          "required": true,
+          "multi": false
+        },
+        {
+          "name": "./minLength",
+          "label": "Minimum number of characters",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./description",
+          "label": "Help text",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./tooltipVisible",
+          "label": "./tooltipVisible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "description": "Select the option to display the short description around the component and no tooltip text when a user hovers over the component.",
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./visible@TypeHint",
+          "label": "./visible@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./enabled@TypeHint",
+          "label": "./enabled@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./readOnly@TypeHint",
+          "label": "./readOnly@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./tooltip",
+          "label": "Short description",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "description": "Provide the text to display as a tooltip when a user hovers on the field.",
+          "multi": false
+        },
+        {
+          "name": "./fieldType",
+          "label": "./fieldType",
+          "component": "select",
+          "valueType": "string",
+          "required": true,
+          "multi": false,
+          "options": [
+            {
+              "name": "Text Input",
+              "value": "text-input"
+            }
+          ]
+        },
+        {
+          "name": "./validatePictureClauseMessage",
+          "label": "Error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./assistPriority",
+          "label": "Text for screen readers",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "",
+              "value": ""
+            },
+            {
+              "name": "Custom Text",
+              "value": "custom"
+            },
+            {
+              "name": "Description",
+              "value": "description"
+            },
+            {
+              "name": "Title",
+              "value": "label"
+            },
+            {
+              "name": "Name",
+              "value": "name"
+            },
+            {
+              "name": "None",
+              "value": "none"
+            }
+          ],
+          "default": "custom"
+        },
+        {
+          "name": "./enabled",
+          "label": "./enabled",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./pattern",
+          "label": "Pattern",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "description": "Regular Expression is permitted.",
+          "multi": false
+        },
+        {
+          "name": "./default",
+          "label": "Default value",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./fd:viewType",
+          "label": "./fd:viewType",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./dorColspan",
+          "label": "Number of columns to use to display the field in a Document of Record",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "description": "It is supported only for column layout in Document of Record.",
+          "multi": false
+        },
+        {
+          "name": "./mandatoryMessage",
+          "label": "Error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when required field is left empty.",
+          "multi": false
+        },
+        {
+          "name": "./dorBindRef",
+          "label": "Document of Record bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "description": "You can specify a Document of Record Bind Reference to link an adaptive form field with a document of record field. When you fill any value in the linked field of an adaptive form, the value is also displayed in the linked field of the corresponding document of a record.",
+          "multi": false
+        },
+        {
+          "name": "./autocomplete",
+          "label": "Autofill attribute",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "",
+              "value": ""
+            },
+            {
+              "name": "off",
+              "value": "off"
+            },
+            {
+              "name": "on",
+              "value": "on"
+            },
+            {
+              "name": "name",
+              "value": "name"
+            },
+            {
+              "name": "given-name",
+              "value": "given-name"
+            },
+            {
+              "name": "street-address",
+              "value": "street-address"
+            },
+            {
+              "name": "postal-code",
+              "value": "postal-code"
+            },
+            {
+              "name": "cc-name",
+              "value": "cc-name"
+            },
+            {
+              "name": "additional-name",
+              "value": "additional-name"
+            },
+            {
+              "name": "family-name",
+              "value": "family-name"
+            },
+            {
+              "name": "organization",
+              "value": "organization"
+            },
+            {
+              "name": "organization-title",
+              "value": "organization-title"
+            },
+            {
+              "name": "address-line1",
+              "value": "address-line1"
+            },
+            {
+              "name": "address-line2",
+              "value": "address-line2"
+            },
+            {
+              "name": "address-line3",
+              "value": "address-line3"
+            },
+            {
+              "name": "address-level1",
+              "value": "address-level1"
+            },
+            {
+              "name": "address-level2",
+              "value": "address-level2"
+            },
+            {
+              "name": "address-level3",
+              "value": "address-level3"
+            },
+            {
+              "name": "address-level4",
+              "value": "address-level4"
+            },
+            {
+              "name": "country",
+              "value": "country"
+            },
+            {
+              "name": "country-name",
+              "value": "country-name"
+            },
+            {
+              "name": "cc-given-name",
+              "value": "cc-given-name"
+            },
+            {
+              "name": "cc-additional-name",
+              "value": "cc-additional-name"
+            },
+            {
+              "name": "cc-family-name",
+              "value": "cc-family-name"
+            },
+            {
+              "name": "cc-number",
+              "value": "cc-number"
+            },
+            {
+              "name": "cc-csc",
+              "value": "cc-csc"
+            },
+            {
+              "name": "cc-exp-month",
+              "value": "cc-exp-month"
+            },
+            {
+              "name": "cc-exp-year",
+              "value": "cc-exp-year"
+            },
+            {
+              "name": "cc-exp",
+              "value": "cc-exp"
+            },
+            {
+              "name": "cc-type",
+              "value": "cc-type"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "name": "./maxLength",
+          "label": "Maximum Number of characters",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./unboundFormElement@TypeHint",
+          "label": "./unboundFormElement@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./custom",
+          "label": "Custom text",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./visible",
+          "label": "./visible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./readOnly",
+          "label": "./readOnly",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./validateExpMessage",
+          "label": "Script validation message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Displayed when validation script fails.",
+          "multi": false
+        },
+        {
+          "name": "./minLengthMessage",
+          "label": "Minimum characters error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when less than minimum characters are entered.",
+          "multi": false
+        },
+        {
+          "name": "./displayPatternType",
+          "label": "Type",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./dorExclusion",
+          "label": "./dorExclusion",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./displayFormat",
+          "label": "Format",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "description": "The format in which the value will be displayed to the user.",
+          "multi": false
+        },
+        {
+          "name": "./unboundFormElement",
+          "label": "./unboundFormElement",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./isTitleRichText",
+          "label": "./isTitleRichText",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./multiLine",
+          "label": "./multiLine",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./required",
+          "label": "Required",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./maxLengthMessage",
+          "label": "Maximum characters error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when more than maximum characters are entered.",
+          "multi": false
+        },
+        {
+          "name": "./displayValueExpression",
+          "label": "./displayValueExpression",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        }
+      ]
+    },
+    {
+      "title": "Telephoneinput",
+      "componentType": "/apps/forms-components-examples/components/form/telephoneinput",
+      "componentSuperType": "core/fd/components/form/telephoneinput/v1/telephoneinput",
+      "fields": [
+        {
+          "name": "./dataRef",
+          "label": "Bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./hideTitle",
+          "label": "./hideTitle",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./placeholder",
+          "label": "Placeholder text",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./validationPatternType",
+          "label": "Type",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./name",
+          "label": "Name",
+          "component": "textfield",
+          "valueType": "string",
+          "required": true,
+          "multi": false
+        },
+        {
+          "name": "./minLength",
+          "label": "Minimum number of characters",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./description",
+          "label": "Help text",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./tooltipVisible",
+          "label": "./tooltipVisible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "description": "Select the option to display the short description around the component and no tooltip text when a user hovers over the component.",
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./visible@TypeHint",
+          "label": "./visible@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./enabled@TypeHint",
+          "label": "./enabled@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./readOnly@TypeHint",
+          "label": "./readOnly@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./tooltip",
+          "label": "Short description",
+          "component": "richtext",
+          "valueType": "string",
+          "required": false,
+          "description": "Provide the text to display as a tooltip when a user hovers on the field.",
+          "multi": false
+        },
+        {
+          "name": "./fieldType",
+          "label": "./fieldType",
+          "component": "select",
+          "valueType": "string",
+          "required": true,
+          "multi": false,
+          "options": [
+            {
+              "name": "Telephone Input",
+              "value": "tel"
+            }
+          ]
+        },
+        {
+          "name": "./validatePictureClauseMessage",
+          "label": "Error Message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./assistPriority",
+          "label": "Text for screen readers",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "",
+              "value": ""
+            },
+            {
+              "name": "Custom Text",
+              "value": "custom"
+            },
+            {
+              "name": "Description",
+              "value": "description"
+            },
+            {
+              "name": "Title",
+              "value": "label"
+            },
+            {
+              "name": "Name",
+              "value": "name"
+            },
+            {
+              "name": "None",
+              "value": "none"
+            }
+          ],
+          "default": "custom"
+        },
+        {
+          "name": "./enabled",
+          "label": "./enabled",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./pattern",
+          "label": "Pattern",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "description": "Regular Expression is permitted.",
+          "multi": false
+        },
+        {
+          "name": "./default",
+          "label": "Default value",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./fd:viewType",
+          "label": "./fd:viewType",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./dorColspan",
+          "label": "Number of columns to use to display the field in a Document of Record",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "description": "It is supported only for column layout in Document of Record.",
+          "multi": false
+        },
+        {
+          "name": "./mandatoryMessage",
+          "label": "Error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when required field is left empty.",
+          "multi": false
+        },
+        {
+          "name": "./dorBindRef",
+          "label": "Document of Record bind reference",
+          "component": "generic",
+          "valueType": "string",
+          "required": false,
+          "description": "You can specify a Document of Record Bind Reference to link an adaptive form field with a document of record field. When you fill any value in the linked field of an adaptive form, the value is also displayed in the linked field of the corresponding document of a record.",
+          "multi": false
+        },
+        {
+          "name": "./autocomplete",
+          "label": "Autofill attribute",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "options": [
+            {
+              "name": "",
+              "value": ""
+            },
+            {
+              "name": "off",
+              "value": "off"
+            },
+            {
+              "name": "on",
+              "value": "on"
+            },
+            {
+              "name": "tel",
+              "value": "tel"
+            },
+            {
+              "name": "tel-national",
+              "value": "tel-national"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "name": "./maxLength",
+          "label": "Maximum Number of characters",
+          "component": "textfield",
+          "valueType": "number",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./unboundFormElement@TypeHint",
+          "label": "./unboundFormElement@TypeHint",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false,
+          "default": "Boolean"
+        },
+        {
+          "name": "./custom",
+          "label": "Custom text",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./visible",
+          "label": "./visible",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "false"
+        },
+        {
+          "name": "./readOnly",
+          "label": "./readOnly",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./validateExpMessage",
+          "label": "Script validation message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Displayed when validation script fails.",
+          "multi": false
+        },
+        {
+          "name": "./minLengthMessage",
+          "label": "Minimum characters error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when less than minimum characters are entered.",
+          "multi": false
+        },
+        {
+          "name": "./displayPatternType",
+          "label": "Type",
+          "component": "select",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        },
+        {
+          "name": "./dorExclusion",
+          "label": "./dorExclusion",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./displayFormat",
+          "label": "Format",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "description": "The format in which the value will be displayed to the user.",
+          "multi": false
+        },
+        {
+          "name": "./unboundFormElement",
+          "label": "./unboundFormElement",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./isTitleRichText",
+          "label": "./isTitleRichText",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./required",
+          "label": "Required",
+          "component": "checkbox",
+          "valueType": "boolean",
+          "required": false,
+          "multi": false,
+          "default": "true"
+        },
+        {
+          "name": "./maxLengthMessage",
+          "label": "Maximum characters error message",
+          "component": "textarea",
+          "valueType": "string",
+          "required": false,
+          "description": "Error message shown when more than maximum characters are entered.",
+          "multi": false
+        },
+        {
+          "name": "./displayValueExpression",
+          "label": "./displayValueExpression",
+          "component": "textfield",
+          "valueType": "string",
+          "required": false,
+          "multi": false
+        }
+      ]
+    }
+  ],
+  "placementRules": [
+    {
+      "id": "jcr:content/guideContainer",
+      "description": "Components placement rule for 'jcr:content/guideContainer' container",
+      "condition": {
+        "matchTargetRelation": "parent"
+      },
+      "action": {
+        "explanation": "ComponentDefinitionRef is a reference to componentType in ComponentDefinitions",
+        "allowedInsertions": [
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/emailinput",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/datepicker",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/review",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field"
+            },
+            "requiredKeys": [
+              "./name"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/numberinput",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/termsandconditions",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/wizard",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/image",
+            "suggestedProperties": {
+              "./alt": "Suggested alternative text for accessibility",
+              "./jcr:title": "Suggested caption text"
+            },
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/container",
+            "suggestedProperties": {
+              "./id": "Suggested container ID"
+            },
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/text",
+            "suggestedProperties": {
+              "./text": "Suggested text content"
+            },
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/datetime",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/accordion",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/footer",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/checkbox",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/telephoneinput",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/radiobutton",
+            "suggestedProperties": {
+              "./link": "Suggested link destination",
+              "./jcr:title": "Suggested button text"
+            },
+            "mandatoryProperties": {
+              "./type": "Required field",
+              "./name": "Required field",
+              "./enum": "Specify the content to submit, when the option is selected.",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./enum",
+              "./fieldType",
+              "./type"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/title",
+            "suggestedProperties": {
+              "./type": "Suggested heading level (h1-h6)",
+              "./jcr:title": "Suggested title text"
+            },
+            "mandatoryProperties": {
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/tabsontop",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/fragment",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/verticaltabs",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/actions/submit",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/actions/reset",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/dropdown",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./enum": "Specify the content to submit, when the option is selected.",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./enum",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/switch",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./type": "Required field",
+              "./name": "Required field",
+              "./enum": "Specify the content to submit, when the option is selected.",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./enum",
+              "./fieldType",
+              "./type"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/pageheader",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/checkboxgroup",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./enum": "Specify the content to submit, when the option is selected.",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./enum",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/textinput",
+            "suggestedProperties": {
+              "./text": "Suggested text content"
+            },
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/panelcontainer",
+            "suggestedProperties": {
+              "./id": "Suggested container ID"
+            },
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/scribble",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field"
+            },
+            "requiredKeys": [
+              "./name"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/fileinput",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./type": "Selecting the String data type option would increase the upload size by 30%.",
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType",
+              "./type"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/button",
+            "suggestedProperties": {
+              "./link": "Suggested link destination",
+              "./jcr:title": "Suggested button text"
+            },
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-core-components-it/form/hcaptcha",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./cloudServicePath": "Required field",
+              "./name": "Required field"
+            },
+            "requiredKeys": [
+              "./cloudServicePath",
+              "./name"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-core-components-it/form/turnstile",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./cloudServicePath": "Required field",
+              "./name": "Required field"
+            },
+            "requiredKeys": [
+              "./cloudServicePath",
+              "./name"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-core-components-it/form/recaptcha",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./rcCloudServicePath": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./rcCloudServicePath"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-core-components-it/components/svg",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-core-components-it/components/svgSelector",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-core-components-it/components/customfileupload",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./type": "Selecting the String data type option would increase the upload size by 30%.",
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType",
+              "./type"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-core-components-it/components/textinput/v1/textinput",
+            "suggestedProperties": {
+              "./text": "Suggested text content"
+            },
+            "mandatoryProperties": {
+              "./name": "Required field",
+              "./fieldType": "Required field"
+            },
+            "requiredKeys": [
+              "./name",
+              "./fieldType"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/draftsandsubmissions",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/linkcomponent",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./title": "Required field"
+            },
+            "requiredKeys": [
+              "./title"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/searchlister",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/aemform",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/demo",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/demo/component",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/pdfviewer",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./documentPath": "Path of Document."
+            },
+            "requiredKeys": [
+              "./documentPath"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/imagev2",
+            "suggestedProperties": {
+              "./alt": "Suggested alternative text for accessibility",
+              "./jcr:title": "Suggested caption text"
+            },
+            "mandatoryProperties": {
+              "./alt": "Textual alternative of the meaning or function of the image, for visually impaired readers."
+            },
+            "requiredKeys": [
+              "./alt"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/teaser",
+            "suggestedProperties": {
+              "./pretitle": "Suggested teaser pretitle",
+              "./jcr:title": "Suggested teaser title"
+            },
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/image",
+            "suggestedProperties": {
+              "./alt": "Suggested alternative text for accessibility",
+              "./jcr:title": "Suggested caption text"
+            },
+            "mandatoryProperties": {
+              "./alt": "Textual alternative of the meaning or function of the image, for visually impaired readers."
+            },
+            "requiredKeys": [
+              "./alt"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/container",
+            "suggestedProperties": {
+              "./id": "Suggested container ID"
+            },
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/experiencefragment",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/text",
+            "suggestedProperties": {
+              "./text": "Suggested text content"
+            },
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/accordion",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/search",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./searchRoot": "The root page from which to search in. Can be a blueprint master, language master or regular page."
+            },
+            "requiredKeys": [
+              "./searchRoot"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/sidebar",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/tabs",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/progressbar",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/title",
+            "suggestedProperties": {
+              "./type": "Suggested heading level (h1-h6)",
+              "./jcr:title": "Suggested title text"
+            },
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/separator",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/list",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/download",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/carousel",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/sharing",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/contentfragment",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/navigation",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./navigationRoot": "The root page from which to build the navigation. Can be a blueprint master, language master or regular page."
+            },
+            "requiredKeys": [
+              "./navigationRoot"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/demo",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/breadcrumb",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/embed",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./url": "The URL of the content to embed. The URL will be checked against supported processors for a match.",
+              "./html": "The code of the content to embed. The embed code is filtered to remove unsafe tags, such as the script tag."
+            },
+            "requiredKeys": [
+              "./url",
+              "./html"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/button",
+            "suggestedProperties": {
+              "./link": "Suggested link destination",
+              "./jcr:title": "Suggested button text"
+            },
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/contentfragmentlist",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/languagenavigation",
+            "suggestedProperties": {},
+            "mandatoryProperties": {
+              "./navigationRoot": "The root page of the global language structure."
+            },
+            "requiredKeys": [
+              "./navigationRoot"
+            ],
+            "semanticHints": []
+          },
+          {
+            "componentDefinitionRef": "/apps/core-components-examples/components/tableofcontents",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          }
+        ],
+        "semanticHints": []
+      }
+    },
+    {
+      "id": "/mnt/override/conf/core-components-examples/settings/wcm/templates/af-blank-v2/structure/jcr:content/container1",
+      "description": "Components placement rule for '/mnt/override/conf/core-components-examples/settings/wcm/templates/af-blank-v2/structure/jcr:content/container1' container",
+      "condition": {
+        "matchTargetRelation": "parent"
+      },
+      "action": {
+        "explanation": "ComponentDefinitionRef is a reference to componentType in ComponentDefinitions",
+        "allowedInsertions": [
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/pageheader",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          }
+        ],
+        "semanticHints": []
+      }
+    },
+    {
+      "id": "jcr:content/container1",
+      "description": "Components placement rule for 'jcr:content/container1' container",
+      "condition": {
+        "matchTargetRelation": "parent"
+      },
+      "action": {
+        "explanation": "ComponentDefinitionRef is a reference to componentType in ComponentDefinitions",
+        "allowedInsertions": [
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/pageheader",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          }
+        ],
+        "semanticHints": []
+      }
+    },
+    {
+      "id": "jcr:content/container2",
+      "description": "Components placement rule for 'jcr:content/container2' container",
+      "condition": {
+        "matchTargetRelation": "parent"
+      },
+      "action": {
+        "explanation": "ComponentDefinitionRef is a reference to componentType in ComponentDefinitions",
+        "allowedInsertions": [
+          {
+            "componentDefinitionRef": "/apps/forms-components-examples/components/form/footer",
+            "suggestedProperties": {},
+            "mandatoryProperties": {},
+            "requiredKeys": [],
+            "semanticHints": []
+          }
+        ],
+        "semanticHints": []
+      }
+    }
+  ]
+}

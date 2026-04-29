@@ -1,0 +1,21 @@
+{
+  "id": "content-model-to-tree-basic",
+  "description": "Converts content model to treeJson with correct qualifiedIds, fieldTypes, and nesting",
+  "script": "forms-rule-creator/scripts/content-model-to-tree.bundle.js",
+  "args": {
+    "--content-model-file": "fixture:content-model-contact-us.json"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": {
+    "success": true,
+    "treeJson": {
+      "id": "$form",
+      "fieldType": "form",
+      "items": [
+        { "id": "$form.full_name",    "name": "full_name",    "fieldType": "text-input" },
+        { "id": "$form.address",      "name": "address",      "fieldType": "text-input" },
+        { "id": "$form.email_address","name": "email_address","fieldType": "email" }
+      ]
+    }
+  }
+}

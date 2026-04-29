@@ -1,0 +1,34 @@
+{
+  "id": "routing-add-field-intent",
+  "type": "llm",
+  "description": "Add-field intent is classified correctly and routed to forms-content-update workflow — calls get-aem-page-content then patch",
+  "userMessage": "Add an email field to my contact us form at /content/forms/af/default-site/contact-us1",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [
+        { "siteId": "default-site", "title": "Default Site", "path": "/content/forms/af/default-site" }
+      ]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-no-email.json",
+    "get-aem-page-content-definition": "@fixtures/definition-slim.json",
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "classifies-as-add-field",
+      "description": "The model identifies this as an add-field operation (not add-rule, create-form, or modify-property)",
+      "required": true
+    },
+    {
+      "id": "calls-patch-aem-page-content",
+      "description": "The model calls patch-aem-page-content with an 'add' operation to insert the email field",
+      "required": true
+    },
+    {
+      "id": "patch-has-correct-component-type",
+      "description": "The patch payload includes the correct component type for emailinput (e.g. .../form/emailinput) and fieldType=email",
+      "required": false
+    }
+  ]
+}

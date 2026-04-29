@@ -1,0 +1,42 @@
+{
+  "nodeName": "ROOT",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "EVENT_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "EVENT_CONDITION",
+            "choice": {
+              "nodeName": "EVENT_AND_COMPARISON",
+              "items": [
+                {
+                  "nodeName": "EVENT_AND_COMPARISON_LEFT_HAND_EXPRESSION",
+                  "choice": { "nodeName": "COMPONENT", "value": { "id": "$form.nonexistent_field" } }
+                },
+                {
+                  "nodeName": "EVENT_AND_COMPARISON_OPERATOR",
+                  "choice": { "nodeName": "EQUALS_TO", "value": null }
+                },
+                {
+                  "nodeName": "PRIMITIVE_EXPRESSION",
+                  "choice": { "nodeName": "STRING_LITERAL", "value": "test" }
+                }
+              ]
+            },
+            "nested": false
+          },
+          { "nodeName": "Then", "value": null },
+          {
+            "nodeName": "BLOCK_STATEMENTS",
+            "items": []
+          }
+        ]
+      }
+    }
+  ],
+  "enabled": true,
+  "isValid": true,
+  "version": 1
+}

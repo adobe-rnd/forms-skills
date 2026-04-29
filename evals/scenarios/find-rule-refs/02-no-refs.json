@@ -1,0 +1,14 @@
+{
+  "id": "find-rule-refs-no-refs",
+  "description": "Returns empty refs when qualified-id is not referenced in any rule",
+  "script": "forms-content-update/scripts/find-rule-refs.bundle.js",
+  "args": {
+    "--content-model-file": "fixture:content-model-with-rule-refs.json",
+    "--qualified-id": "$form.state"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": {
+    "refs": [],
+    "total": 0
+  }
+}

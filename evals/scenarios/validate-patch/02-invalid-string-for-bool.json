@@ -1,0 +1,21 @@
+{
+  "id": "validate-patch-invalid-string-for-bool",
+  "description": "Replace required with string 'true' fails validation — boolean type mismatch",
+  "script": "forms-content-update/scripts/validate-patch.bundle.js",
+  "args": {
+    "--content-model": "@fixtures/content-model-contact-us.json",
+    "--definition": "@fixtures/definition-slim.json",
+    "--ops": "[{\"op\":\"replace\",\"path\":\"/items/0/items/0/properties/required\",\"value\":\"true\"}]"
+  },
+  "expectedExitCode": 1,
+  "expectedOutput": {
+    "valid": false,
+    "errors": [
+      {
+        "property": "required",
+        "expected": "boolean",
+        "got": "string"
+      }
+    ]
+  }
+}

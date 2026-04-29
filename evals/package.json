@@ -1,0 +1,13 @@
+{
+  "name": "forms-content-authoring-evals",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LLM eval runner for forms-content-authoring skill",
+  "scripts": {
+    "eval:script": "node scripts/run-evals.js",
+    "eval:llm": "node scripts/run-llm-evals.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/bedrock-sdk": "^0.28.1"
+  }
+}

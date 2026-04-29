@@ -1,0 +1,16 @@
+{
+  "id": "find-rule-refs-finds-ref",
+  "description": "Finds COMPONENT ref to $form.country in fd:visible expression rule on 'state' field — note: fd:change (event handler) is intentionally excluded from scan",
+  "script": "forms-content-update/scripts/find-rule-refs.bundle.js",
+  "args": {
+    "--content-model-file": "fixture:content-model-with-rule-refs.json",
+    "--qualified-id": "$form.country"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": {
+    "total": 1,
+    "refs": [
+      { "fieldName": "state", "capiKey": "0:1", "fdKey": "fd:visible" }
+    ]
+  }
+}

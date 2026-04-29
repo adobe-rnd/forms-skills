@@ -1,0 +1,31 @@
+{
+  "id": "rule-correctness-on-change-fd-change",
+  "type": "llm",
+  "description": "A 'when X changes, do Y' intent maps to EVENT_SCRIPTS → fd:change, not fd:visible (expression rule). Wrong key produces a visibility rule instead of an event handler.",
+  "userMessage": "On the contact us form at /content/forms/af/default-site/contact-us1, when full_name changes, clear the email_address field",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [{ "siteId": "default-site", "title": "Default Site" }]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-contact-us.json",
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "uses-fd-change-not-fd-visible",
+      "description": "The patch op targets fd:change (an event handler inside fd:events) on the full_name field — NOT fd:visible, fd:validate, or any expression rule key. 'When X changes' is always an EVENT_SCRIPTS rule bound to the change event.",
+      "required": true
+    },
+    {
+      "id": "rule-targets-full-name-as-source",
+      "description": "The fd:change rule is attached to the full_name field (the change source), not to email_address",
+      "required": true
+    },
+    {
+      "id": "rule-clears-email-address",
+      "description": "The rule body sets or clears email_address (e.g. sets its value to empty/null via setValue or a CALC_EXPRESSION)",
+      "required": false
+    }
+  ]
+}

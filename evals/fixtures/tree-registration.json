@@ -1,0 +1,50 @@
+{
+  "success": true,
+  "treeJson": {
+    "id": "$form",
+    "name": "guideContainer",
+    "displayName": "Demo Form",
+    "type": "FORM",
+    "fieldType": "form",
+    "path": "",
+    "items": [
+      {
+        "id": "$form.name",
+        "name": "name",
+        "displayName": "Name",
+        "type": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+        "fieldType": "text-input",
+        "path": "",
+        "items": []
+      },
+      {
+        "id": "$form.gender",
+        "name": "gender",
+        "displayName": "Gender",
+        "type": "AFCOMPONENT|FIELD|DROPDOWN|STRING",
+        "fieldType": "drop-down",
+        "path": "",
+        "items": []
+      },
+      {
+        "id": "$form.address",
+        "name": "address",
+        "displayName": "Address",
+        "type": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+        "fieldType": "text-input",
+        "path": "",
+        "items": []
+      },
+      {
+        "id": "$form.submit",
+        "name": "submit",
+        "displayName": "Submit",
+        "type": "AFCOMPONENT|FIELD|BUTTON",
+        "fieldType": "button",
+        "path": "",
+        "items": []
+      }
+    ]
+  },
+  "outputPath": "/tmp/treeJson-70952.json"
+}

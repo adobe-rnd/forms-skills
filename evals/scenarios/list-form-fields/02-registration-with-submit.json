@@ -1,0 +1,16 @@
+{
+  "id": "list-form-fields-registration",
+  "description": "Lists fields including submit button for a registration form",
+  "script": "forms-content-update/scripts/list-form-fields.bundle.js",
+  "args": {
+    "--content-model": "@fixtures/content-model-registration.json"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": [
+    { "name": "guideContainer", "capiKey": "0", "depth": 1 },
+    { "name": "name",   "capiKey": "0:0", "depth": 2, "fieldType": "text-input" },
+    { "name": "gender", "capiKey": "0:1", "depth": 2, "fieldType": "drop-down" },
+    { "name": "address","capiKey": "0:2", "depth": 2 },
+    { "name": "submit", "capiKey": "0:3", "depth": 2, "fieldType": "button" }
+  ]
+}

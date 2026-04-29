@@ -1,0 +1,46 @@
+[
+  {
+    "name": "fd:rules",
+    "found": true,
+    "capiKey": "0:0:0",
+    "pointer": "/items/0/items/0/items/0",
+    "propertyPointer": "/items/0/items/0/items/0/properties",
+    "qualifiedId": "$form.full_name.fd:rules",
+    "type": "AFCOMPONENT|FIELD",
+    "displayName": "fd:rules",
+    "componentType": "fd:rules",
+    "isPanel": false,
+    "component": {
+      "id": "fd:rules",
+      "componentType": "fd:rules",
+      "properties": {
+        "fd:change": [
+          "{\"nodeName\": \"ROOT\", \"items\": [{\"nodeName\": \"STATEMENT\", \"choice\": {\"nodeName\": \"EVENT_SCRIPTS\", \"items\": [{\"nodeName\": \"EVENT_CONDITION\", \"choice\": {\"nodeName\": \"EVENT_AND_COMPARISON\", \"items\": [{\"nodeName\": \"EVENT_AND_COMPARISON_LEFT_HAND_EXPRESSION\", \"choice\": {\"nodeName\": \"COMPONENT\", \"value\": {\"id\": \"$form.full_name\"}}}, {\"nodeName\": \"EVENT_AND_COMPARISON_OPERATOR\", \"choice\": {\"nodeName\": \"EQUALS_TO\", \"value\": null}}, {\"nodeName\": \"PRIMITIVE_EXPRESSION\", \"choice\": {\"nodeName\": \"STRING_LITERAL\", \"value\": \"rishi\"}}]}, \"nested\": false}, {\"nodeName\": \"Then\", \"value\": null}, {\"nodeName\": \"BLOCK_STATEMENTS\", \"items\": [{\"nodeName\": \"BLOCK_STATEMENT\", \"choice\": {\"nodeName\": \"SET_VALUE_STATEMENT\", \"items\": [{\"nodeName\": \"COMPONENT\", \"value\": {\"id\": \"$form.email_address\"}}, {\"nodeName\": \"to\", \"value\": null}, {\"nodeName\": \"EXPRESSION\", \"choice\": {\"nodeName\": \"STRING_LITERAL\", \"value\": \"rismehta@adobe.com\"}}]}}]}]}}], \"enabled\": true, \"isValid\": true, \"version\": 1}"
+        ]
+      },
+      "items": []
+    }
+  },
+  {
+    "name": "fd:events",
+    "found": true,
+    "capiKey": "0:0:1",
+    "pointer": "/items/0/items/0/items/1",
+    "propertyPointer": "/items/0/items/0/items/1/properties",
+    "qualifiedId": "$form.full_name.fd:events",
+    "type": "AFCOMPONENT|FIELD",
+    "displayName": "fd:events",
+    "componentType": "fd:events",
+    "isPanel": false,
+    "component": {
+      "id": "fd:events",
+      "componentType": "fd:events",
+      "properties": {
+        "change": [
+          "if($field == 'rishi', dispatchEvent(email_address, 'custom:setProperty', {value : 'rismehta@adobe.com'}), {})"
+        ]
+      },
+      "items": []
+    }
+  }
+]

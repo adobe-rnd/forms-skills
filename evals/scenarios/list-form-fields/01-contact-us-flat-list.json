@@ -1,0 +1,17 @@
+{
+  "id": "list-form-fields-contact-us",
+  "description": "Lists all fields with name, capiKey, pointer, depth — includes fd:rules/fd:events children",
+  "script": "forms-content-update/scripts/list-form-fields.bundle.js",
+  "args": {
+    "--content-model": "@fixtures/content-model-contact-us.json"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": [
+    { "name": "guideContainer", "capiKey": "0", "depth": 1 },
+    { "name": "full_name",      "capiKey": "0:0", "depth": 2, "fieldType": "text-input" },
+    { "name": "fd:rules",       "capiKey": "0:0:0", "depth": 3 },
+    { "name": "fd:events",      "capiKey": "0:0:1", "depth": 3 },
+    { "name": "address",        "capiKey": "0:1", "depth": 2 },
+    { "name": "email_address",  "capiKey": "0:2", "depth": 2, "fieldType": "email" }
+  ]
+}

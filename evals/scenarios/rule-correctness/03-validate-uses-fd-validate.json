@@ -1,0 +1,31 @@
+{
+  "id": "rule-correctness-validate-fd-validate",
+  "type": "llm",
+  "description": "A 'make X required when Y' intent maps to VALIDATE_EXPRESSION → fd:validate, not fd:visible (which controls visibility) or fd:enabled (which controls editability).",
+  "userMessage": "On the contact us form at /content/forms/af/default-site/contact-us1, make the address field required when full_name is filled",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [{ "siteId": "default-site", "title": "Default Site" }]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-contact-us.json",
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "uses-fd-validate-not-fd-visible",
+      "description": "The patch op targets fd:validate (or a required constraint inside fd:rules) on the address field — NOT fd:visible or fd:enabled. 'Make required when' is a validation constraint, not a visibility or access rule.",
+      "required": true
+    },
+    {
+      "id": "condition-references-full-name",
+      "description": "The validation condition references the full_name field's qualified id (e.g. $form.full_name) to check whether it is filled/non-empty",
+      "required": true
+    },
+    {
+      "id": "patch-targets-address-field",
+      "description": "The patch operation targets the address field's pointer, not full_name",
+      "required": true
+    }
+  ]
+}

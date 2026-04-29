@@ -1,0 +1,26 @@
+{
+  "id": "find-field-fd-rules-found",
+  "description": "find-field locates fd:rules and fd:events nodes when they exist — used by apply-rule-workflow CHECK step",
+  "script": "forms-content-update/scripts/find-field.bundle.js",
+  "args": {
+    "--content-model": "@fixtures/content-model-contact-us.json",
+    "--names": "fd:rules,fd:events"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": [
+    {
+      "name": "fd:rules",
+      "found": true,
+      "capiKey": "0:0:0",
+      "pointer": "/items/0/items/0/items/0",
+      "propertyPointer": "/items/0/items/0/items/0/properties"
+    },
+    {
+      "name": "fd:events",
+      "found": true,
+      "capiKey": "0:0:1",
+      "pointer": "/items/0/items/0/items/1",
+      "propertyPointer": "/items/0/items/0/items/1/properties"
+    }
+  ]
+}

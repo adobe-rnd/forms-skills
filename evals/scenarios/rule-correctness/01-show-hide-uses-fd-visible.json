@@ -1,0 +1,31 @@
+{
+  "id": "rule-correctness-show-hide-fd-visible",
+  "type": "llm",
+  "description": "A 'show X when Y' intent maps to SHOW_EXPRESSION → fd:visible, not fd:change (event handler). Wrong key silently writes bad data.",
+  "userMessage": "On the contact us form at /content/forms/af/default-site/contact-us1, show the address field only when full_name is not empty",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [{ "siteId": "default-site", "title": "Default Site" }]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-contact-us.json",
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "uses-fd-visible-not-fd-change",
+      "description": "The patch op targets fd:visible (or fd:rules containing a visible expression) on the address field — NOT fd:change, fd:events, or any event handler key. A show/hide condition is always an expression rule on fd:visible.",
+      "required": true
+    },
+    {
+      "id": "references-full-name-field-id",
+      "description": "The rule expression or formula references the full_name field using its qualified id (e.g. $form.full_name), not a hardcoded string or display name",
+      "required": true
+    },
+    {
+      "id": "patch-targets-address-field",
+      "description": "The patch operation targets the address field's pointer (not full_name or email_address)",
+      "required": true
+    }
+  ]
+}

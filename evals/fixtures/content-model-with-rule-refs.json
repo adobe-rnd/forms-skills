@@ -1,0 +1,76 @@
+{
+  "id": "jcr:content",
+  "componentType": "core/fd/components/page/v2/page",
+  "properties": {
+    "jcr:title": "Rule Refs Test Form"
+  },
+  "items": {
+    "0": {
+      "capi-key": "0",
+      "capi-index": 0,
+      "id": "guideContainer",
+      "componentType": "core/fd/components/form/container/v2/container",
+      "properties": {
+        "fieldType": "form",
+        "jcr:title": "Test Form"
+      },
+      "items": {
+        "0:0": {
+          "capi-key": "0:0",
+          "capi-index": 0,
+          "id": "country",
+          "componentType": "forms-components-examples/components/form/dropdown",
+          "properties": {
+            "dorColspan": 12,
+            "name": "country",
+            "jcr:title": "Country",
+            "fieldType": "drop-down",
+            "enum": ["US", "UK", "IN"],
+            "enumNames": ["United States", "United Kingdom", "India"]
+          },
+          "items": {}
+        },
+        "0:1": {
+          "capi-key": "0:1",
+          "capi-index": 1,
+          "id": "state",
+          "componentType": "forms-components-examples/components/form/textinput",
+          "properties": {
+            "dorColspan": 12,
+            "name": "state",
+            "jcr:title": "State",
+            "fieldType": "text-input"
+          },
+          "items": {
+            "0:1:0": {
+              "capi-key": "0:1:0",
+              "capi-index": 0,
+              "id": "fd:rules",
+              "componentType": "fd:rules",
+              "properties": {
+                "fd:visible": [
+                  "{\"nodeName\":\"ROOT\",\"items\":[{\"nodeName\":\"STATEMENT\",\"choice\":{\"nodeName\":\"SIMPLE_EXPRESSION\",\"items\":[{\"nodeName\":\"AND_COMPARISON\",\"items\":[{\"nodeName\":\"AND_COMPARISON_LEFT_HAND_EXPRESSION\",\"choice\":{\"nodeName\":\"COMPONENT\",\"id\":\"$form.country\"}},{\"nodeName\":\"AND_COMPARISON_OPERATOR\",\"choice\":{\"nodeName\":\"EQUALS_TO\",\"value\":null}},{\"nodeName\":\"PRIMITIVE_EXPRESSION\",\"choice\":{\"nodeName\":\"STRING_LITERAL\",\"value\":\"US\"}}]}]}}]}"
+                ],
+                "visible": "$form.country == 'US'"
+              },
+              "items": {}
+            }
+          }
+        },
+        "0:2": {
+          "capi-key": "0:2",
+          "capi-index": 2,
+          "id": "submit",
+          "componentType": "forms-components-examples/components/form/actions/submit",
+          "properties": {
+            "dorColspan": 12,
+            "name": "submit",
+            "jcr:title": "Submit",
+            "fieldType": "button"
+          },
+          "items": {}
+        }
+      }
+    }
+  }
+}

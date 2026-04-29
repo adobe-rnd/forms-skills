@@ -1,0 +1,17 @@
+{
+  "id": "apply-rule-patch-replace",
+  "description": "When fd:rules already exists, generates a replace op on the full propertyPointer (not per-key)",
+  "script": "forms-content-update/scripts/apply-rule-patch.bundle.js",
+  "args": {
+    "--merged-rule-file": "fixture:merged-rule-visible.json",
+    "--find-field-result-file": "fixture:ff-result-rules-found.json",
+    "--field-pointer": "/items/0/items/0"
+  },
+  "expectedExitCode": 0,
+  "expectedOutput": [
+    {
+      "op": "replace",
+      "path": "/items/0/items/0/items/0/properties"
+    }
+  ]
+}

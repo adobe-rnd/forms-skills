@@ -1,0 +1,33 @@
+{
+  "id": "routing-add-rule-intent",
+  "type": "llm",
+  "description": "Pure add-rule request ('show state when country is US') goes through rule creation workflow — invokes forms-rule-creator, not forms-content-update patch",
+  "userMessage": "On the contact us form at /content/forms/af/default-site/contact-us1, show the address field only when full_name is not empty",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [
+        { "siteId": "default-site", "title": "Default Site", "path": "/content/forms/af/default-site" }
+      ]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-contact-us.json",
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "classifies-as-add-rule",
+      "description": "The model identifies this as an add-rule (not add-field or modify-property) intent",
+      "required": true
+    },
+    {
+      "id": "fetches-content-model-for-rule",
+      "description": "The model calls get-aem-page-content to get the content model before building the rule",
+      "required": true
+    },
+    {
+      "id": "applies-rule-via-patch",
+      "description": "The model ultimately calls patch-aem-page-content with fd:visible or fd:rules in the patch payload targeting the address field",
+      "required": true
+    }
+  ]
+}

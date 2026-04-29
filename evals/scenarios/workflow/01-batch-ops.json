@@ -1,0 +1,29 @@
+{
+  "id": "workflow-batch-ops",
+  "type": "llm",
+  "description": "Multiple field additions in a single request are batched into one patch-aem-page-content call — not one call per field",
+  "userMessage": "Add a first name field and a last name field to /content/forms/af/default-site/contact-us1",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [
+        { "siteId": "default-site", "title": "Default Site", "path": "/content/forms/af/default-site" }
+      ]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-contact-us.json",
+    "get-aem-page-content-definition": { "items": [] },
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "single-patch-call",
+      "description": "The model makes only ONE call to patch-aem-page-content that includes both field additions in a single patch array — not two separate patch calls",
+      "required": true
+    },
+    {
+      "id": "patch-includes-both-fields",
+      "description": "The single patch call contains add operations for both the first name and last name fields",
+      "required": true
+    }
+  ]
+}

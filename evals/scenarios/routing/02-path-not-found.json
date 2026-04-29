@@ -1,0 +1,31 @@
+{
+  "id": "routing-path-not-found",
+  "type": "llm",
+  "description": "When get-aem-pages returns no match for the given path, orchestrator stops and asks the user rather than making up a pageId",
+  "userMessage": "Add a name field to /content/forms/af/default-site/nonexistent-form",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [
+        { "siteId": "default-site", "title": "Default Site", "path": "/content/forms/af/default-site" }
+      ]
+    },
+    "get-aem-pages": { "items": [] }
+  },
+  "rubric": [
+    {
+      "id": "calls-get-aem-pages",
+      "description": "The model calls get-aem-pages with the JCR path to resolve a pageId before proceeding",
+      "required": true
+    },
+    {
+      "id": "stops-on-empty-result",
+      "description": "After get-aem-pages returns empty items, the model stops and reports the path was not found — it does NOT call get-aem-page-content, patch-aem-page-content, or get-aem-sites",
+      "required": true
+    },
+    {
+      "id": "no-raw-path-as-pageId",
+      "description": "The model never passes the raw JCR path (/content/forms/af/...) as a pageId argument to any MCP tool call",
+      "required": true
+    }
+  ]
+}

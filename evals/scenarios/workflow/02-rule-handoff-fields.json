@@ -1,0 +1,34 @@
+{
+  "id": "workflow-rule-handoff-fields",
+  "type": "llm",
+  "description": "For compound requests, the model adds the field first, then re-fetches the content model, then uses find-field to get the capiKey for the rule target — and applies the rule via patch",
+  "userMessage": "Add a country dropdown to /content/forms/af/default-site/contact-us1 and show address only when country is set to 'US'",
+  "toolResponses": {
+    "get-aem-sites": {
+      "items": [
+        { "siteId": "default-site", "title": "Default Site", "path": "/content/forms/af/default-site" }
+      ]
+    },
+    "get-aem-pages": "@fixtures/pages-contact-us.json",
+    "get-aem-page-content": "@fixtures/page-content-clean.json",
+    "get-aem-page-content-definition": "@fixtures/definition-dropdown.json",
+    "patch-aem-page-content": { "status": "ok" }
+  },
+  "rubric": [
+    {
+      "id": "adds-field-first",
+      "description": "The model calls patch-aem-page-content to add the country dropdown field before attempting any rule creation",
+      "required": true
+    },
+    {
+      "id": "fetches-content-model-for-rule",
+      "description": "The model calls get-aem-page-content at least once after the field-add patch — to obtain a content model it can use as the basis for rule creation",
+      "required": true
+    },
+    {
+      "id": "applies-visibility-rule",
+      "description": "The model makes a second patch-aem-page-content call applying an fd:visible or fd:rules rule that controls the address field's visibility based on the country value",
+      "required": true
+    }
+  ]
+}
