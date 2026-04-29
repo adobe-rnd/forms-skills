@@ -3,10 +3,24 @@ name: manage-context
 description: >
   Manages agent memory files in the .agent/ workspace directory — handover.md,
   history.md, and sessions.md. Maintains continuity across sessions by capturing
-  project state, archiving history, and logging session activity. Opt-in —
-  prompts the user before updating.
+  project state, archiving history, logging session activity, and generating
+  progress reports. Opt-in — prompts the user before updating.
   Triggers: update context, save progress, handover, session log, agent memory,
-  update reports, save state, what did we do, session summary.
+  update reports, save state, what did we do, session summary, generate report,
+  progress report, track progress.
+triggers:
+  - update context
+  - save progress
+  - handover
+  - session log
+  - agent memory
+  - update reports
+  - save state
+  - what did we do
+  - session summary
+  - generate report
+  - progress report
+  - track progress
 type: skill
 license: Apache-2.0
 metadata:
@@ -26,6 +40,8 @@ Manages the `.agent/` directory — the agent's memory across sessions.
 - User explicitly asks to save progress, update handover, or log the session
 - At the end of a session when the user confirms they're done
 - User asks "what did we do?" or "summarize this session"
+- User asks to generate a progress report or status update
+- At the end of a significant agentic task to capture decisions and context
 
 **Do NOT** update `.agent/` files silently. Always ask the user first.
 
@@ -38,6 +54,8 @@ Manages the `.agent/` directory — the agent's memory across sessions.
 | `handover.md` | Latest project state snapshot — what's done, what's pending, how to resume | Overwrite |
 | `history.md` | Append-only archive of previous handover snapshots with timestamps | Append |
 | `sessions.md` | Chronological session log — date, agent, session ID, summary | Append |
+
+> **Agentic context note:** These files collectively form the agent's persistent memory. `handover.md` is the active state, `history.md` is the archive, and `sessions.md` is the audit trail.
 
 All files live in `.agent/` at the workspace root.
 
@@ -210,6 +228,30 @@ When **all plans** for a journey show status ✅ Done:
    - Remove that journey's Plan Execution Status table
    - If another journey is queued, promote it to active
    - If no journeys remain, set Active journey to `—`
+
+---
+
+## Progress Report
+
+When the user asks for a progress report or status update, generate a concise summary from the current handover state without modifying any files:
+
+```
+# Progress Report — <date>
+
+**Workspace:** <workspace name>
+**Active journey:** <journey name> | **Plan:** <current plan number>
+
+## Completed This Session
+<bullet list of what was accomplished>
+
+## Current Status
+<one paragraph: what's done, what's in progress, what's next>
+
+## Pending Actions
+<bullet list of remaining steps>
+```
+
+This is read-only — do NOT update `.agent/` files just because a progress report was requested. Only update on explicit confirmation.
 
 ---
 

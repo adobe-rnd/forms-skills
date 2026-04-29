@@ -1,6 +1,6 @@
 ---
-name: forms-context
-description: Domain router for agent memory & session continuity skills
+name: forms-context-management
+description: Domain router for agentic context management — session state, progress saving, and report generation/update
 type: domain
 triggers:
   - update reports
@@ -10,19 +10,22 @@ triggers:
   - agent memory
   - save state
   - session summary
+  - context management
+  - generate report
+  - update report
 license: Apache-2.0
 metadata:
   author: Adobe
   version: "0.1"
 ---
 
-# Context — Domain Router
+# Context Management — Domain Router
 
 | | |
 |---|---|
-| **ID** | `context` |
+| **ID** | `context-management` |
 | **Version** | 0.1 |
-| **Description** | Routes agent memory & session continuity intents to the correct skill. |
+| **Description** | Routes agentic context management intents — session state, progress tracking, and report generation/update. |
 
 ## Routing Table
 
