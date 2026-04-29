@@ -148,11 +148,11 @@ Direct domain routing is appropriate when the user's intent is a **single, isola
 | Example Intent | Domain | Why Not a Plan |
 |----------------|--------|----------------|
 | "Push my form to AEM" | `infra` | Single deploy action, not a build workflow |
-| "Add a visibility rule to panelX" | `logic` | Single rule addition, form already exists |
+| "Add a visibility rule to panelX" | `rule-creator` | Single rule addition, form already exists |
 | "Show me the API client for checkEnquiry" | `integration` | Information retrieval, no build needed |
-| "Update the project reports" | `context` | Context management, not a build step |
+| "Update the project reports" | `context-management` | Context management, not a build step |
 | "Validate my Screen.md" | `analysis` | Single review action |
-| "Create a custom date-picker component" | `build` | Single component creation |
+| "Create a custom date-picker component" | `content-author` | Single component creation |
 
 ---
 
@@ -240,9 +240,9 @@ After each plan completes, present the user with these options. All local change
    2. **Push** — Push them to GitHub with `eds-code-sync push --branch <branch-name> --pr`.
    3. **Wait for merge** — Ask the user to review and merge the PR.
    4. **Re-sync** — Once the user confirms the merge, run `eds-code-sync sync` to re-sync the local `code/` directory with the merged main branch before proceeding.
-2. **AEM forms second** — If any form or rule files were created or modified (in `repo/`), push them to AEM Author with `form-sync push <form_path>` for each changed form. This must happen after EDS code is deployed, since forms may reference custom functions or components that need to be live first.
+2. **AEM form content** is now authored directly through `forms-content-author` via the Sites Content MCP server — there is no separate deploy step for form content.
 
-**When updating reports (options 1, 2, 3):** Route to `context` → `manage-context` to update `.agent/handover.md`, `.agent/history.md`, and `.agent/sessions.md`.
+**When updating reports (options 1, 2, 3):** Route to `context-management` → `manage-context` to update `.agent/handover.md`, `.agent/history.md`, and `.agent/sessions.md`.
 
 ---
 

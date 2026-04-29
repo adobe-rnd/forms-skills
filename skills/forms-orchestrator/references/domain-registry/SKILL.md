@@ -27,11 +27,11 @@ Domains are skill containers. Each domain has a router SKILL.md that handles ski
 | Domain | Router | Description |
 |--------|--------|-------------|
 | `analysis` | [`references/analysis/SKILL.md`](references/analysis/SKILL.md) | Analysis & documentation — requirements, screen docs, migration, review |
-| `build` | [`references/build/SKILL.md`](references/build/SKILL.md) | Form structure & components — scaffold, create/modify JSON, custom components |
-| `logic` | [`references/logic/SKILL.md`](references/logic/SKILL.md) | Business rules & custom functions — rules, JS functions, optimization |
+| `content-author` | [`references/content-author/SKILL.md`](references/content-author/SKILL.md) | Form structure & components — scaffold, create/modify JSON, custom components |
+| `rule-creator` | [`references/rule-creator/SKILL.md`](references/rule-creator/SKILL.md) | Business rules & custom functions — rules, JS functions, optimization |
 | `integration` | [`references/integration/SKILL.md`](references/integration/SKILL.md) | API & data integration — FDM sync, OpenAPI, JS API clients |
-| `infra` | [`references/infra/SKILL.md`](references/infra/SKILL.md) | Infrastructure — workspace setup, form sync, EDS code sync, git |
-| `context` | [`references/context/SKILL.md`](references/context/SKILL.md) | Agent memory & continuity — handover, history, session logs |
+| `infra` | [`references/infra/SKILL.md`](references/infra/SKILL.md) | Infrastructure — workspace setup, EDS code sync, git |
+| `context-management` | [`references/context-management/SKILL.md`](references/context-management/SKILL.md) | Agent memory & continuity — handover, history, session logs |
 
 ---
 

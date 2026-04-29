@@ -10,7 +10,7 @@ CLI tools are distributed across domain modules. When referencing any script fro
 
 ```
 "${CLAUDE_PLUGIN_ROOT}/skills/forms-shared/scripts/<tool-name>" <args>
-"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/<tool-name>" <args>
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-creator/scripts/<tool-name>" <args>
 "${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/<tool-name>" <args>
 ```
 
@@ -19,7 +19,7 @@ CLI tools are distributed across domain modules. When referencing any script fro
 | # | Rule |
 |---|------|
 | 1 | **Always use `${CLAUDE_PLUGIN_ROOT}`** — never construct paths from the skill's own base directory. The base directory injected by Claude Code (e.g., `Base directory for this skill: /path/to/...`) is for resolving skill-local assets (`assets/`, `references/`), **not** for locating scripts. |
-| 2 | **Always include the module name** — the plugin root (`${CLAUDE_PLUGIN_ROOT}`) is the directory containing `.claude-plugin/`. Scripts live in the owning module: `skills/forms-shared/scripts/`, `skills/forms-logic/scripts/`, `skills/forms-infra/scripts/`. |
+| 2 | **Always include the module name** — the plugin root (`${CLAUDE_PLUGIN_ROOT}`) is the directory containing `.claude-plugin/`. Scripts live in the owning module: `skills/forms-shared/scripts/`, `skills/forms-rule-creator/scripts/`, `skills/forms-infra/scripts/`. |
 | 3 | **Never hardcode absolute paths** — no `/Users/...` paths in SKILL.md files. Use `${CLAUDE_PLUGIN_ROOT}` for plugin-relative paths and `<cwd>/<name>` style placeholders for documentation examples. |
 | 4 | **Skill-local assets use relative paths** — files within a skill's own directory tree (e.g., `assets/plan-template.md`, `references/grammar-reference.md`) should be referenced with relative paths from the SKILL.md, not with `${CLAUDE_PLUGIN_ROOT}`. |
 
@@ -28,12 +28,11 @@ CLI tools are distributed across domain modules. When referencing any script fro
 | Script | Full Path |
 |--------|-----------|
 | `eds-code-sync` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/eds-code-sync` |
-| `form-sync` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/form-sync` |
-| `rule-transform` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-transform` |
-| `rule-validate` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-validate` |
-| `rule-save` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-save` |
-| `rule-grammar` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/rule-grammar` |
-| `parse-functions` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/parse-functions` |
+| `rule-transform` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-creator/scripts/rule-transform` |
+| `rule-validate` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-creator/scripts/rule-validate` |
+| `rule-save` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-creator/scripts/rule-save` |
+| `rule-grammar` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-creator/scripts/rule-grammar` |
+| `parse-functions` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-creator/scripts/parse-functions` |
 | `api-manager` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-shared/scripts/api-manager` |
 | `git-sandbox` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/git-sandbox` |
 
@@ -82,7 +81,7 @@ Plans are sequentially ordered execution units within a journey. Each plan conta
 
 ### Plan Status Tracking
 
-Plan status is tracked in `.agent/handover.md` via the Plan Execution Status dashboard, managed by Domain Registry → `context` › `manage-context`.
+Plan status is tracked in `.agent/handover.md` via the Plan Execution Status dashboard, managed by Domain Registry → `context-management` › `manage-context`.
 
 **Statuses:** ✅ Done — 🔵 Active — ⬚ Pending — ⏸️ Blocked — ❌ Failed
 
@@ -113,7 +112,7 @@ When all plans for a journey show ✅ Done:
 | File | Managed By | Purpose |
 |------|------------|---------|
 | `.env` | `setup-workspace` | `FORMS_WORKSPACE` path + AEM/GitHub credentials — never commit |
-| `metadata.json` | `sync-forms` | Tracks synced form/fragment paths (AEM ↔ local) |
+| `metadata.json` | `setup-workspace` | Tracks workspace metadata (forms paths, AEM config) |
 | `sandbox.json` | `git-sandbox` | Restricts allowed commit paths and push branch names |
 
 ---
