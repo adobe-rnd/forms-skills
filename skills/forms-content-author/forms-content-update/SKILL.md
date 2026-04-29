@@ -272,9 +272,9 @@ Renaming a field changes its `qualifiedId` (`$form.panel.oldName` → `$form.pan
 node $SKILL_DIR/scripts/find-field.bundle.js --content-model '<json>' --name '<name>'
 node $SKILL_DIR/scripts/find-rule-refs.bundle.js --content-model-file /tmp/pre-model.json --qualified-id '<id>'
 node $SKILL_DIR/scripts/rewrite-rule-refs.bundle.js --content-model-file /tmp/post-model.json --old-id '<old>' --new-id '<new>'
-node $SKILL_DIR/../forms-rule-creator/scripts/content-model-to-tree.bundle.js --content-model-file /tmp/post-model.json
-node $SKILL_DIR/../forms-rule-creator/scripts/validate-rule.bundle.js /tmp/rewritten-rule.json --tree /tmp/post-treeJson.json --storage-path <fdKey>
-node $SKILL_DIR/../forms-rule-creator/scripts/generate-formula.bundle.js /tmp/rewritten-rule.json --tree /tmp/post-treeJson.json --event <fdKey>
+node $SKILL_DIR/../../forms-rule-creator/scripts/content-model-to-tree.bundle.js --content-model-file /tmp/post-model.json
+node $SKILL_DIR/../../forms-rule-creator/scripts/validate-rule.bundle.js /tmp/rewritten-rule.json --tree /tmp/post-treeJson.json --storage-path <fdKey>
+node $SKILL_DIR/../../forms-rule-creator/scripts/generate-formula.bundle.js /tmp/rewritten-rule.json --tree /tmp/post-treeJson.json --event <fdKey>
 ```
 
 > **If validate-rule fails after rewrite:** The COMPONENT.id swap was mechanical — unexpected errors mean something else is wrong. Report to user, skip patching that rule.
