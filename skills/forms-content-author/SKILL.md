@@ -1,9 +1,9 @@
 ---
 name: forms-content-author
-description: "Orchestrator for AEM Adaptive Forms content authoring via the Sites Content MCP API. Use when the user wants to create, add, modify, delete, move, or read AEM Adaptive Form fields, panels, fragments, or form-level settings. Routes to forms-content-generate, forms-content-update, or forms-rule-creator based on intent. Triggers: create form, add field, add panel, add fragment, change property, delete field, move field, show fields, set required, rename, add options, show/hide rules."
+description: "Domain skill for AEM Adaptive Forms content authoring via the Sites Content MCP API. Use when the user wants to create, add, modify, delete, move, or read AEM Adaptive Form fields, panels, fragments, or form-level settings. Routes to forms-content-generate, forms-content-update, or forms-rule-creator based on intent. Triggers: create form, add field, add panel, add fragment, change property, delete field, move field, show fields, set required, rename, add options, show/hide rules."
 ---
 
-# Forms Content Orchestrator
+# Forms Content Author
 
 Routes form authoring requests to the appropriate sub-skill based on intent.
 
@@ -11,15 +11,16 @@ Routes form authoring requests to the appropriate sub-skill based on intent.
 
 ## Sub-Skill Usage
 
-Sub-skills (`forms-content-update`, `forms-content-generate`, `forms-rule-creator`) are **not registered as top-level skills** and cannot be invoked via the `Skill` tool. They are loaded automatically when this skill loads — their SKILL.md content is already in context.
+`forms-content-update` and `forms-content-generate` are internal sub-skills — they are **not registered as top-level skills** and cannot be invoked via the `Skill` tool. They are loaded automatically when this skill loads — their SKILL.md content is already in context.
 
-**To follow a sub-skill:** read its instructions directly from context. Do NOT call the `Skill` tool for them.
+`forms-rule-creator` is a **registered top-level skill** — invoke it via the `Skill` tool.
 
-If a sub-skill's content is not in context, load it with the `Read` tool:
+**To follow an internal sub-skill:** read its instructions directly from context. Do NOT call the `Skill` tool for `forms-content-update` or `forms-content-generate`.
+
+If an internal sub-skill's content is not in context, load it with the `Read` tool:
 ```
 Read $SKILL_DIR/forms-content-update/SKILL.md
 Read $SKILL_DIR/forms-content-generate/SKILL.md
-Use the Skill tool to invoke `forms-rule-creator` — it is a registered top-level skill in this workspace.
 ```
 
 ---
@@ -29,7 +30,7 @@ Use the Skill tool to invoke `forms-rule-creator` — it is a registered top-lev
 Before anything, verify the Sites Content MCP tools are available (e.g. `get-aem-sites`; the configured server alias may vary, such as `aem-sites-content` or `sites-mcp`). If not, stop and show:
 
 ```
-The forms-content-orchestrator skill requires the Sites Content MCP server.
+The forms-content-author skill requires the Sites Content MCP server.
 
 Local AEM (localhost:4502):
   claude mcp add aem-sites-content -- node /tmp/aem-sites-contentapi-mcp-server/build/index.js
