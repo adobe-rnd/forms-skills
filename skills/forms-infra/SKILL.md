@@ -1,15 +1,11 @@
 ---
 name: forms-infra
 description: >
-  Domain router for infrastructure skills — workspace setup, form sync,
-  EDS code sync, and sandboxed git operations.
+  Domain router for infrastructure skills — workspace setup, EDS code sync,
+  and sandboxed git operations.
 type: domain
 triggers:
   - setup
-  - sync
-  - pull
-  - push
-  - deploy
   - git
   - workspace
   - credentials
@@ -23,7 +19,7 @@ metadata:
 
 **ID:** `infra`
 **Version:** 0.1
-**Description:** Domain router for infrastructure skills — workspace setup, form sync, EDS code sync, and sandboxed git operations.
+**Description:** Domain router for infrastructure skills — workspace setup, EDS code sync, and sandboxed git operations.
 
 This router does not implement — it delegates. It matches user intents to the correct skill within this domain.
 
@@ -36,7 +32,6 @@ First match wins.
 | Intent | Examples | Skill |
 |--------|----------|-------|
 | Set up workspace, initialize project, configure credentials, system prereqs | "set up my workspace", "configure credentials" | `setup-workspace` |
-| Pull / push / list / create forms on AEM, form sync | "sync my forms", "pull forms from AEM", "list forms" | `sync-forms` |
 | Pull / push EDS code, create branch, open PR on GitHub, code sync | "push EDS code", "open a PR on GitHub", "sync code" | `sync-eds-code` |
 | Sandboxed git commit / push / reset, restricted git operations | "commit my changes", "git push", "reset branch" | `git-sandbox` |
 
@@ -51,16 +46,14 @@ All skills owned by this domain.
 | # | Skill | Purpose | Triggers |
 |---|-------|---------|----------|
 | 1 | `setup-workspace` | Initialize project, configure credentials | setup, workspace, credentials, initialize |
-| 2 | `sync-forms` | Pull / push / list / create forms on AEM | sync, forms, pull, push, list, create |
-| 3 | `sync-eds-code` | Pull / push EDS code, branch, open PR on GitHub | sync, code, eds, branch, pr, github |
-| 4 | `git-sandbox` | Sandboxed git operations (commit, push, reset) | git, commit, push, reset, sandbox |
+| 2 | `sync-eds-code` | Pull / push EDS code, branch, open PR on GitHub | sync, code, eds, branch, pr, github |
+| 3 | `git-sandbox` | Sandboxed git operations (commit, push, reset) | git, commit, push, reset, sandbox |
 
 ### Skill Locations
 
 | Skill | Path |
 |-------|------|
 | `setup-workspace` | [`references/setup-workspace/SKILL.md`](references/setup-workspace/SKILL.md) |
-| `sync-forms` | [`references/sync-forms/SKILL.md`](references/sync-forms/SKILL.md) |
 | `sync-eds-code` | [`references/sync-eds-code/SKILL.md`](references/sync-eds-code/SKILL.md) |
 | `git-sandbox` | [`references/git-sandbox/SKILL.md`](references/git-sandbox/SKILL.md) |
 
@@ -112,7 +105,7 @@ How this domain participates in plan-driven execution.
 | When | Skill(s) Invoked | Role |
 |------|-------------------|------|
 | Before any plans — workspace setup | `setup-workspace` | Initializes project, configures credentials, verifies prerequisites |
-| End of each plan's validate + deploy step | `sync-forms`, `sync-eds-code`, `git-sandbox` | Deploys form JSON, pushes EDS code, and commits changes after each plan completes |
+| End of each plan's validate + deploy step | `sync-eds-code`, `git-sandbox` | Pushes EDS code and commits changes after each plan completes |
 
 ---
 

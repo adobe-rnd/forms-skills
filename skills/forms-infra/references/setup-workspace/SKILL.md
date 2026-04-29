@@ -310,6 +310,56 @@ Confirm to the user:
 
 > **Note:** The plugin bundles its own Python virtual environment and dependencies — you don't need to install any Python packages yourself. The first time the agent calls a Python-based tool, a venv is created automatically inside the plugin directory.
 
+## Sites Content MCP Server
+
+The `forms-content-update` sub-skill (used by `forms-content-author`) communicates with AEM through the Sites Content MCP server. Add it once per environment — restart Claude Code after adding.
+
+### AEM as a Cloud Service (default)
+
+```bash
+claude mcp add --transport http aem-sites-content \
+  https://mcp.adobeaemcloud.com/adobe/mcp/content
+```
+
+Auth is IMS OAuth — a browser login window opens automatically on first use.
+
+### Local AEM SDK / Quickstart (alternative)
+
+**Step 1 — Add the MCP server**
+
+```bash
+claude mcp add aem-sites-content -- node /tmp/aem-sites-contentapi-mcp-server/build/index.js
+```
+
+Set these environment variables for the MCP server process:
+
+```
+AEM_AUTHOR_URL=http://localhost:4502
+AEM_AUTHOR_AUTH_PARAMETER=admin:admin
+ASSETS_ACCESS_TOKEN=dummy
+```
+
+The server source is available at [github.com/adobe/aem-sites-contentapi-mcp-server](https://github.com/adobe/aem-sites-contentapi-mcp-server). Build it and place the output at `/tmp/aem-sites-contentapi-mcp-server/build/index.js`.
+
+**Step 2 — Install the forms components package**
+
+1. Open `http://localhost:4502/crx/packmgr`
+2. Upload and install `core-forms-components-examples-all-3.0.150.zip`
+
+This installs the `forms-components-examples` component group that all Adaptive Form fields depend on.
+
+**Step 3 — Install the content package**
+
+1. Open `http://localhost:4502/crx/packmgr`
+2. Upload and install `default-site.zip`
+
+This creates:
+- `/content/forms/af/default-site/` — the default site root
+- `/conf/forms/default-site/settings/wcm/templates/af-blank-v2` — the blank form template
+- `/content/forms/af/default-site/blank-form` — use this as the template source when `forms-content-author` asks for a template page path
+
+Restart Claude Code after adding the MCP server in either setup.
+
 ## Workspace Directory Structure
 
 ```
@@ -398,10 +448,9 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 
 | Tool | Location | Purpose |
 |------|----------|---------|
-| `form-sync` | `skills/sync-forms/scripts/` | Sync forms between AEM Author and local workspace |
 | `eds-code-sync` | `skills/sync-eds-code/scripts/` | Sync EDS code between GitHub and local via git |
 | `api-manager` | `scripts/` (shared) | Manage API definitions, generate typed JS clients |
-| `form-validate` | `skills/create-form/scripts/` | Validate form.json against EDS field schemas |
+| `form-validate` | `skills/forms-content-author/scripts/` | Validate form.json against EDS field schemas |
 | `git-sandbox` | `skills/git-sandbox/scripts/` | Sandboxed git operations for AI agents |
 | `scaffold-form` | `skills/scaffold-form/scripts/` | Scaffold empty form JSON from template |
 | `rule-transform` | `scripts/` (shared) | Transform form JSON for rule editing |
