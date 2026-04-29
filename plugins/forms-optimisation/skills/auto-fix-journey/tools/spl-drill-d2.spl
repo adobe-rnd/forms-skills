@@ -1,0 +1,7 @@
+-- Drill D2: Distribution by host
+-- Placeholders: __HOST__, __SHORT_CLASS__
+-- For multi-class categories: __SHORT_CLASS__ → "ClassA" OR "ClassB"
+
+search index=ams_cq host="__HOST__" "*ERROR*" "__SHORT_CLASS__"
+| stats count as errors by host
+| sort -errors

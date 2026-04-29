@@ -1,0 +1,14 @@
+-- Mode B: INFO failure analysis (no journeyId, log type = INFO)
+-- Placeholders: __HOST__
+-- Extracts non-zero error codes from INFO logs, grouped by Java class.
+
+search index=ams_cq host="__HOST__" "*INFO*" (FAILURE OR "Error Code" OR ErrorCode OR "errorCode")
+| rex field=_raw "HTTP/1\.1\]\s+(?<java_class>[\w.\$]+)\s+(?<msg>[^\n]{1,150})"
+| rex field=_raw "\[(?:qtp|0x)[^\]]+\]\s+(?<java_class2>[\w.\$]+)\s+(?<msg2>[^\n]{1,150})"
+| eval java_class=coalesce(java_class, java_class2) | eval msg=coalesce(msg, msg2)
+| eval short_class=mvindex(split(java_class, "."), -1)
+| rex field=msg "(?:Error[_\s]?[Cc]ode|ErrorCode)[\s:=]*(?<err_code>[A-Z0-9]{2,20})"
+| where isnotnull(err_code) AND err_code!="00" AND err_code!="0" AND err_code!="null"
+| stats count as occurrences, max(_time) as last_ts by short_class, err_code
+| eval last_seen=strftime(last_ts, "%Y-%m-%d %H:%M:%S") | fields - last_ts
+| sort -occurrences | head 20

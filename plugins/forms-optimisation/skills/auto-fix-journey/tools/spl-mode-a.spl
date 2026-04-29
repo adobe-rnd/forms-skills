@@ -1,0 +1,15 @@
+-- Mode A: ERROR aggregation (no journeyId, log type = ERROR)
+-- Placeholders: __HOST__
+-- Groups by short Java class + error summary, sorted by occurrence count.
+
+search index=ams_cq host="__HOST__" "*ERROR*"
+| rex field=_raw "HTTP/1\.1\]\s+(?<java_class>[\w.\$]+)\s+(?<error_msg>[^\n]{1,150})"
+| rex field=_raw "\[(?:qtp|0x)[^\]]+\]\s+(?<java_class2>[\w.\$]+)\s+(?<error_msg2>[^\n]{1,150})"
+| eval java_class=coalesce(java_class, java_class2)
+| eval error_msg=coalesce(error_msg, error_msg2)
+| where isnotnull(java_class)
+| eval short_class=mvindex(split(java_class, "."), -1)
+| eval error_summary=substr(error_msg, 1, 120)
+| stats count as occurrences, max(_time) as last_ts by short_class, error_summary
+| eval last_seen=strftime(last_ts, "%Y-%m-%d %H:%M:%S") | fields - last_ts
+| sort -occurrences | head 25
