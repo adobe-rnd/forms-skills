@@ -1,8 +1,8 @@
 ---
 name: auto-fix-journey
-description: Query Splunk for AEM Forms journey logs and errors, analyze root causes, suggest fixes, and raise a PR. Supports aggregated error/INFO analysis (no journeyId), per-journey trace (journeyId provided), and FDM API analytics (route-level call counts, failure rates, latency).
-compatibility: Requires Python 3 with splunk-sdk installed (`pip install splunk-sdk`). SPLUNK_PASS must be provided via env var or entered when prompted.
-allowed-tools: Read Write Bash AskUserQuestion
+description: Queries Splunk for AEM Forms journey logs and errors, analyzes root causes, presents structured findings with actionable recommendations, and fixes backend Java errors in customer code. Supports aggregated ERROR/INFO analysis, per-journey traces, FDM API analytics, and end-to-end Java fix generation with PR creation. Use when the user asks about AEM Forms errors, Splunk logs, journey traces, API failure rates, FDM performance, or asks to fix backend Java errors in AEM Forms.
+compatibility: Requires Python 3 with splunk-sdk installed (`pip install splunk-sdk`). SPLUNK_PASS must be provided via env var or entered when prompted. Git + gh CLI required for fix branch and PR creation (Steps 5-8).
+allowed-tools: Read Write Edit Bash Agent AskUserQuestion
 user_invocable: true
 metadata:
   author: adobe-forms
@@ -15,21 +15,27 @@ metadata:
 
 ```
 tools/
-├── splunk-runner.py      — Python script template (write to /tmp, substitute __SPL__/__HOURS__)
-├── spl-mode-a.spl        — Mode A: ERROR aggregation (placeholders: __HOST__)
-├── spl-mode-b.spl        — Mode B: INFO failure analysis (placeholders: __HOST__)
-├── spl-mode-c.spl        — Mode C: Journey trace (placeholders: __HOST__, __JOURNEY_ID__, __LEVEL_FILTER__)
-├── spl-mode-d.spl        — Mode D: FDM API Analytics (placeholders: __INDEX__, __HOST__, __HEAD__)
-├── spl-drill-d1.spl      — Drill: Volume by hour (placeholders: __HOST__, __SHORT_CLASS__)
-├── spl-drill-d2.spl      — Drill: Distribution by host (placeholders: __HOST__, __SHORT_CLASS__)
-└── spl-drill-d3.spl      — Drill: Sample journey IDs (placeholders: __HOST__, __SHORT_CLASS__)
+├── splunk-runner.py              — Modes A/B/C runner (substitute __SPL__, __HOURS__)
+├── splunk-runner-analytics.py    — Mode D runner (substitute __SPL__, __DAYS__, __START_DATE__, __END_DATE__)
+├── spl-mode-a.spl                — Mode A: ERROR aggregation (placeholders: __HOST__)
+├── spl-mode-b.spl                — Mode B: INFO failure analysis (placeholders: __HOST__)
+├── spl-mode-c.spl                — Mode C: Journey trace (placeholders: __HOST__, __JOURNEY_ID__, __LEVEL_FILTER__)
+├── spl-mode-d.spl                — Mode D: FDM API Analytics (placeholders: __INDEX__, __HOST__, __HEAD__)
+├── spl-drill-d1.spl              — Drill: Volume by hour (placeholders: __HOST__, __SHORT_CLASS__)
+├── spl-drill-d2.spl              — Drill: Distribution by host (placeholders: __HOST__, __SHORT_CLASS__)
+├── spl-drill-d3.spl              — Drill: Sample journey IDs (placeholders: __HOST__, __SHORT_CLASS__)
+├── spl-journey-stack.spl         — Fix: Full exception stack for class+journey (placeholders: __HOST__, __SHORT_CLASS__, __JOURNEY_ID__)
+├── spl-journey-info-context.spl  — Fix: Non-PII INFO+ERROR context for a journey (placeholders: __HOST__, __JOURNEY_ID__)
+└── sub-agent-prompt-java.md      — Fix: Java fix sub-agent prompt template (Steps 5-8)
 ```
 
 ## Knowledge
 
 ```
 knowledge/
-└── error-categories.md  — Named category patterns and analyst-narrative output format spec
+├── error-categories.md  — Named category patterns and analyst-narrative output format spec
+├── fix-classifier.md    — Structural / Logic / Framework fix classification rules
+└── repos.md             — Package-prefix → git repo manifest (fill in once per project)
 ```
 
 ---
@@ -97,7 +103,10 @@ If missing, `AskUserQuestion("Enter SPLUNK_PASS (will not be stored):")` and set
 
 ## Step 2 — Write and run the query script
 
-Read `tools/splunk-runner.py`. Select the template matching the mode (standard vs. analytics), substitute placeholders, write to `/tmp/fji_query.py` (or `/tmp/fji_analytics.py` for Mode D), then run:
+For **Modes A/B/C**: read `tools/splunk-runner.py`, substitute `__SPL__` and `__HOURS__`, write to `/tmp/fji_query.py`.
+For **Mode D**: read `tools/splunk-runner-analytics.py`, substitute `__SPL__`, `__DAYS__`, `__START_DATE__`, `__END_DATE__`, write to `/tmp/fji_analytics.py`.
+
+Then run:
 
 ```bash
 SPLUNK_PASS="<pass>" python3 /tmp/fji_query.py 2>/dev/null
@@ -214,6 +223,138 @@ When the user says "drill deeper into #N" or names a category:
 
 ---
 
+## Step 5 — Get full exception context (fix flow only)
+
+Triggered when the user says "fix #N", "fix all structural", or "fix all" after Step 4.
+
+For each targeted error (identified by `short_class` + `error_summary` from Mode A results):
+
+1. Get a sample journey ID from D3 drill results (already available from Step 4).
+2. Run in parallel using `splunk-runner.py` with `HOURS=24`:
+   - `tools/spl-journey-stack.spl` — substitute `__HOST__`, `__SHORT_CLASS__`, `__JOURNEY_ID__`; captures full exception message up to 500 chars
+   - `tools/spl-journey-info-context.spl` — substitute `__HOST__`, `__JOURNEY_ID__`; captures non-PII journey flow (API codes, timing, step markers)
+3. Extract from results:
+   - Full exception message and any stack trace lines present in the log
+   - API error codes (`err_code` field) from INFO context
+   - Journey step sequence (which classes were called before the failure)
+   - Approximate line number if present in the exception message
+
+**Important — PII constraint**: INFO logs do not contain user payload (name, PAN, DOB, amount). Use only what is visible: exception type, message, class names, API error codes, and journey flow order.
+
+Display a per-error context summary:
+```
+**Exception context — <short_class>**
+Exception: <type>: <message (500 chars)>
+Journey flow: <ClassA> → <ClassB> → <short_class> (failed)
+API error code: <err_code or "none">
+Fix type: <Structural / Logic / Framework>
+```
+
+---
+
+## Step 6 — Classify fixes
+
+Read `knowledge/fix-classifier.md`. Apply the decision flowchart to each error using the exception context from Step 5.
+
+For each error, set `fix_type` to one of:
+- `structural` — deterministic null/cast/bounds/lifecycle error; apply fix directly
+- `logic` — depends on runtime payload not visible in logs; generate stub + checklist
+- `framework` — OSGi/CRX/FDM config issue; return config recommendation, no code edit
+
+Display a classification table before proceeding:
+
+```
+| # | short_class | Exception | Fix type | Action |
+|---|-------------|-----------|----------|--------|
+| 1 | JourneyHelperServiceImpl | NullPointerException at line 142 | structural | Apply fix |
+| 2 | FormsRelationServiceImpl | errorCode: V5LO4010SH | logic | Stub + checklist |
+| 3 | APIOrchestrationServiceImpl | ComponentException | framework | Config recommendation |
+```
+
+Proceed automatically — no confirmation prompt.
+
+---
+
+## Step 7 — Locate source file
+
+For each `structural` or `logic` error:
+
+1. Read `knowledge/repos.md`. Match `short_class` to a row by `java_package_prefix`.
+   - If no match: ask the user for the git URL and branch (one `AskUserQuestion` covering all unmatched classes). Append new rows to `knowledge/repos.md`.
+2. Clone the repo if `local_clone_path` does not exist:
+   ```bash
+   git clone <git_url> <local_clone_path>
+   git -C <local_clone_path> checkout <branch>
+   ```
+3. Find the source file:
+   ```bash
+   find <local_clone_path> -name "<short_class>.java" -not -path "*/test/*"
+   ```
+   - Zero matches: report "Source file not found — provide the path manually."
+   - Multiple matches: ask the user which to use.
+4. Read the file and locate the method near the line from the stack trace.
+
+---
+
+## Step 8 — Spawn Java fix sub-agents and raise PR
+
+### 8.1 Generate fixes
+
+Read `tools/sub-agent-prompt-java.md`. For each error, substitute all `__PLACEHOLDERS__` from the error context and source file location, then spawn a sub-agent:
+
+- Different repos or different files → spawn ALL in parallel
+- Same file → spawn sequentially (read file between each to avoid conflicting `old_string`)
+
+### 8.2 Handle results
+
+- `fix_type: structural`, `needs_review: false` → apply the `old_string` → `new_string` diff with the Edit tool immediately
+- `fix_type: logic`, `needs_review: true` → display `analysis` and `manual_test_checklist`; do not edit the file; include in PR description as "Flagged for manual review"
+- `fix_type: framework` → display config recommendation block; no file edit
+
+Print each fix as a diff before applying (informational — no confirmation prompt):
+```
+File: <file_path>
+- <old_string line(s)>
++ <new_string line(s)>
+Reason: <explanation>
+```
+
+### 8.3 Create fix branch, commit, push
+
+```bash
+FIX_BRANCH="fix/auto-fix-journey-<short_class_slug>-$(date +%Y%m%d)"
+git -C <local_clone_path> checkout <branch>
+git -C <local_clone_path> pull origin <branch>
+git -C <local_clone_path> checkout -b $FIX_BRANCH
+# (apply fixes with Edit tool)
+git -C <local_clone_path> add <changed files>
+git -C <local_clone_path> commit -m "fix: <N> backend errors in AEM Forms journey
+<bullet per fix: ClassName:line — explanation>
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git -C <local_clone_path> push origin $FIX_BRANCH
+```
+
+### 8.4 Raise PR
+
+```bash
+gh pr create \
+  --repo <org>/<repo> \
+  --base <branch> \
+  --head $FIX_BRANCH \
+  --title "fix: auto-fix <N> AEM Forms journey errors — <short_class_slug>" \
+  --body "..."
+```
+
+PR body must include:
+- Splunk host and query period
+- Errors-fixed table: class, exception, fix type, explanation
+- Errors flagged for manual review: class, analysis, test checklist
+- Framework recommendations (if any)
+
+Return the PR URL. If `gh` is not installed, print the GitHub compare URL.
+
+---
+
 ## Error Handling
 
 | Situation | Action |
@@ -224,6 +365,12 @@ When the user says "drill deeper into #N" or names a category:
 | Empty results | "No logs found — try a wider time range or different host filter." |
 | Journey trace returns no rows | "Journey ID not found in last __HOURS__h. Try 2 days or check the ID." |
 | All rows have `short_class` null | "Log format not matched — paste one raw log line so I can adjust the regex." |
+| No journey IDs from D3 (fix flow) | Ask the user to provide a journey ID manually for Step 5 |
+| Class not in `knowledge/repos.md` | Ask for git URL + branch; append to repos.md |
+| Source file not found in repo | Report "not found"; ask user for path before proceeding |
+| Minified or generated `.java` file | Return `needs_review: true` with "Minified/generated — cannot auto-fix" |
+| `old_string` not unique in file | Expand with more surrounding lines before retrying |
+| `git push` fails | Print push command for user to run manually |
 
 ---
 
@@ -240,7 +387,12 @@ When the user says "drill deeper into #N" or names a category:
 
 "Show API analytics for last 7 days"
 "Which FDM APIs have the highest failure rate?"
-"Show API performance for 2026-04-01 to 2026-04-28"
+"Show API performance for <start-date> to <end-date>"
 "Top 10 slowest FDM API routes this week"
 "API analytics on hdfc-uat-* for last 2 days"
+
+"fix #1"
+"fix all structural errors"
+"fix all"
+"fix the NullPointerException in JourneyHelperServiceImpl"
 ```
