@@ -85,7 +85,7 @@ Other domains or skills that this domain's skills may delegate to or depend on.
 
 | Dependency | Direction | Reason |
 |------------|-----------|--------|
-| `logic` | `logic` → This domain | Logic domain may call `manage-apis` when creating functions that need API clients |
+| `rule-creator` | `rule-creator` → This domain | Rule creator domain may call `manage-apis` when creating custom functions that need API clients |
 
 ---
 

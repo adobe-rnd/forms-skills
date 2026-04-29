@@ -26,7 +26,7 @@ Manages API integrations for AEM Forms using OpenAPI 3.0 specifications and the 
 - Comparing staging vs deployed API clients
 - Troubleshooting API integration issues in forms
 
-**Do NOT use for:** Writing custom function logic that calls APIs — use the **create-function** skill instead (it covers the async wrapper + `globals.functions.request()` pattern).
+**Do NOT use for:** Writing custom function logic that calls APIs — use the **forms-rule-creator** skill instead (it covers custom function authoring, the async wrapper pattern, and `globals.functions.request()`).
 
 ## Critical Rules
 
