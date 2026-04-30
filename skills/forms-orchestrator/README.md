@@ -79,12 +79,12 @@ You don't need to memorize this — just start talking to the agent. The orchest
 
 | Domain | Purpose | Skills |
 |--------|---------|--------|
-| `analysis` | Requirements & documentation | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `review-screen-doc` |
-| `build` | Form structure & components | `scaffold-form`, `create-form`, `create-component` |
-| `logic` | Business rules & functions | `add-rules`, `create-function`, `optimize-rules` |
+| `analysis` | Requirements & documentation | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `jud-to-screen` |
+| `content-author` | Form structure & components via Sites Content MCP | `forms-custom-components` (+ `forms-content-update`, `forms-content-generate` internally) |
+| `rule-creator` | Business rules & custom functions | `forms-rule-creator` |
 | `integration` | APIs & data | `manage-apis` |
-| `infra` | Setup, sync, deploy | `setup-workspace`, `sync-forms`, `sync-eds-code`, `git-sandbox` |
-| `context` | Agent memory & session continuity | `manage-context` |
+| `infra` | Setup, sync, deploy | `setup-workspace`, `sync-eds-code`, `git-sandbox` |
+| `context-management` | Agent memory & session continuity | `manage-context` |
 
 ### Plan Types
 
@@ -145,13 +145,13 @@ After installation, tell your agent:
 
 > _"Set up a new AEM Forms workspace for my project."_
 
-The `setup-workspace` skill handles everything — directory structure, `.env` credentials, system checks, and first sync. See [`forms-orchestrator/references/domain-registry/references/infra/references/setup-workspace/SKILL.md`](forms-orchestrator/references/domain-registry/references/infra/references/setup-workspace/SKILL.md) for the full workspace layout, credential reference, and configuration guide.
+The `setup-workspace` skill handles everything — directory structure, `.env` credentials, system checks, and first sync. See [`skills/forms-infra/references/setup-workspace/SKILL.md`](../forms-infra/references/setup-workspace/SKILL.md) for the full workspace layout, credential reference, and configuration guide.
 
 Once your workspace is ready, just start talking:
 
 > _"Here's the requirements doc for a personal loan application. Build the form."_
 
-The **forms-orchestrator** (`forms-orchestrator/SKILL.md`) receives your intent and runs through the 6-step routing algorithm. For complex requirements it invokes the **Planner** to generate a sequence of plans, then executes each plan by routing to the appropriate domain and skill. For simple single-task requests it routes directly to the matching domain. See the orchestrator for the complete routing table and available skills across all six domains: `analysis`, `build`, `logic`, `integration`, `infra`, and `context`.
+The **forms-orchestrator** (`forms-orchestrator/SKILL.md`) receives your intent and runs through the 6-step routing algorithm. For complex requirements it invokes the **Planner** to generate a sequence of plans, then executes each plan by routing to the appropriate domain and skill. For simple single-task requests it routes directly to the matching domain. See the orchestrator for the complete routing table and available skills across all six domains: `analysis`, `content-author`, `rule-creator`, `integration`, `infra`, and `context-management`.
 
 ---
 
@@ -205,131 +205,134 @@ See `forms-orchestrator/assets/error-handling.md` for CLI tool error patterns an
 
 ## 3. Run Evals
 
-Skill-level evals use the [`@aemforms/crispy-garbanzo`](https://artifactory.corp.adobe.com/ui/native/npm-aem-release-local/%40aemforms/crispy-garbanzo) runner.
-
-Evals run against AWS Bedrock — set up credentials once before running:
+Deterministic script evals (no token needed):
 
 ```bash
-cp skills/aem/forms/.envrc.example skills/aem/forms/.envrc
-# fill in AWS_BEARER_TOKEN_BEDROCK and AWS_REGION, then:
-direnv allow
+node evals/scripts/run-evals.js
+node evals/scripts/run-evals.js --filter find-field   # subset
 ```
+
+LLM evals (Bedrock bearer token or `ANTHROPIC_API_KEY`):
 
 ```bash
-# One-time setup
-npm install
+# Bedrock
+AWS_BEARER_TOKEN_BEDROCK=<token> AWS_REGION=us-east-1 node evals/scripts/run-llm-evals.js
 
-# Run a skill's evals
-npx crispy-garbanzo --skill <path-to-skill-dir>
+# Direct Anthropic API
+ANTHROPIC_API_KEY=<key> node evals/scripts/run-llm-evals.js
 
-# Example — create-component
-npx crispy-garbanzo \
-  --skill skills/aem/forms/forms-orchestrator/references/domain-registry/references/build/references/create-component
-
-# Approve current results as the new baseline
-npx crispy-garbanzo --skill <path> --approve
+node evals/scripts/run-llm-evals.js --filter routing/01 --verbose  # single scenario
 ```
 
-Per-skill config, scenarios, and baselines live in `<skill>/evals/`. Shared AEM fixtures (e.g. `form-repo`) ship with `crispy-garbanzo` under `fixtures/aem/`.
+Scenarios live in `evals/scenarios/`, fixtures in `evals/fixtures/`.
 
 ## Repository Structure
 
 ```
-forms-skills/                       # repo root — also the aem-forms plugin
+forms-skills/                            # repo root — aem-forms plugin
 ├── .claude-plugin/
-│   └── plugin.json                # Plugin metadata and skill registry
-├── package.json
-├── skills/aem/forms/
-│   ├── pyproject.toml             # Python packaging — deps, entry points
-│   ├── README.md                  # This file
-│   ├── forms-orchestrator/
-│   ├── SKILL.md                   # forms-orchestrator — entry point (type: router)
-│   ├── assets/
-│   │   ├── guidelines.md          # Orchestrator constraints & conventions
-│   │   ├── routing-table.md       # 6-step routing algorithm
-│   │   └── error-handling.md      # Tool error reporting & agent recovery patterns
-│   ├── scripts/                   # Shared CLI wrappers + tool backends
-│   │   ├── setup.sh               # Environment setup (creates .venv at project root)
-│   │   ├── _resolve-workspace     # Workspace resolution helper (sourced by all tools)
-│   │   ├── api-manager            # CLI wrapper
-│   │   ├── eds-code-sync          # CLI wrapper
-│   │   ├── form-sync              # CLI wrapper
-│   │   ├── git-sandbox            # CLI wrapper
-│   │   ├── parse-functions        # CLI wrapper
-│   │   ├── python3                # Python venv wrapper
-│   │   ├── rule-grammar           # CLI wrapper
-│   │   ├── rule-save              # CLI wrapper
-│   │   ├── rule-transform         # CLI wrapper
-│   │   ├── rule-validate          # CLI wrapper
-│   │   ├── api_manager/           # Python backend for api-manager
-│   │   └── rule_coder/            # Node.js backend for rule-* tools
-│   └── references/
-│       ├── planner/               # Plan generator (type: skill)
-│       │   ├── SKILL.md
-│       │   ├── assets/
-│       │   │   └── plan-template.md
-│       │   └── references/
-│       │       ├── default-strategy.md
-│       │       ├── structure-plan.md
-│       │       ├── workflow-plan.md
-│       │       ├── logic-plan.md
-│       │       ├── integration-plan.md
-│       │       └── infrastructure-plan.md
-│       └── domain-registry/       # Domain & skill catalog (type: router)
-│           ├── SKILL.md
-│           ├── assets/
-│           │   ├── skills-catalog.md
-│           │   ├── skill-resolution.md
-│           │   ├── contribution-guide.md
-│           │   └── templates/
-│           │       └── domain-template.md
-│           └── references/
-│               ├── analysis/      # SKILL.md + references/{analyze-requirements, analyze-v1-form, create-screen-doc, review-screen-doc}
-│               ├── build/         # SKILL.md + references/{scaffold-form, create-form, create-component}
-│               ├── logic/         # SKILL.md + references/{add-rules, create-function, optimize-rules}
-│               ├── integration/   # SKILL.md + references/{manage-apis}
-│               ├── infra/         # SKILL.md + references/{setup-workspace, sync-forms, sync-eds-code, git-sandbox}
-│               └── context/       # SKILL.md + references/{manage-context}
-│   └── tutorial.md                # End-to-end walkthrough: build a Contact Us form
+│   └── plugin.json                      # Plugin metadata and skill registry
+├── evals/                               # Eval scenarios, fixtures, runner scripts
+│   ├── scripts/
+│   │   ├── run-evals.js
+│   │   └── run-llm-evals.js
+│   ├── scenarios/
+│   └── fixtures/
+└── skills/
+    ├── forms-orchestrator/              # Entry point router (type: router)
+    │   ├── SKILL.md
+    │   ├── assets/
+    │   │   ├── guidelines.md
+    │   │   ├── routing-table.md
+    │   │   └── error-handling.md
+    │   ├── references/
+    │   │   ├── planner/                 # Plan generator (type: skill)
+    │   │   └── domain-registry/         # Domain & skill catalog (type: router)
+    │   └── tutorial.md
+    ├── forms-analysis/                  # Analysis domain
+    │   └── references/
+    │       ├── analyze-requirements/
+    │       ├── analyze-v1-form/
+    │       ├── create-screen-doc/
+    │       └── jud-to-screen/
+    ├── forms-content-author/            # Content authoring domain
+    │   ├── SKILL.md
+    │   ├── forms-content-update/        # MCP-based form authoring (internal sub-skill)
+    │   ├── forms-content-generate/      # Component payload builder (internal sub-skill)
+    │   └── references/
+    │       └── forms-custom-components/
+    ├── forms-rule-creator/              # Rule & custom function authoring
+    │   ├── SKILL.md
+    │   ├── scripts/                     # Pre-built bundles (no npm install at runtime)
+    │   ├── assets/
+    │   │   ├── agent-kb/                # Rule authoring reference docs
+    │   │   └── grammar/                 # Grammar reference docs
+    │   └── references/
+    ├── forms-infra/                     # Infra domain
+    │   └── references/
+    │       ├── setup-workspace/
+    │       ├── sync-eds-code/
+    │       └── git-sandbox/
+    ├── forms-integration/               # Integration domain
+    │   └── references/
+    │       └── manage-apis/
+    ├── forms-context-management/        # Context & session domain
+    │   └── references/
+    │       └── manage-context/
+    └── forms-shared/                    # Shared scripts
+        └── scripts/
+            ├── api-manager
+            ├── eds-code-sync
+            ├── git-sandbox
+            └── api_manager/
 ```
 
 Every level follows the [agentskills.io specification](https://agentskills.io/specification): `SKILL.md` (required) + `scripts/` + `references/` + `assets/` (optional).
 
-## Shared CLI Tools (`forms-shared/scripts/`, `forms-logic/scripts/`, `forms-infra/scripts/`)
+## Shared CLI Tools (`forms-shared/scripts/`)
 
 | Tool | Backend | Description |
 |------|---------|-------------|
 | `api-manager` | `forms-shared/scripts/api_manager/cli.py` | Manage OpenAPI specs and JS clients |
-| `rule-transform` | `forms-logic/scripts/rule_coder/bridge/cli/transform-form.js` | Transform form JSON for rule editing |
-| `rule-validate` | `forms-logic/scripts/rule_coder/validator/` | Validate rule JSON against grammar |
-| `rule-save` | `forms-logic/scripts/rule_coder/bridge/cli/save-rule.js` | Save compiled rules back to form |
-| `rule-grammar` | `forms-logic/scripts/rule_coder/grammar/` | Print the rule grammar reference |
-| `parse-functions` | `forms-logic/scripts/rule_coder/bridge/cli/parse-functions.js` | Parse custom function JSDoc annotations |
+
+## Rule Creator Bundles (`forms-rule-creator/scripts/`)
+
+Pre-built Node.js bundles — no `npm install` at runtime.
+
+| Bundle | Description |
+|--------|-------------|
+| `content-model-to-tree.bundle.js` | Content model → treeJson |
+| `validate-rule.bundle.js` | Validate rule AST |
+| `generate-formula.bundle.js` | Compile rule AST → JSON Formula |
+| `parse-functions.bundle.js` | Parse custom function JSDoc annotations |
+| `validate-merge.bundle.js` | Validate merged rule patch |
+
+## Content Update Bundles (`forms-content-author/forms-content-update/scripts/`)
+
+| Bundle | Description |
+|--------|-------------|
+| `find-field.bundle.js` | Find field/panel by name → capiKey + pointer |
+| `resolve-insert-position.bundle.js` | Resolve insert index in panel |
+| `validate-patch.bundle.js` | Type-check replace ops against Content API definition |
+| `list-form-fields.bundle.js` | Flat list of all fields in content model |
 
 ## Skill-Embedded CLI Tools
 
-These tools live inside individual skill directories at `forms-orchestrator/references/domain-registry/references/<domain>/references/<skill>/scripts/`.
-
-| Tool | Domain / Skill | Language |
-|------|----------------|----------|
-| `form-sync` | `infra/sync-forms` | Python |
-| `eds-code-sync` | `infra/sync-eds-code` | Python |
-| `git-sandbox` | `infra/git-sandbox` | Python |
-| `form-validate` | `build/create-form` | Node.js |
-| `scaffold-form` | `build/scaffold-form` | Python |
-| `api-skill` | `integration/manage-apis` | Python |
+| Tool | Skill | Language |
+|------|-------|----------|
+| `eds-code-sync` | `forms-infra/scripts/eds-code-sync` | Python |
+| `git-sandbox` | `forms-infra/scripts/git-sandbox` | Python |
+| `api-skill` | `forms-integration/references/manage-apis/scripts/` | Python |
 
 ## Adding a New Skill
 
-1. Decide which domain it belongs to (`analysis`, `build`, `logic`, `integration`, `infra`, or `context`).
-2. Create a directory under `forms-orchestrator/references/domain-registry/references/<domain>/references/<skill-name>/`.
-3. Add a `SKILL.md` file with frontmatter (`name`, `description`) and instructions.
+1. Decide which domain it belongs to (`analysis`, `content-author`, `rule-creator`, `integration`, `infra`, or `context-management`).
+2. Create a directory under `skills/forms-<domain>/references/<skill-name>/`.
+3. Add a `SKILL.md` file with frontmatter (`name`, `description`, `type`) and instructions.
 4. If the skill needs a CLI tool, add a `scripts/` directory inside the skill.
-5. If the skill has a **Python** package, add its `scripts/` path to the `PYTHONPATH` block in `forms-shared/scripts/python3` (the central Python wrapper manages all package paths — no individual script should set `PYTHONPATH`).
-6. If the skill has a **Python** package, add its `scripts/` path to `pyproject.toml` under `[tool.setuptools.packages.find]` `where`.
-7. Register it in `forms-orchestrator/references/domain-registry/assets/skills-catalog.md`.
-8. Register it in `.claude-plugin/plugin.json` (repo root) under the `skills` array.
-9. Run `npx check-plugin .` from the repo root to verify.
+5. Register it in `skills/forms-orchestrator/references/domain-registry/assets/skills-catalog.md`.
+6. Register it in `.claude-plugin/plugin.json` (repo root) under the `skills` array.
+7. Run `npx check-plugin .` from the repo root to verify.
 
 ---
 

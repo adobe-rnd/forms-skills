@@ -50,8 +50,8 @@ Look up the STATEMENT type in the matrix at the bottom and **Read each listed gr
 
 Example for SHOW_EXPRESSION:
 ```
-Read $SKILL_DIR/forms-rule-creator/grammar/visibility-expressions.md
-Read $SKILL_DIR/forms-rule-creator/grammar/conditions.md
+Read $SKILL_DIR/forms-rule-creator/assets/grammar/visibility-expressions.md
+Read $SKILL_DIR/forms-rule-creator/assets/grammar/conditions.md
 Read $SKILL_DIR/forms-rule-creator/references/component-lookup.md
 ```
 
@@ -63,8 +63,8 @@ Look up the STATEMENT type in the matrix at the bottom and Read each listed arti
 
 Example:
 ```
-Read $SKILL_DIR/forms-rule-creator/agent-kb/05-rule-events-by-scenario.md
-Read $SKILL_DIR/forms-rule-creator/agent-kb/06-rule-properties-by-field-type.md
+Read $SKILL_DIR/forms-rule-creator/assets/agent-kb/05-rule-events-by-scenario.md
+Read $SKILL_DIR/forms-rule-creator/assets/agent-kb/06-rule-properties-by-field-type.md
 ```
 
 ### Step 4: Run `content-model-to-tree.bundle.js` → treeJson
@@ -107,8 +107,9 @@ If any field returns `found: false`: stop and ask the user to confirm the field 
 
 ### Step 7: Write custom function if required
 
-- Load `agent-kb/12-custom-functions-authoring.md` + `agent-kb/13-custom-function-helper-apis.md`
+- Load `assets/agent-kb/12-custom-functions-authoring.md` + `assets/agent-kb/13-custom-function-helper-apis.md`
 - Write the function following the JSDoc pattern defined there
+- Store the function in `code/blocks/form/functions.js` — this is the only file AEM discovers custom functions from
 - Re-run `parse-functions.bundle.js` on the updated file
 - Re-save `/tmp/customFunctions.json`
 
@@ -222,7 +223,7 @@ For event rules (`fd:click`, `fd:init`, etc.), `fd:rules` has only the raw AST e
 
 - No mandatory Function Rule pattern — BLOCK_STATEMENTs used directly in EVENT_SCRIPTS
 - COMPONENT nodes always resolved from treeJson — never hand-constructed
-- Event names always confirmed against `agent-kb/05-rule-events-by-scenario.md` — no guessing
+- Event names always confirmed against `assets/agent-kb/05-rule-events-by-scenario.md` — no guessing
 - `validate-rule.bundle.js` must exit 0 before `generate-formula.bundle.js` runs
 - `generate-formula.bundle.js` must return `formulaValid: true` before outputting result
 - Output is `{ fd:rules, fd:events }` object only — no file writes

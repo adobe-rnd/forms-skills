@@ -41,14 +41,15 @@ SKILL.md                                    Claude Code skill definition
 scripts/
   content-model-to-tree.bundle.js           Content model → treeJson
   validate-rule.bundle.js                   Rule AST validator
-  generate-formula.bundle.js               Rule AST → JSON Formula compiler
+  generate-formula.bundle.js                Rule AST → JSON Formula compiler
   parse-functions.bundle.js                 Custom function parser
   validate-merge.bundle.js                  Merged rule patch validator
   vendor/
     custom-function-parser.js               Required by parse-functions.bundle.js
-agent-kb/                                   Rule authoring reference docs
-grammar/                                    Grammar reference docs
-reference/
+assets/
+  agent-kb/                                 Rule authoring reference docs
+  grammar/                                  Grammar reference docs
+references/
   component-lookup.md                       How to resolve components from treeJson
   tools-reference.md                        CLI tool reference
 ```

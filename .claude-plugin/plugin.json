@@ -9,28 +9,17 @@
   "license": "Apache-2.0",
   "skills": [
     "./skills/forms-orchestrator",
-    "./skills/forms-orchestrator/references/planner",
     "./skills/forms-analysis/references/analyze-requirements",
     "./skills/forms-analysis/references/analyze-v1-form",
     "./skills/forms-analysis/references/create-screen-doc",
     "./skills/forms-analysis/references/jud-to-screen",
-    "./skills/forms-build/references/scaffold-form",
-    "./skills/forms-build/references/create-form",
-    "./skills/forms-build/references/create-component",
-    "./skills/forms-logic/references/add-rules",
-    "./skills/forms-logic/references/create-function",
-    "./skills/forms-logic/references/optimize-rules",
+    "./skills/forms-content-author/references/forms-custom-components",
+    "./skills/forms-rule-creator",
     "./skills/forms-infra/references/setup-workspace",
-    "./skills/forms-infra/references/sync-forms",
     "./skills/forms-infra/references/sync-eds-code",
     "./skills/forms-infra/references/git-sandbox",
     "./skills/forms-integration/references/manage-apis",
-    "./skills/forms-context/references/manage-context"
+    "./skills/forms-context-management/references/manage-context"
   ],
-  "keywords": [
-    "adobe",
-    "aem",
-    "forms",
-    "adaptive-forms"
-  ]
+  "keywords": ["adobe", "aem", "forms", "adaptive-forms"]
 }

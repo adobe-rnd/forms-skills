@@ -14,7 +14,7 @@ Repository of Adobe AEM Forms skills for AI coding agents.
 
 ### AEM Forms
 
-Turn natural language into production AEM Adaptive Forms. A plan-driven skill gateway with 16 skills across 6 domains.
+Turn natural language into production AEM Adaptive Forms. A plan-driven skill gateway across 6 domains.
 
 **Quick Start:**
 ```bash
@@ -28,34 +28,34 @@ The **forms-orchestrator** routes intents through a 6-step algorithm — it gene
 
 | Domain | Skills |
 |--------|--------|
-| `analysis` | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `review-screen-doc` |
-| `build` | `scaffold-form`, `create-form`, `create-component` |
-| `logic` | `add-rules`, `create-function`, `optimize-rules` |
+| `analysis` | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `jud-to-screen` |
+| `content-author` | `forms-custom-components` (+ `forms-content-update`, `forms-content-generate` internally) |
+| `rule-creator` | `forms-rule-creator` |
 | `integration` | `manage-apis` |
-| `infra` | `setup-workspace`, `sync-forms`, `sync-eds-code`, `git-sandbox` |
-| `context` | `manage-context` |
+| `infra` | `setup-workspace`, `sync-eds-code`, `git-sandbox` |
+| `context-management` | `manage-context` |
 
-**Requirements:** Node.js 18+, Python 3.10+, `git` on PATH. The plugin manages its own Python virtual environment — dependencies are installed automatically on first use.
+**Requirements:** Node.js 18+, `git` on PATH.
 
 ## Repository Structure
 
 ```
 forms-skills/
-├── .claude-plugin/plugin.json     ← plugin identity (aem-forms)
-├── .github/
-│   ├── workflows/validate.yml
-│   ├── CONTRIBUTING.md
-│   └── CODE_OF_CONDUCT.md
-├── forms-shared/                  ← shared runtime + api-manager
-├── forms-orchestrator/            ← entry point router
-├── forms-analysis/                ← analysis domain
-├── forms-build/                   ← build domain
-├── forms-context/                 ← context domain
-├── forms-infra/                   ← infra domain
-├── forms-integration/             ← integration domain
-├── forms-logic/                   ← logic domain
-├── pyproject.toml
-├── package.json
+├── .claude-plugin/plugin.json          ← plugin identity (aem-forms)
+├── evals/                              ← eval scenarios, fixtures, runner scripts
+├── skills/
+│   ├── forms-orchestrator/             ← entry point router
+│   ├── forms-analysis/                 ← analysis domain
+│   ├── forms-content-author/           ← content authoring domain
+│   │   ├── forms-content-update/       ← MCP-based form authoring (internal sub-skill)
+│   │   ├── forms-content-generate/     ← component payload builder (internal sub-skill)
+│   │   └── references/
+│   │       └── forms-custom-components/
+│   ├── forms-rule-creator/             ← rule & custom function authoring
+│   ├── forms-infra/                    ← infra domain
+│   ├── forms-integration/              ← integration domain
+│   ├── forms-context-management/       ← context & session domain
+│   └── forms-shared/                   ← shared scripts (api-manager, eds-code-sync, etc.)
 └── README.md
 ```
 

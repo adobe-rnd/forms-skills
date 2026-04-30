@@ -309,11 +309,11 @@ Plans are not typed explicitly — their type emerges from which specification s
 
 | Type | Purpose | Primary Skills |
 |------|---------|----------------|
-| Structure | Form skeleton — panels, fields, basic validations | `create-form`, `scaffold-form` |
-| Workflow | Specific user flow or conditional branch | `create-form`, `add-rules`, `create-function` |
-| Logic | Cross-cutting validations and business rules | `add-rules`, `create-function` |
-| Integration | API wiring — data loading, save/submit, external services | `manage-apis`, `create-function`, `add-rules` |
-| Infrastructure | Error handling, session mgmt, toasts, sanitization | `create-function`, `add-rules` |
+| Structure | Form skeleton — panels, fields, basic validations | `forms-content-author` |
+| Workflow | Specific user flow or conditional branch | `forms-content-author`, `forms-rule-creator` |
+| Logic | Cross-cutting validations and business rules | `forms-rule-creator` |
+| Integration | API wiring — data loading, save/submit, external services | `manage-apis`, `forms-rule-creator` |
+| Infrastructure | Error handling, session mgmt, toasts, sanitization | `forms-rule-creator` |
 
 ### Plan Conventions
 
