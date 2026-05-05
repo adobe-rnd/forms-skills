@@ -1,46 +1,15 @@
-# ── Dependencies ─────────────────────────────────────────
+# Dependencies
 node_modules/
 
-# ── Python ───────────────────────────────────────────────
-__pycache__/
-*.pyc
-*.pyo
-*.egg-info/
-.venv/
-venv/
-*.egg
-pip-wheel-metadata/
-
-# ── Build / Distribution ────────────────────────────────
-dist/
-build/
-!skills/**/build/
-*.whl
-
-# ── Test / Coverage ──────────────────────────────────────
-.pytest_cache/
-.coverage
-htmlcov/
-*.cover
-
-# ── Credentials & Environment ────────────────────────────
-.env
-.env.*
-!.env.example
-
-# ── OS Files ─────────────────────────────────────────────
+# OS files
 .DS_Store
-Thumbs.db
 
-# ── Editor / IDE ─────────────────────────────────────────
+# Editor files
 *.swp
 *.swo
 *~
-.idea/
-.vscode/
-*.code-workspace
 
-# ── Temporary Files ──────────────────────────────────────
+# Temporary files
 drafts/tmp/
 
 # Release artifacts
