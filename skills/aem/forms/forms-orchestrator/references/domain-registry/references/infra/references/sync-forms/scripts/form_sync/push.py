@@ -321,6 +321,7 @@ def create_empty_form(
     config: Config,
     form_title: str,
     folder_path: str,
+    form_type: str = "eds",
 ) -> str:
     """
     Create an empty form on AEM.
@@ -330,6 +331,8 @@ def create_empty_form(
         config: Configuration with GitHub URL.
         form_title: Title for the new form.
         folder_path: DAM folder path for the form.
+        form_type: "eds" (default) or "core_component". Controls the template
+                   and initial form JSON sent to the GenAI endpoint.
 
     Returns:
         The URL path of the created form (e.g., /content/forms/af/myform-v1.html).
@@ -337,14 +340,26 @@ def create_empty_form(
     Raises:
         FormCreationError: If form creation fails.
     """
+    if form_type == "core_component":
+        template_path = "/conf/mysite/settings/wcm/templates/blank-af-v2"
+        form_json = json.dumps({
+            "jcr:primaryType": "nt:unstructured",
+            "fieldType": "form",
+            "sling:resourceType": "mysite/components/adaptiveForm/formcontainer",
+            "fd:version": "2.1",
+        })
+    else:
+        template_path = "/libs/fd/franklin/templates/page"
+        form_json = '{"items": []}'
+
     payload = {
         "queryType": "create_form",
         "result": {
             "formTitle": form_title,
-            "formJson": '{"items": []}',
+            "formJson": form_json,
             "queryType": "create_form",
             "folderPath": folder_path,
-            "templatePath": "/libs/fd/franklin/templates/page",
+            "templatePath": template_path,
             "githubUrl": config.github_url,
         },
     }
@@ -429,6 +444,7 @@ def create_form_via_sling_import(
     config: Config,
     form_title: str,
     form_path: str,
+    form_type: str = "eds",
     on_progress: Optional[callable] = None,
 ) -> str:
     """
@@ -445,6 +461,7 @@ def create_form_via_sling_import(
         config: Configuration object.
         form_title: Title for the new form.
         form_path: Full AEM path (e.g., /content/forms/af/forms-team/myform).
+        form_type: Form architecture — "eds" (Franklin/EDS) or "core_component" (Adaptive Form Core Components).
         on_progress: Optional callback for progress messages.
 
     Returns:
@@ -488,6 +505,28 @@ def create_form_via_sling_import(
         },
     }
 
+    # Build the full JCR page structure with correct Adaptive Form resource types
+    page_cc_json = {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "jcr:title": form_title,
+            "sling:resourceType": "mysite/components/adaptiveForm/page",
+            "cq:template": "/conf/mysite/settings/wcm/templates/blank-af-v2",
+            "jcr:language": "en",
+            "author": "adobe",
+            "sling:configRef": f"/conf/forms/{form_path.replace('/content/forms/af/', '')}/",
+            "guideContainer": {
+                "jcr:primaryType": "nt:unstructured",
+                "sling:resourceType": "mysite/components/adaptiveForm/formcontainer",
+                "fd:version": "2.1",
+                "fieldType": "form",
+                "jcr:title": form_title,
+                "name": form_title.lower().replace(" ", "-"),
+            },
+        },
+    }
+
     try:
         # Ensure parent folder exists
         parent_path = "/".join(form_path.rstrip("/").split("/")[:-1])
@@ -501,14 +540,17 @@ def create_form_via_sling_import(
             headers={"Authorization": config.basic_auth_header},
         )
 
+        # Select page structure based on form type
+        page_structure = page_cc_json if form_type == "core_component" else page_json
+        log(f"Creating form page at: {form_path} (type: {form_type})")
+
         # Import the page structure via Sling POST
-        log(f"Creating form page at: {form_path}")
         response = requests.post(
             f"{config.aem_host}{form_path}",
             data={
                 ":operation": "import",
                 ":contentType": "json",
-                ":content": json.dumps(page_json),
+                ":content": json.dumps(page_structure),
                 ":replace": "true",
                 ":replaceProperties": "true",
             },
@@ -607,6 +649,7 @@ def patch_form_content(
     cloud_token: CloudToken,
     form_path: str,
     form_data: dict,
+    form_type: str = "eds",
 ) -> None:
     """
     Patch entire form content via Universal Editor API.
@@ -616,10 +659,21 @@ def patch_form_content(
         cloud_token: Cloud token for authentication.
         form_path: Path to the form (without .html).
         form_data: The complete form data dict to patch.
+        form_type: "eds" (default) or "core_component". Controls the JCR
+                   content path used as the patch target.
 
     Raises:
         FormSyncError: If patching the form fails.
     """
+    # EDS forms: content lives at root/section, child key is "form"
+    # CC forms: content lives at jcr:content, child key is "guideContainer"
+    if form_type == "core_component":
+        resource_path = f"{form_path}/jcr:content"
+        patch_path = "/guideContainer"
+    else:
+        resource_path = f"{form_path}/jcr:content/root/section"
+        patch_path = "/form"
+
     # Build the payload for patch API
     payload = {
         "connections": [
@@ -632,13 +686,13 @@ def patch_form_content(
         "patch": [
             {
                 "op": "add",
-                "path": "/form",
+                "path": patch_path,
                 "value": form_data,
             }
         ],
         "target": {
             "prop": "",
-            "resource": f"urn:aemconnection:{form_path}/jcr:content/root/section",
+            "resource": f"urn:aemconnection:{resource_path}",
             "type": "component",
         },
     }
@@ -656,6 +710,12 @@ def patch_form_content(
         )
 
         if not response.ok:
+            # AEM Cloud Service returns 409 for Core Component forms when the
+            # guideContainer node already exists but the UE patch still writes
+            # the content successfully. Treat 409 as a warning-level success for
+            # CC forms; raise only for other error codes.
+            if form_type == "core_component" and response.status_code == 409:
+                return  # Content was written; AEM returned 409 due to node state
             raise FormSyncError(
                 f"Failed to patch form content: "
                 f"HTTP {response.status_code} - {response.text[:200]}"
@@ -1035,6 +1095,7 @@ def push_form(
             cloud_token=cloud_token,
             form_path=target_path,
             form_data=form_data,
+            form_type=config.form_type,
         )
         log("Preview form/fragment content added successfully")
 
@@ -1051,6 +1112,7 @@ def push_form(
             cloud_token=cloud_token,
             form_path=current_path,
             form_data=form_data,
+            form_type=config.form_type,
         )
         log(f"{entity_type.capitalize()} content updated successfully")
         target_path = current_path
@@ -1062,8 +1124,10 @@ def push_form(
         original_form_name = extract_form_name(form_metadata.original_path)
         form_title = f"{original_form_name}{suffix}"
 
-        if config.create_form_strategy == "sling_import":
-            # Local mode: use Sling POST import (no GenAI endpoint)
+        if config.create_form_strategy == "sling_import" or config.form_type == "core_component":
+            # Local mode OR Core Component forms: use Sling POST import.
+            # CC forms always use Sling import because the GenAI endpoint only
+            # creates EDS/Franklin forms and cannot produce the correct CC page structure.
             if form_metadata.fragment:
                 log(f"Creating new fragment via Sling import: {form_title}")
                 # For fragments, construct the target path from folder_path + name
@@ -1087,11 +1151,12 @@ def push_form(
                     config=config,
                     form_title=form_title,
                     form_path=target_path,
+                    form_type=config.form_type,
                     on_progress=on_progress,
                 )
                 log(f"Created form via Sling import: {target_path}")
         else:
-            # Stage/Prod: use GenAI endpoint
+            # Stage/Prod EDS forms: use GenAI endpoint
             if form_metadata.fragment:
                 log(f"Creating new fragment: {form_title}")
                 target_path = create_empty_fragment(
@@ -1109,6 +1174,7 @@ def push_form(
                     config=config,
                     form_title=form_title,
                     folder_path=form_metadata.folder_path,
+                    form_type=config.form_type,
                 )
                 target_path = get_form_path_from_url(form_url)
                 log(f"Created empty form: {target_path}")
@@ -1124,6 +1190,7 @@ def push_form(
             cloud_token=cloud_token,
             form_path=target_path,
             form_data=form_data,
+            form_type=config.form_type,
         )
         log("Form/fragment content added successfully")
 

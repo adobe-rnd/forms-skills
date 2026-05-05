@@ -59,6 +59,18 @@ metadata:
 > Empty forms → `scaffold-form`.
 > Custom components → `create-component`.
 
+### Core Component Adaptive Forms — Restricted Skills
+
+When the user is building a **Core Component Adaptive Form** ("core component form", "CC form", "adaptive form core component"), apply these restrictions:
+
+| Skill | Allowed? | Notes |
+|-------|----------|-------|
+| `scaffold-form` | ✅ Yes | Use `--form-type core_component` flag |
+| `create-form` | ✅ Yes | Works identically for both form types |
+| `create-component` | ❌ No | Custom components are EDS-specific; not applicable to CC forms |
+
+For CC form scaffolding, always pass `--form-type core_component` to produce the correct `sling:resourceType: mysite/components/adaptiveForm/formcontainer` root. Never scaffold a CC form with the EDS template.
+
 ## File Locations
 
 | Asset | Canonical Path |

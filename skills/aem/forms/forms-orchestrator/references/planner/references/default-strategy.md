@@ -36,6 +36,33 @@ At minimum, one input source must be available. Richer inputs produce better pla
 
 ---
 
+## Form Type Detection (Run First)
+
+Before decomposing requirements, determine whether the user intends an **EDS/Franklin form** or a **Core Component Adaptive Form**. This controls which skills are included in plans.
+
+| Signal | Form Type |
+|--------|-----------|
+| "Core Component", "CC form", "adaptive form core component", "core component form" | `core_component` |
+| "EDS form", "Franklin form", or no type specified | `eds` |
+
+### Core Component Forms — Constrained Skill Set
+
+When form type is `core_component`, apply these constraints throughout all plans:
+
+| Constraint | Reason |
+|------------|--------|
+| **Use `scaffold-form --form-type core_component`** | Generates correct `mysite/components/adaptiveForm/formcontainer` root |
+| **Use `form-sync push --form-type core_component`** in every push step | Creates proper CC page structure via Sling import |
+| **No `create-function` skill** | Custom JS functions require GitHub deployment — not part of CC workflow |
+| **No `create-component` skill** | Custom EDS components are GitHub-deployed — not applicable to CC forms |
+| **No `manage-apis` / API client generation** | CC forms use AEM-native rule actions for API calls; no JS client files needed |
+| **No `eds-code-sync` steps** | No GitHub code to sync for CC forms |
+| **No EDS code deployment** | Skip entirely — CC form deployment is AEM-only |
+
+For CC forms, API integration (if any) uses AEM visual rules with the `globals.functions.request()` built-in — referenced directly in `add-rules` steps, not wrapped in exported custom functions.
+
+---
+
 ## Process
 
 ### Step 1 — Analyze Requirements
@@ -118,24 +145,37 @@ The exact number and naming of plans depends on the form's complexity and struct
 
 ## Example Decomposition
 
-A moderately complex form with conditional branches and API integrations might decompose into plans like this:
+### EDS / Franklin Form
+
+A moderately complex EDS form with conditional branches and API integrations:
 
 | Plan | Focus | Skills Used |
 |------|-------|-------------|
-| 01 | Form structure & initial fields | `create-form` |
-| 02 | Workflow branch A (e.g., conditional section) | `create-form`, `add-rules` |
-| 03 | Workflow branch B (e.g., alternative path) | `create-form`, `add-rules`, `create-function` |
-| 04 | Shared fields & common sections | `create-form`, `add-rules` |
-| 05 | Cross-field business rule validations | `create-function`, `add-rules` |
-| 06 | API integration — data loading & prefill | `manage-apis`, `create-function`, `add-rules` |
-| 07 | API integration — save & submit | `manage-apis`, `create-function`, `add-rules` |
-| 08 | Error handling & session management | `create-function`, `add-rules` |
+| 01 | Form structure & initial fields | `scaffold-form`, `create-form`, `sync-forms` |
+| 02 | Workflow branch A (e.g., conditional section) | `create-form`, `add-rules`, `sync-forms` |
+| 03 | Workflow branch B (e.g., alternative path) | `create-form`, `add-rules`, `create-function`, `sync-forms` |
+| 04 | Cross-field validations | `create-function`, `add-rules`, `sync-forms` |
+| 05 | API integration — submit | `manage-apis`, `create-function`, `add-rules`, `sync-forms` |
+| 06 | Error handling | `create-function`, `add-rules`, `sync-forms` |
 
-**Key principles illustrated:**
-- Plans follow the recommended order (structure → workflows → validations → integrations → infrastructure)
-- Every plan freely mixes skills (`create-form` + `add-rules` + `create-function` in the same plan)
-- Each plan ends with validate + push, keeping the form in a deployable state
-- The exact number of plans depends on the form's complexity — a simple form might need only 3
+### Core Component Adaptive Form
+
+Same form requirements — but built as a Core Component Adaptive Form. Plans are simpler because there is no GitHub/EDS workflow:
+
+| Plan | Focus | Skills Used |
+|------|-------|-------------|
+| 01 | Form structure & initial fields | `scaffold-form --form-type core_component`, `create-form`, `sync-forms --form-type core_component` |
+| 02 | Workflow branch A | `add-rules`, `sync-forms --form-type core_component` |
+| 03 | Workflow branch B | `add-rules`, `sync-forms --form-type core_component` |
+| 04 | Cross-field validations | `add-rules`, `sync-forms --form-type core_component` |
+| 05 | API submit | `add-rules` (using built-in `globals.functions.request`), `sync-forms --form-type core_component` |
+
+**Key differences for CC forms:**
+- No `create-function` — all logic lives in visual rules via `add-rules`
+- No `create-component` — no custom EDS components
+- No `manage-apis` — no JS API client generation
+- No `eds-code-sync` — no GitHub code to deploy
+- Every push step uses `form-sync push --form-type core_component`
 
 ---
 

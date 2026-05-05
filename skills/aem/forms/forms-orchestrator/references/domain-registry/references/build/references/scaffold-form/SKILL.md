@@ -27,18 +27,27 @@ You generate empty AEM Adaptive Form JSON files from a template using the `scaff
 
 **Do NOT use for:** Modifying existing forms (use **create-form** skill), or creating forms on AEM Author (use **sync-forms** skill).
 
+## Form Types
+
+| Type | Flag | Root `sling:resourceType` | When to Use |
+|------|------|--------------------------|-------------|
+| EDS / Franklin (default) | *(omit)* | `fd/franklin/components/form/v1/form` | EDS forms with GitHub-deployed custom functions |
+| Core Component | `--form-type core_component` | `mysite/components/adaptiveForm/formcontainer` | Adaptive Form Core Components — no GitHub workflow needed |
+
 ## Critical Rules
 
 1. **Use the CLI** — do not hand-create form.json files from scratch
 2. **Will not overwrite** — the tool refuses to create files that already exist
 3. **Naming convention** — form names should be kebab-case (e.g., `my-registration-form`)
 4. **Always add fields after scaffolding** — the scaffolded form is empty; delegate to the **create-form** skill to add fields
+5. **CC forms skip GitHub steps** — when `--form-type core_component`, never run `create-function`, `create-component`, or `eds-code-sync` steps
 
 ## Tool Commands
 
 | Action | Command |
 |--------|---------|
-| Scaffold a form | `scaffold-form <form_name>` |
+| Scaffold an EDS form | `scaffold-form <form_name>` |
+| Scaffold a Core Component form | `scaffold-form <form_name> --form-type core_component` |
 | With custom title | `scaffold-form <form_name> --title "My Form Title"` |
 | With submit button | `scaffold-form <form_name> --with-submit` |
 | Custom output dir | `scaffold-form <form_name> --output-dir ./my-dir` |
@@ -67,11 +76,17 @@ The form.json includes:
 
 ## Examples
 
-### Basic form
+### Basic EDS form
 ```bash
 scaffold-form customer-onboarding
 ```
-Creates `form/customer-onboarding.form.json` with title "Customer Onboarding".
+Creates `form/customer-onboarding.form.json` with title "Customer Onboarding" (EDS/Franklin type).
+
+### Core Component Adaptive Form
+```bash
+scaffold-form member-demographics --form-type core_component
+```
+Creates `form/member-demographics.form.json` with `sling:resourceType: mysite/components/adaptiveForm/formcontainer`. Use this when building a Core Component Adaptive Form — no GitHub/EDS workflow required.
 
 ### Form with submit button in custom directory
 ```bash

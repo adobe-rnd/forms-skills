@@ -67,6 +67,7 @@ class Config:
     client_id: str = ""
     cloud_token_source: str = "aem_genai"
     create_form_strategy: str = "genai"
+    form_type: str = "eds"  # "eds" | "core_component"
 
     @property
     def basic_auth_encoded(self) -> str:
@@ -304,6 +305,14 @@ class Config:
         # client_id: explicit .env override, then profile default
         client_id = os.getenv("FORM_SYNC_CLIENT_ID", profile["client_id"])
 
+        # Parse optional form type (eds or core_component)
+        form_type = os.getenv("FORM_SYNC_FORM_TYPE", "eds").strip().lower()
+        if form_type not in ("eds", "core_component"):
+            raise ConfigurationError(
+                f"Invalid FORM_SYNC_FORM_TYPE value: '{form_type}'.\n"
+                "Valid values: eds, core_component"
+            )
+
         return cls(
             aem_host=aem_host,
             github_url=os.getenv("GITHUB_URL"),
@@ -321,6 +330,7 @@ class Config:
             client_id=client_id,
             cloud_token_source=profile["cloud_token_source"],
             create_form_strategy=profile["create_form_strategy"],
+            form_type=form_type,
         )
 
 

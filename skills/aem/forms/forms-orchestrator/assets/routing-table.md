@@ -209,12 +209,20 @@ After each plan completes, present the user with these options. All local change
 | **4. Proceed to next plan** | ❌ | ❌ | Skip both, start next plan immediately |
 
 **When deploying (option 1):**
+
+First, determine the form type from the active journey (EDS or Core Component):
+
+**EDS / Franklin forms:**
 1. **EDS code first** — If any files in the `code/` directory were created or modified:
    1. **Validate** — Run `eds-code-sync validate` to verify the changes pass `npm install` and `npm run lint`. The local `code/` directory does not contain `package.json` — the validate command clones the repo, applies changes, and runs checks automatically. If validation fails, fix the issues in `code/` and re-run validate.
    2. **Push** — Push them to GitHub with `eds-code-sync push --branch <branch-name> --pr`.
    3. **Wait for merge** — Ask the user to review and merge the PR.
    4. **Re-sync** — Once the user confirms the merge, run `eds-code-sync sync` to re-sync the local `code/` directory with the merged main branch before proceeding.
 2. **AEM forms second** — If any form or rule files were created or modified (in `repo/`), push them to AEM Author with `form-sync push <form_path>` for each changed form. This must happen after EDS code is deployed, since forms may reference custom functions or components that need to be live first.
+
+**Core Component Adaptive Forms:**
+1. **Skip EDS code entirely** — Core Component forms have no GitHub/EDS code. There are no custom function files, no component files, and no `eds-code-sync` steps. Skip step 1 in full.
+2. **Push directly to AEM** — Push form and rule files with `form-sync push <form_path> --form-type core_component` for each changed form. No prerequisite GitHub deployment required.
 
 **When updating reports (options 1, 2, 3):** Route to `context` → `manage-context` to update `.agent/handover.md`, `.agent/history.md`, and `.agent/sessions.md`.
 

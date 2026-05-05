@@ -25,15 +25,33 @@ def _name_to_title(form_name: str) -> str:
     return form_name.replace("-", " ").replace("_", " ").title()
 
 
-def _build_form_json(title: str, *, with_submit: bool = False) -> dict:
-    """Return the JCR-format AEM Adaptive Form structure."""
-    form: dict = {
-        "jcr:primaryType": "nt:unstructured",
-        "sling:resourceType": "fd/franklin/components/form/v1/form",
-        "fieldType": "form",
-        "fd:version": "2.1",
-        "title": title,
-    }
+def _build_form_json(
+    title: str, *, with_submit: bool = False, form_type: str = "eds"
+) -> dict:
+    """Return the JCR-format AEM Adaptive Form structure.
+
+    Args:
+        title: Human-readable form title.
+        with_submit: Include a submit button node.
+        form_type: "eds" (EDS/Franklin, default) or "core_component"
+                   (Adaptive Form Core Components).
+    """
+    if form_type == "core_component":
+        form: dict = {
+            "jcr:primaryType": "nt:unstructured",
+            "sling:resourceType": "mysite/components/adaptiveForm/formcontainer",
+            "fieldType": "form",
+            "fd:version": "2.1",
+            "title": title,
+        }
+    else:
+        form = {
+            "jcr:primaryType": "nt:unstructured",
+            "sling:resourceType": "fd/franklin/components/form/v1/form",
+            "fieldType": "form",
+            "fd:version": "2.1",
+            "title": title,
+        }
 
     if with_submit:
         form["submit"] = {
@@ -79,6 +97,17 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         dest="with_submit",
         help="Include a submit button in the generated form.",
     )
+    parser.add_argument(
+        "--form-type",
+        choices=["eds", "core_component"],
+        default="eds",
+        dest="form_type",
+        help=(
+            "Form architecture: 'eds' (EDS/Franklin, default) or "
+            "'core_component' (Adaptive Form Core Components). "
+            "Controls the root sling:resourceType in the generated form.json."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -113,7 +142,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     # ── Build JSON payloads ──────────────────────────────────────────
-    form_json = _build_form_json(title, with_submit=args.with_submit)
+    form_json = _build_form_json(
+        title, with_submit=args.with_submit, form_type=args.form_type
+    )
     rule_json = _build_rule_json()
 
     # ── Write files ──────────────────────────────────────────────────
@@ -128,6 +159,7 @@ def main(argv: list[str] | None = None) -> int:
     summary = {
         "form_name": form_name,
         "title": title,
+        "form_type": args.form_type,
         "with_submit": args.with_submit,
         "files_created": [
             str(form_path),
