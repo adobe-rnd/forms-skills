@@ -93,31 +93,6 @@ Handover documentation and PDF guides generation for AEM Edge Delivery Services 
 | `whitepaper` | Create professional PDF whitepapers from Markdown |
 | `auth` | Authenticate with AEM Config Service API |
 
-### AEM Forms
-
-Turn natural language into production AEM Adaptive Forms. A plan-driven skill gateway with 16 skills across 6 domains.
-
-**Quick Start:**
-```bash
-# Say: "Set up a new AEM Forms workspace for my project."
-# Then: "Here's the requirements doc for my form. Build it."
-```
-
-The **forms-orchestrator** routes intents through a 6-step algorithm — it generates plans from requirements via a Planner, resolves skills via a Domain Registry, and executes them. For single tasks it routes directly to the matching domain.
-
-#### Domains
-
-| Domain | Skills |
-|--------|--------|
-| `analysis` | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `review-screen-doc` |
-| `build` | `scaffold-form`, `create-form`, `create-component` |
-| `logic` | `add-rules`, `create-function`, `optimize-rules` |
-| `integration` | `manage-apis` |
-| `infra` | `setup-workspace`, `sync-forms`, `sync-eds-code`, `git-sandbox` |
-| `context` | `manage-context` |
-
-**Requirements:** Node.js 18+, Python 3.10+, `git` on PATH. The plugin manages its own Python virtual environment — dependencies are installed automatically on first use.
-
 ### AEM as a Cloud Service — Create Component
 
 The `create-component` skill creates complete AEM components following Adobe best practices for AEM Cloud Service and AEM 6.5. It covers:
@@ -268,23 +243,74 @@ plugins/
 │   │   │   └── plugin.json
 │   │   └── skills/
 │   │       ├── best-practices/
+│   │       │   ├── README.md
+│   │       │   ├── SKILL.md
+│   │       │   └── references/
 │   │       ├── migration/
+│   │       │   ├── README.md
+│   │       │   ├── SKILL.md
+│   │       │   ├── references/
+│   │       │   └── scripts/
 │   │       ├── ensure-agents-md/
+│   │       │   ├── SKILL.md
+│   │       │   └── references/
+│   │       │       ├── AGENTS.md.template
+│   │       │       └── module-catalog.md
 │   │       ├── create-component/
+│   │       │   ├── SKILL.md
+│   │       │   ├── assets/
+│   │       │   └── references/
 │   │       ├── aem-workflow/
+│   │       │   ├── SKILL.md
+│   │       │   ├── workflow-model-design/
+│   │       │   ├── workflow-development/
+│   │       │   ├── workflow-triggering/
+│   │       │   ├── workflow-launchers/
+│   │       │   ├── workflow-debugging/
+│   │       │   ├── workflow-triaging/
+│   │       │   └── workflow-orchestrator/
 │   │       └── dispatcher/
+│   │           ├── SKILL.md
+│   │           ├── config-authoring/
+│   │           ├── technical-advisory/
+│   │           ├── incident-response/
+│   │           ├── performance-tuning/
+│   │           ├── security-hardening/
+│   │           └── workflow-orchestrator/
 │   └── 6.5-lts/
 │       ├── .claude-plugin/
 │       │   └── plugin.json
 │       └── skills/
 │           ├── aem-workflow/
+│           │   ├── SKILL.md
+│           │   ├── workflow-model-design/
+│           │   ├── workflow-development/
+│           │   ├── workflow-triggering/
+│           │   ├── workflow-launchers/
+│           │   ├── workflow-debugging/
+│           │   ├── workflow-triaging/
+│           │   └── workflow-orchestrator/
 │           ├── aem-replication/
+│           │   ├── README.md
+│           │   ├── SKILL.md
+│           │   ├── configure-replication-agent/
+│           │   ├── replicate-content/
+│           │   ├── replication-api/
+│           │   └── troubleshoot-replication/
 │           ├── ensure-agents-md/
 │           └── dispatcher/
+│               ├── SKILL.md
+│               ├── config-authoring/
+│               ├── technical-advisory/
+│               ├── incident-response/
+│               ├── performance-tuning/
+│               ├── security-hardening/
+│               └── workflow-orchestrator/
 ├── app-builder/
 │   ├── .claude-plugin/
 │   │   └── plugin.json
 │   └── skills/
+│       ├── _shared/
 │       ├── appbuilder-project-init/
 │       ├── appbuilder-action-scaffolder/
 │       ├── appbuilder-ui-scaffolder/
@@ -293,21 +319,6 @@ plugins/
 │       └── appbuilder-cicd-pipeline/
 └── creative-cloud/
     └── adobe-for-creativity/
-skills/
-└── aem/
-    └── forms/
-        ├── .claude-plugin/
-        │   └── plugin.json
-        ├── pyproject.toml
-        ├── setup.sh
-        ├── forms-orchestrator/
-        │   ├── SKILL.md
-        │   ├── assets/
-        │   ├── scripts/
-        │   └── references/
-        │       ├── planner/
-        │       └── domain-registry/
-        └── tests/
         ├── .claude-plugin/
         │   └── plugin.json
         ├── skills/
