@@ -63,7 +63,7 @@ All skills owned by this domain.
 
 Guard policies are constraints that apply across all skills in this domain. They prevent unsafe or incorrect operations.
 
-> **<guard-policy-id>:** <Description of what is forbidden and why. Example: "Never edit `.rule.json` directly. All business logic must go through `add-rules`.">
+> **<guard-policy-id>:** <Description of what is forbidden and why. Example: "Never edit `.rule.json` directly. All business logic must go through `forms-rule-creator`.">
 
 > **<guard-policy-id>:** <Description of another constraint.>
 

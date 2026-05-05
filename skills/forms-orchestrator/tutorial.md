@@ -62,7 +62,7 @@ Tell Claude:
 
 > "Create the form JSON based on that specification."
 
-Claude uses the `create-form` skill to generate `form.json` with the correct field types, validation constraints, and panel layout. It runs the form validator automatically — you'll see any issues flagged before the file is written.
+Claude uses the `forms-content-author` skill to generate `form.json` with the correct field types, validation constraints, and panel layout. It runs the form validator automatically — you'll see any issues flagged before the file is written.
 
 ---
 
@@ -72,7 +72,7 @@ Tell Claude:
 
 > "Add the visibility rule: show the message field when Inquiry Type is 'Support', hide it otherwise."
 
-Claude uses the `add-rules` skill. It:
+Claude uses the `forms-rule-creator` skill. It:
 1. Runs `transform-form` to get the exact component names from your form
 2. Constructs the rule JSON using the correct grammar
 3. Validates the rule before saving — it will not save an invalid rule
@@ -87,7 +87,7 @@ Tell Claude:
 
 > "Create a custom function that pre-fills the message field with 'I'm interested in learning more about...' when the inquiry type is set to Sales."
 
-Claude uses the `create-function` skill to write the function with proper JSDoc annotations and wire it into the form's `customFunctionsPath`. It verifies the function appears in the parsed output before finishing.
+Claude uses the `forms-rule-creator` skill to write the function with proper JSDoc annotations and wire it into the form's `customFunctionsPath`. It verifies the function appears in the parsed output before finishing.
 
 ---
 
@@ -107,15 +107,15 @@ Claude will confirm with you before pushing. Once deployed, open your AEM instan
 |-------|----------------|
 | `setup-workspace` | Credentials, directory structure, connectivity |
 | `analyze-requirements` | Structured spec from plain-language requirements |
-| `create-form` | `form.json` with fields, panels, validation |
-| `add-rules` | Business rules in `form.rule.json` |
-| `create-function` | Custom JS function wired to the form |
+| `forms-content-author` | `form.json` with fields, panels, validation |
+| `forms-rule-creator` | Business rules in `form.rule.json` |
+| `forms-rule-creator` | Custom JS function wired to the form |
 
 ---
 
 ## Known Limitations
 
-- **AEM connection required for push** — `form-sync push` needs a valid bearer token. Tokens expire every 24h; regenerate from AEM Developer Console → Integrations → Local Token.
+- **AEM connection required** — `forms-content-author` uses the Sites Content MCP server to read and write form content. IMS tokens for AEM as a Cloud Service expire; re-authenticate via the MCP server if you get a 401.
 - **No API integration in this tutorial** — `manage-apis` and data-loading rules require an OpenAPI spec in `refs/apis/`. See the plugin README for how to add APIs.
 
 ---
@@ -124,8 +124,8 @@ Claude will confirm with you before pushing. Once deployed, open your AEM instan
 
 | Issue | Fix |
 |-------|-----|
-| `Cannot find module 'lodash'` | Run `npm install` in `forms-logic/scripts/rule_coder/bridge/` |
-| Validator reports invalid field type | Check `forms-orchestrator/.../create-form/references/field-types.md` for valid types |
-| Rule validator says Unknown nodeName | Check `forms-orchestrator/.../add-rules/references/grammar-reference.md` |
+| `Cannot find module 'lodash'` | Run `npm install` in `forms-rule-creator/` |
+| Validator reports invalid field type | Check `forms-orchestrator/.../forms-content-author/references/field-types.md` for valid types |
+| Rule validator says Unknown nodeName | Check `forms-orchestrator/.../forms-rule-creator/references/grammar-reference.md` |
 | 401 on AEM push | Bearer token expired — regenerate and paste into `.env` |
 | Wrong working directory errors | Make sure you're running commands from the workspace root |

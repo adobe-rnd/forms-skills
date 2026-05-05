@@ -368,7 +368,7 @@ Restart Claude Code after adding the MCP server in either setup.
 ├── CLAUDE.md                      # Claude Code guidance: plugin path, checklists, conventions
 ├── .claude/
 │   └── settings.json              # Claude Code hooks: blocks package-lock.json edits, runs lint before git commit
-├── metadata.json                  # Tracks synced forms (auto-managed by form-sync)
+├── metadata.json                  # Fragment registry (auto-managed)
 ├── sandbox.json                   # Git sandbox config (repo URL, branch, allowed paths)
 ├── .agent/                        # Agent memory — handover, history, session log
 │   ├── handover.md
@@ -419,7 +419,7 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 2. **`FORMS_WORKSPACE` read from `.env` in cwd** — written during this setup flow
 3. **Fall back to cwd** — backwards-compatible default
 
-> **Key point:** `FORMS_WORKSPACE` must be the first entry in `.env`. This is how every tool — form-sync, api-manager, rule-save, scaffold-form, etc. — knows where to find the workspace and all its files.
+> **Key point:** `FORMS_WORKSPACE` must be the first entry in `.env`. This is how every tool — `api-manager`, `eds-code-sync`, `git-sandbox`, etc. — knows where to find the workspace and all its files.
 
 ## Environment Variable Reference
 
@@ -452,7 +452,7 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 | `api-manager` | `scripts/` (shared) | Manage API definitions, generate typed JS clients |
 | `form-validate` | `skills/forms-content-author/scripts/` | Validate form.json against EDS field schemas |
 | `git-sandbox` | `skills/git-sandbox/scripts/` | Sandboxed git operations for AI agents |
-| `scaffold-form` | `skills/scaffold-form/scripts/` | Scaffold empty form JSON from template |
+| `forms-content-author` | `skills/forms-content-author/scripts/` | Scaffold empty form JSON from template |
 | `rule-transform` | `scripts/` (shared) | Transform form JSON for rule editing |
 | `rule-validate` | `scripts/` (shared) | Validate rule JSON against grammar |
 | `rule-save` | `scripts/` (shared) | Save rules back to rule store |
@@ -473,7 +473,7 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 | `eds-code-sync test` fails for GitHub | Bad token or wrong repo | Verify `GITHUB_TOKEN` has `repo` scope and `GITHUB_REPO` is correct |
 | Python venv errors | Corrupted venv | Delete the venv directory inside the plugin and retry (it auto-recreates) |
 | `sandbox.json` not found | Missing config | Create `sandbox.json` in workspace root — run `git-sandbox example-config` for a starter |
-| Forms not appearing after pull | Wrong DAM path | Use `form-sync list <dam-path>` to discover correct paths first |
+| Form not found via MCP | Wrong JCR path | Use `get-aem-pages(publishPath: "<path>")` to discover the correct pageId first |
 | `.env` committed to git | Security risk | Add `.env` to `.gitignore` immediately; rotate all exposed credentials |
 
 ## Headless Workspace Validation

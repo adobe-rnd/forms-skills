@@ -12,7 +12,6 @@ dependencies = [
     "click>=8.0.0",
     "python-dotenv>=1.0.0",
     "requests>=2.28.0",
-    "pydantic>=2.0",
     "PyYAML>=6.0.0",
     "Jinja2>=3.0.0",
     "apispec>=6.0.0",
@@ -27,17 +26,14 @@ dev = [
 ]
 
 [project.scripts]
-form-sync = "form_sync.cli:cli"
 eds-code-sync = "eds_code_sync.cli:cli"
 api-manager = "api_manager.cli:cli"
+api-skill = "api_skill.cli:main"
 git-sandbox = "git_sandbox.cli:cli"
 
 [tool.setuptools.packages.find]
 where = [
     "skills/forms-shared/scripts",
-    "skills/forms-build/references/create-form/scripts",
-    "skills/forms-build/references/scaffold-form/scripts",
-    "skills/forms-infra/references/sync-forms/scripts",
     "skills/forms-infra/references/sync-eds-code/scripts",
     "skills/forms-infra/references/git-sandbox/scripts",
     "skills/forms-integration/references/manage-apis/scripts",

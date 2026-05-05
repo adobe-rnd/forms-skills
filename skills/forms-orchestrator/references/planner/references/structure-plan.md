@@ -12,7 +12,7 @@ Builds the form skeleton: panels, fields, and basic per-field validations.
 
 | Attribute | Value |
 |-----------|-------|
-| **Primary skills** | `create-form`, `scaffold-form` |
+| **Primary skills** | `forms-content-author` |
 | **Specification focus** | Panel hierarchy tree, field property tables (name, type, required, min, max, pattern) |
 | **Typical steps** | Create form on AEM → build form.json with panels and fields → validate → push |
 | **Example** | Plan 01: Form Structure & Initial Fields |
@@ -58,24 +58,19 @@ A table defining every field's properties:
 
 ## Typical Steps
 
-1. **Create form on AEM** using `scaffold-form`:
-   - Bootstrap a new empty form via `form-sync create`
-   - Verify `metadata.json` is updated correctly
+1. **Create form on AEM** using `forms-content-author` (`create-form` intent):
+   - Provide the template source pageId; `forms-content-update` scaffolds the form via `patch-aem-page-content`
 
-2. **Build form.json** using `create-form`:
+2. **Build form content** using `forms-content-author`:
    - Add all top-level panels (including empty placeholders for later plans)
    - Add fields to panels with types, required flags, min/max, patterns
    - Set `visible: false` on panels that are conditionally shown later
    - Add `constraintMessages` for field-level validation errors
+   - All changes are written directly to AEM via `patch-aem-page-content`
 
 3. **Validate:**
    ```
    node tools/eds-form-validator/validate.cjs <form.json> code/authoring/_form.json
-   ```
-
-4. **Push to AEM:**
-   ```
-   form-sync push <aem-content-path>
    ```
 
 ---

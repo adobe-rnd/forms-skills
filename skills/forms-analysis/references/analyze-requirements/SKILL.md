@@ -220,7 +220,7 @@ Each plan file must follow this structure:
 # Plan NN: <Title>
 
 **Source:** `journeys/<journey>.md` section X.X / `Screen.md` references
-**Skills:** <primary skills invoked: create-form, add-rules, create-function, manage-apis, create-component>
+**Skills:** <primary skills invoked: forms-content-author, forms-rule-creator, manage-apis, forms-custom-components>
 **Depends on:** Plan NN (description) — or "None (first plan)"
 
 ---
@@ -281,11 +281,11 @@ When breaking a form specification into plans:
 
 | Order | Focus | Primary Skills | Example |
 |-------|-------|---------------|---------|
-| 01 | Form structure + primary fields | `create-form`, `scaffold-form` | Panels, field types, basic validation |
-| 02–05 | Screen-by-screen logic | `create-form`, `add-rules`, `create-function` | Visibility rules, business rules per screen |
-| 06–08 | API integration | `manage-apis`, `create-function`, `add-rules` | API clients, prefill, save/submit |
-| 09 | Complex workflows | `create-function`, `add-rules` | Multi-step flows (e.g., OTP, verification) |
-| 10 | Error handling & edge cases | `create-function`, `add-rules` | Session management, error modals, fallbacks |
+| 01 | Form structure + primary fields | `forms-content-author` | Panels, field types, basic validation |
+| 02–05 | Screen-by-screen logic | `forms-content-author`, `forms-rule-creator` | Visibility rules, business rules per screen |
+| 06–08 | API integration | `manage-apis`, `forms-rule-creator` | API clients, prefill, save/submit |
+| 09 | Complex workflows | `forms-rule-creator` | Multi-step flows (e.g., OTP, verification) |
+| 10 | Error handling & edge cases | `forms-rule-creator` | Session management, error modals, fallbacks |
 
 ## Exclusions
 

@@ -15,18 +15,18 @@ When a plan step declares a skill, resolve it as follows:
 
 ```
 Plan step declares:
-  skill: add-rules
+  skill: forms-rule-creator
        │
        ▼
 Skills Catalog:
-  #8: logic › add-rules ✅ exists
+  #8: rule-creator › forms-rule-creator ✅ exists
        │
        ▼
 Domain Registry:
-  logic → references/logic/SKILL.md
+  rule-creator → references/rule-creator/SKILL.md
        │
        ▼
-Route to logic/SKILL.md → invokes add-rules
+Route to rule-creator/SKILL.md → invokes forms-rule-creator
 ```
 
 If a plan step declares a skill that doesn't exist in the catalog, halt and report the error. Do not guess.

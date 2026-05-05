@@ -16,7 +16,7 @@ Adds cross-cutting validations and business rules that span multiple fields or p
 
 | Attribute | Value |
 |-----------|-------|
-| **Primary skills** | `add-rules`, `create-function` |
+| **Primary skills** | `forms-rule-creator` |
 | **Specification focus** | Validation rule tables (trigger fields, condition, error message, display method), custom function signatures with parameters and return types, algorithm pseudocode |
 | **Typical steps** | Create custom functions → wire validation rules to trigger fields → unit test edge cases → validate → push |
 | **Example** | Plan 05: Cross-field Business Rule Validations |
@@ -85,12 +85,12 @@ Algorithm:
 
 ## Typical Steps to Execute
 
-1. **Create custom functions** using `create-function`:
+1. **Create custom functions** using `forms-rule-creator`:
    - Write each function in the fragment script
    - Add sync exported wrapper + async helper (if using `globals`)
    - Re-export from form-level script with JSDoc stubs
 
-2. **Wire validation rules** using `add-rules`:
+2. **Wire validation rules** using `forms-rule-creator`:
    - For each trigger field, create a rule that calls the custom function on `fd:change`
    - Validate rule JSON with `rule_coder.validator`
    - Save rule to store with `save-rule.js`
@@ -106,9 +106,7 @@ Algorithm:
    ```
 
 5. **Push to AEM:**
-   ```
-   form-sync push <aem-content-path>
-   ```
+   Use `forms-content-author` — content is written directly to AEM via `patch-aem-page-content`.
 
 ---
 

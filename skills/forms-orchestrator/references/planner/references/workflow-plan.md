@@ -16,7 +16,7 @@ Builds a specific user flow or branch within the form.
 
 | Attribute | Value |
 |-----------|-------|
-| **Primary skills** | `create-form`, `add-rules`, `create-function` |
+| **Primary skills** | `forms-content-author`, `forms-rule-creator` |
 | **Specification focus** | Branching logic tables (trigger → condition → show/hide/set actions), enum mappings, conditional field requirements |
 | **Typical steps** | Add fields to existing panels → implement visibility rules → implement value/property rules → validate → push |
 | **Example** | Plan 02: Workflow Branch A, Plan 03: Workflow Branch B |
@@ -68,20 +68,20 @@ Show what triggers the branch, the conditions, and the resulting actions:
 
 ## Typical Steps
 
-1. **Add fields to existing panels** using `create-form`:
+1. **Add fields to existing panels** using `forms-content-author`:
    - Add workflow-specific fields to the panels created by the structure plan
    - Set initial visibility (`visible: false` for conditionally shown panels)
 
-2. **Implement visibility rules** using `add-rules`:
+2. **Implement visibility rules** using `forms-rule-creator`:
    - Wire trigger fields to show/hide panels and fields based on user selection
    - Ensure mutually exclusive branches hide each other
 
-3. **Implement value/property rules** using `add-rules`:
+3. **Implement value/property rules** using `forms-rule-creator`:
    - Set conditional required flags
    - Clear dependent fields when the branch changes
    - Reset state when the user switches between branches
 
-4. **Create custom functions** (if needed) using `create-function`:
+4. **Create custom functions** (if needed) using `forms-rule-creator`:
    - Dynamic behavior like switching validation patterns
    - Complex branching logic that can't be expressed in simple rules
 
@@ -91,9 +91,7 @@ Show what triggers the branch, the conditions, and the resulting actions:
    ```
 
 6. **Push to AEM:**
-   ```
-   form-sync push <aem-content-path>
-   ```
+   Use `forms-content-author` — content is written directly to AEM via `patch-aem-page-content`.
 
 ---
 

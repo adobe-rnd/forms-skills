@@ -107,4 +107,4 @@ if (result.componentDefinitions.length === 0) {
 }
 
 console.log(JSON.stringify(result, null, 2));
-process.exit(0);
+process.exitCode = 0;

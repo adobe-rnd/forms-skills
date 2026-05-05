@@ -11,7 +11,7 @@
 //   find-rule-refs.bundle.js         — scan fd:rules ASTs for COMPONENT refs to a qualifiedId
 //   rewrite-rule-refs.bundle.js      — rewrite COMPONENT refs old→new in fd:rules ASTs
 //
-// All scripts share lib/content-model-walk.js (inlined by esbuild — no runtime dependency).
+// All scripts share forms-shared/scripts/content-model-walk.js (inlined by esbuild — no runtime dependency).
 //
 // Usage:
 //   node build.mjs
@@ -45,7 +45,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir          = join(__dirname, '..');
 const scriptsDir       = join(__dirname, 'scripts');
 const pkgCli           = join(__dirname, 'node_modules/@aemforms/rule-editor-transformer/src/cli');
-const formUpdateScripts = join(rootDir, 'forms-content-update/scripts');
+const formUpdateScripts = join(rootDir, 'forms-content-author/forms-content-update/scripts');
 const formUpdateSrc    = join(formUpdateScripts, 'src');
 
 const entries = [
@@ -60,7 +60,7 @@ const entries = [
   { in: join(pkgCli, 'parse-functions.js'), out: join(scriptsDir, 'parse-functions.bundle.js'), keepCustomFunctionParser: true },
 
   // ── forms-content-update ─────────────────────────────────────────────────
-  // lib/content-model-walk.js is inlined into each bundle by esbuild — no runtime dependency
+  // forms-shared/scripts/content-model-walk.js is inlined into each bundle by esbuild — no runtime dependency
   { in: join(formUpdateSrc, 'apply-rule-patch.js'),  out: join(formUpdateScripts, 'apply-rule-patch.bundle.js') },
   { in: join(formUpdateSrc, 'find-field.js'),        out: join(formUpdateScripts, 'find-field.bundle.js') },
   { in: join(formUpdateSrc, 'find-rule-refs.js'),    out: join(formUpdateScripts, 'find-rule-refs.bundle.js') },

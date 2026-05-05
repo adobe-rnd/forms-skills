@@ -289,7 +289,7 @@ Then register: add `'card-choice'` to `customComponents` in `mappings.js`.
 
 ## Modal / Overlay Components
 
-Modal and overlay panels are custom components backed by `panel` as the base type. They are initially hidden in `form.json` and shown/hidden by rules or custom functions. Use `create-component` to attach CSS + JS behavior to a standard panel.
+Modal and overlay panels are custom components backed by `panel` as the base type. They are initially hidden in `form.json` and shown/hidden by rules or custom functions. Use `forms-custom-components` to attach CSS + JS behavior to a standard panel.
 
 ### Pattern overview
 
@@ -348,7 +348,7 @@ export default function decorate(fieldDiv, fieldJson, container, formId) {
 
 4. **Style** `confirm-modal.css` — position the panel as a fixed overlay and style the backdrop.
 
-5. **Wire visibility rules** in `add-rules` — use SHOW_STATEMENT / HIDE_STATEMENT on the modal panel from any trigger (button click, API error, custom event).
+5. **Wire visibility rules** in `forms-rule-creator` — use SHOW_STATEMENT / HIDE_STATEMENT on the modal panel from any trigger (button click, API error, custom event).
 
 > **Key point:** Showing/hiding is always done via the form model (rules or `globals.functions.setProperty`), never by toggling CSS `display` directly. The `subscribe` callback on the `visible` property is how the component learns it was shown/hidden so it can sync any secondary DOM (like the backdrop).
 

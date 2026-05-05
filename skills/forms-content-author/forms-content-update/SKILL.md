@@ -292,7 +292,7 @@ Use the `Write` tool to save the content model to `/tmp/content-model.json`. The
 **Step 1 — Build patch ops using `apply-rule-patch.bundle.js`** — NEVER construct JSON Patch ops manually, NEVER use a `node -e` one-liner:
 
 ```bash
-node $SKILL_DIR/forms-content-update/scripts/apply-rule-patch.bundle.js \
+node $SKILL_DIR/skills/forms-content-author/forms-content-update/scripts/apply-rule-patch.bundle.js \
   --merged-rule-file /tmp/merged-rule.json \
   --content-model-file /tmp/content-model.json \
   --field-pointer '<pointer-of-target-field>' > /tmp/rule-patch.json

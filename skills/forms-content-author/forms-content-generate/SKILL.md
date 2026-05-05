@@ -7,7 +7,7 @@ description: "Use when an AEM Adaptive Form field or component needs to be built
 
 Constructs and validates AEM Adaptive Form component objects locally. **No MCP calls are made here.** This skill is invoked by `forms-content-update` during the build phase: it receives user intent + CONTENT_MODEL + DEFINITION (or a path to the definition file), extracts a component profile via scripts, builds properties strictly from that profile + user intent, and returns a validated component object. The caller owns all MCP interactions.
 
-> **Script paths:** All CLIs are pre-bundled in `$SKILL_DIR/forms-content-generate/scripts/`. The base directory is shown in the "Base directory for this skill:" line at invocation time.
+> **Script paths:** All CLIs are pre-bundled in `$SKILL_DIR/skills/forms-content-author/forms-content-generate/scripts/`. The base directory is shown in the "Base directory for this skill:" line at invocation time.
 
 ---
 
@@ -79,19 +79,19 @@ Constructs and validates AEM Adaptive Form component objects locally. **No MCP c
 **Script calls for steps 2–4:**
 ```bash
 # Step 2 — resolve exact componentType from definition (not from field-types.md)
-RESOLVED=$(node $SKILL_DIR/forms-content-generate/scripts/resolve-component-type.bundle.js \
+RESOLVED=$(node $SKILL_DIR/skills/forms-content-author/forms-content-generate/scripts/resolve-component-type.bundle.js \
   --definition-file '<path to MCP tool-result file>' \
   --field-type '<fieldType from field-types.md>' \
   [--hint '<hint from field-types.md>'])
 COMPONENT_TYPE=$(echo "$RESOLVED" | node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).normalized)")
 
 # Step 3 — slim the definition to just this component
-SLIM=$(node $SKILL_DIR/forms-content-generate/scripts/filter-definition.bundle.js \
+SLIM=$(node $SKILL_DIR/skills/forms-content-author/forms-content-generate/scripts/filter-definition.bundle.js \
   --definition-file '<path>' \
   --component-types "$COMPONENT_TYPE")
 
 # Step 4 — extract the component profile
-node $SKILL_DIR/forms-content-generate/scripts/get-component-def.bundle.js \
+node $SKILL_DIR/skills/forms-content-author/forms-content-generate/scripts/get-component-def.bundle.js \
   --definition "$SLIM" \
   --component-type "$COMPONENT_TYPE"
 ```
@@ -138,7 +138,7 @@ By the time these run, §2 build workflow has already produced SLIM_DEFINITION (
 
 ### 1. check-name-collision — run first
 ```bash
-node $SKILL_DIR/forms-content-generate/scripts/check-name-collision.bundle.js \
+node $SKILL_DIR/skills/forms-content-author/forms-content-generate/scripts/check-name-collision.bundle.js \
   --content-model '<CONTENT_MODEL>' \
   --name '<proposed name>'
 ```
@@ -146,10 +146,9 @@ Exit 1 → propose an alternative name, re-check.
 
 ### 2. validate-add — run after name is confirmed clean
 ```bash
-node $SKILL_DIR/forms-content-generate/scripts/validate-add.bundle.js \
+node $SKILL_DIR/skills/forms-content-author/forms-content-generate/scripts/validate-add.bundle.js \
   --definition '<SLIM_DEFINITION from §2 step 2>' \
   --component '<componentObject json>' \
   [--content-model '<CONTENT_MODEL>' --panel-capi-key '<capiKey>']
 ```
 Exit 1 → read the error output, fix the component object properties, re-run. If exit 1 again → stop and report errors.
-

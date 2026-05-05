@@ -101,7 +101,7 @@ Each skill in the aem-forms plugin references CLI tools in `scripts/`. These too
 
 **Agent behavior:**
 - **NEVER** call save-rule without validating first
-- Use `--rule-store` mode (not legacy form mode) for form-sync compatibility
+- Use `--rule-store` mode when validating rules before applying via `patch-aem-page-content`
 - If save fails, use `DEBUG=true` prefix to get a stack trace:
   ```
   DEBUG=true node scripts/rule_coder/bridge/cli/save-rule.js ...
@@ -200,7 +200,7 @@ All tools follow Unix conventions:
 |-------------|-----------|------------|
 | `PYTHONPATH` includes `scripts/` | Python tools (rule_coder, api_manager) | `PYTHONPATH="<plugin-root>/scripts"` prefix |
 | `node_modules/` in `rule_coder/bridge/` | All Node.js bridge scripts | `npm install` in that directory |
-| `AEM_HOST` + `AEM_TOKEN` env vars | form_sync tools | Set in shell or MCP config |
+| `AEM_HOST` + `AEM_TOKEN` env vars | `api-manager`, `eds-code-sync` | Set in shell or MCP config |
 | Working directory = workspace root | All tools (relative paths) | `cd` to workspace before running |
 
 ---
@@ -210,10 +210,10 @@ All tools follow Unix conventions:
 ### analyze-requirements
 No tool commands — this skill is pure reasoning. Errors are about output quality, not tool failures.
 
-### create-form
+### forms-content-author
 **Critical pattern:** Always run the validator after every form edit. The validator is the gate — no proceeding until it passes.
 
-### add-rules
+### forms-rule-creator (rules)
 **Critical pattern:** validate → save (never reverse). If the validator says invalid, do NOT attempt to save. Fix first.
 
 **Retry budget:** Grammar errors get 2 retry attempts. If the agent can't construct a valid rule after 2 tries, it should:
@@ -221,5 +221,5 @@ No tool commands — this skill is pure reasoning. Errors are about output quali
 2. Show the validation error
 3. Ask for guidance
 
-### create-function
+### forms-rule-creator (custom functions)
 **Critical pattern:** Run parse-functions after writing. If `success: false` or a function is missing from output, the JSDoc is wrong — fix annotations and re-run.

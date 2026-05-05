@@ -71,7 +71,6 @@ Guard policies are constraints that apply across all skills in this domain. They
 
 | File | Managed By | Purpose |
 |------|------------|---------|
-| `metadata.json` | `sync-forms` | Tracks synced form/fragment paths (AEM ↔ local) |
 | `sandbox.json` | `git-sandbox` | Restricts allowed commit paths and push branch names |
 
 ---
@@ -94,7 +93,7 @@ Other domains or skills that this domain's skills may delegate to or depend on.
 
 | Dependency | Direction | Reason |
 |------------|-----------|--------|
-| All other domains | Other domains → `infra` | All other domains depend on infra for deployment (`sync-forms`, `sync-eds-code`, `git-sandbox`) |
+| All other domains | Other domains → `infra` | All other domains depend on infra for deployment (`sync-eds-code`, `git-sandbox`) |
 
 ---
 

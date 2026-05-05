@@ -195,7 +195,7 @@ After validating structure and content, evaluate the Summary metrics against com
 | Metric Exceeded | Recommended Action |
 |-----------------|--------------------|
 | Fields > 37 | Split screen into multiple wizard panels |
-| Validation rules > 22 | Consolidate into custom functions via `optimize-rules` |
+| Validation rules > 22 | Consolidate into custom functions via `forms-rule-creator` |
 | Visibility rules > 15 | Consolidate into a single custom function with a visibility map |
 | Business rules > 9 | Extract into custom functions; review if screen is doing too much |
 | API calls > 4 | Centralize API orchestration into a shared custom function |

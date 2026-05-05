@@ -44,7 +44,7 @@ SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPTS_DIR/.." && pwd)"
 PROJECT_ROOT="$(cd "$PLUGIN_ROOT/../.." && pwd)"
 VENV_PATH="$PROJECT_ROOT/.venv"
-BRIDGE_DIR="$PROJECT_ROOT/skills/forms-logic/scripts/rule_coder/bridge"
+BRIDGE_DIR="$PROJECT_ROOT/skills/forms-rule-creator"
 
 # ── Parse CLI arguments ──────────────────────────────────────────────────────
 FORCE=false
@@ -130,7 +130,7 @@ else
     else
       warn "npm not found — skipping Node.js bridge dependency installation."
       warn "Install Node.js (https://nodejs.org) and re-run, or run:"
-      echo "      cd forms-logic/scripts/rule_coder/bridge && npm install"
+      echo "      cd forms-rule-creator && npm install"
     fi
   else
     warn "Bridge directory not found at $BRIDGE_DIR — skipping npm install."
@@ -144,7 +144,7 @@ echo ""
 echo "  Shared tools (forms-shared/scripts/):"
 echo -e "    ${CYAN}api-manager${RESET}     — Manage OpenAPI specifications"
 echo ""
-echo "  Logic tools (forms-logic/scripts/):"
+echo "  Logic tools (forms-rule-creator/scripts/):"
 echo -e "    ${CYAN}rule-transform${RESET}  — Transform form JSON for rule editing"
 echo -e "    ${CYAN}rule-validate${RESET}   — Validate rule JSON against grammar"
 echo -e "    ${CYAN}rule-save${RESET}       — Save compiled rules back to form"
@@ -153,12 +153,7 @@ echo -e "    ${CYAN}parse-functions${RESET} — Parse custom function JSDoc anno
 echo ""
 echo "  Infra tools (forms-infra/scripts/ and skill scripts/):"
 echo -e "    ${CYAN}eds-code-sync${RESET}   — Sync EDS code via GitHub  (infra/sync-eds-code)"
-echo -e "    ${CYAN}form-sync${RESET}       — Sync forms with AEM       (infra/sync-forms)"
 echo -e "    ${CYAN}git-sandbox${RESET}     — Isolated Git workspace    (infra/git-sandbox)"
-echo ""
-echo "  Build tools (skill scripts/):"
-echo -e "    ${CYAN}form-validate${RESET}   — Validate form JSON        (build/create-form)"
-echo -e "    ${CYAN}scaffold-form${RESET}   — Scaffold empty form JSON  (build/scaffold-form)"
 echo ""
 echo "  Integration tools (skill scripts/):"
 echo -e "    ${CYAN}api-skill${RESET}       — Generate API from cURL    (integration/manage-apis)"

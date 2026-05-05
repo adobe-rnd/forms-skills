@@ -10,7 +10,7 @@ Receives `{ fd:rules, fd:events }` from `forms-rule-creator` (saved to `/tmp/mer
 ```
 
 ```bash
-node $SKILL_DIR/forms-content-update/scripts/find-field.bundle.js \
+node $SKILL_DIR/skills/forms-content-author/forms-content-update/scripts/find-field.bundle.js \
   --content-model '<CONTENT_MODEL>' \
   --names "fd:rules,fd:events"
 # → [{ name, found, pointer, propertyPointer }, ...]
@@ -22,7 +22,7 @@ node $SKILL_DIR/forms-content-update/scripts/find-field.bundle.js \
 ```
 
 ```bash
-node $SKILL_DIR/forms-content-update/scripts/apply-rule-patch.bundle.js \
+node $SKILL_DIR/skills/forms-content-author/forms-content-update/scripts/apply-rule-patch.bundle.js \
   --merged-rule-file /tmp/merged-rule.json \
   --find-field-result-file /tmp/ff-result.json \
   --field-pointer '<field-pointer>'

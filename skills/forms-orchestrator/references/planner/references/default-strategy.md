@@ -122,18 +122,18 @@ A moderately complex form with conditional branches and API integrations might d
 
 | Plan | Focus | Skills Used |
 |------|-------|-------------|
-| 01 | Form structure & initial fields | `create-form` |
-| 02 | Workflow branch A (e.g., conditional section) | `create-form`, `add-rules` |
-| 03 | Workflow branch B (e.g., alternative path) | `create-form`, `add-rules`, `create-function` |
-| 04 | Shared fields & common sections | `create-form`, `add-rules` |
-| 05 | Cross-field business rule validations | `create-function`, `add-rules` |
-| 06 | API integration — data loading & prefill | `manage-apis`, `create-function`, `add-rules` |
-| 07 | API integration — save & submit | `manage-apis`, `create-function`, `add-rules` |
-| 08 | Error handling & session management | `create-function`, `add-rules` |
+| 01 | Form structure & initial fields | `forms-content-author` |
+| 02 | Workflow branch A (e.g., conditional section) | `forms-content-author`, `forms-rule-creator` |
+| 03 | Workflow branch B (e.g., alternative path) | `forms-content-author`, `forms-rule-creator` |
+| 04 | Shared fields & common sections | `forms-content-author`, `forms-rule-creator` |
+| 05 | Cross-field business rule validations | `forms-rule-creator` |
+| 06 | API integration — data loading & prefill | `manage-apis`, `forms-rule-creator` |
+| 07 | API integration — save & submit | `manage-apis`, `forms-rule-creator` |
+| 08 | Error handling & session management | `forms-rule-creator` |
 
 **Key principles illustrated:**
 - Plans follow the recommended order (structure → workflows → validations → integrations → infrastructure)
-- Every plan freely mixes skills (`create-form` + `add-rules` + `create-function` in the same plan)
+- Every plan freely mixes skills (`forms-content-author` + `forms-rule-creator` in the same plan)
 - Each plan ends with validate + push, keeping the form in a deployable state
 - The exact number of plans depends on the form's complexity — a simple form might need only 3
 

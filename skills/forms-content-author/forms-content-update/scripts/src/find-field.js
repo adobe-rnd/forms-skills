@@ -17,7 +17,7 @@
 // Exit codes: 0=found (all found for multi), 1=not found, 2=bad args
 
 import { readFileSync } from 'fs';
-import { walkItems, findFormRoot, fieldTypeToType, PANEL_FIELD_TYPES } from '../../../lib/content-model-walk.js';
+import { walkItems, findFormRoot, fieldTypeToType, PANEL_FIELD_TYPES } from '../../../../forms-shared/scripts/content-model-walk.js';
 
 function capiToPointer(capiKey) {
   return capiKey.split(':').map(s => `/items/${s}`).join('');

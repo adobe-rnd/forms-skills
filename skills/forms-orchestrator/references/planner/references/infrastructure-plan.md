@@ -17,7 +17,7 @@ Cross-cutting concerns like error handling, session management, toast notificati
 
 | Attribute | Value |
 |-----------|-------|
-| **Primary skills** | `create-function`, `add-rules` |
+| **Primary skills** | `forms-rule-creator` |
 | **Specification focus** | Error message catalogs, session management flows, utility function signatures, storage key inventories |
 | **Typical steps** | Create utility functions (toast, error handler, sanitizers) → wire rules to fields → add UI elements (modal panels) → validate → push |
 | **Example** | Plan 08: Error Handling & Session Management |
@@ -89,17 +89,17 @@ Field-level transforms applied on input (e.g., uppercase, trim, format enforceme
 
 ## Typical Steps to Execute
 
-1. **Create utility functions** using `create-function`:
+1. **Create utility functions** using `forms-rule-creator`:
    - Central API response handler
    - Session timeout handler with relogin modal
    - Data sanitization functions (uppercase, trim)
    - Storage cleanup function
 
-2. **Add UI elements** using `create-form` (if needed):
+2. **Add UI elements** using `forms-content-author` (if needed):
    - Relogin modal panel with message and button
    - Any shared UI components for error display
 
-3. **Wire rules to fields** using `add-rules`:
+3. **Wire rules to fields** using `forms-rule-creator`:
    - Sanitization rules on text input fields (`fd:change` triggers)
    - Relogin button click handler
 
@@ -109,9 +109,7 @@ Field-level transforms applied on input (e.g., uppercase, trim, format enforceme
    ```
 
 5. **Push to AEM:**
-   ```
-   form-sync push <aem-content-path>
-   ```
+   Use `forms-content-author` — content is written directly to AEM via `patch-aem-page-content`.
 
 ---
 

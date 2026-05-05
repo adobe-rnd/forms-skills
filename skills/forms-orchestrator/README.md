@@ -131,7 +131,7 @@ The plugin bundles its own Python virtual environment — you don't install any 
 npx skills add adobe/forms-skills --all
 
 # Or install a single skill
-npx skills add adobe/forms-skills --skill create-form
+npx skills add adobe/forms-skills --skill forms-content-author
 
 # List what's available
 npx skills add adobe/forms-skills --list
@@ -179,7 +179,7 @@ cd forms-skills
 The script will:
 1. Create a `.venv` virtual environment at the project root (uses `uv` if available, falls back to `python3 -m venv`).
 2. Install the project in editable mode (`pip install -e ".[dev]"`).
-3. Install the Node.js bridge dependencies (`npm install` in `forms-logic/scripts/rule_coder/bridge/`).
+3. Install the Node.js bridge dependencies (`npm install` in `forms-rule-creator/`).
 
 After setup, activate the venv in any new shell:
 

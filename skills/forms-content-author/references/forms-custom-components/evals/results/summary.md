@@ -1,4 +1,4 @@
-# Evals summary: create-component
+# Evals summary: forms-custom-components
 
 | Scenario | Verdict | Attempts | Duration |
 |---|---|---|---|

@@ -180,4 +180,4 @@ var placementInfo = findRequiredKeys(definition, componentType);
 var profile = buildProfile(componentDef, placementInfo);
 
 console.log(JSON.stringify(profile, null, 2));
-process.exit(0);
+process.exitCode = 0;

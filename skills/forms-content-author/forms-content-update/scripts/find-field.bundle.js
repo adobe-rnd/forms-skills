@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 var __import_meta_url__ = require('url').pathToFileURL(__filename).href;
 
-// ../forms-content-update/scripts/src/find-field.js
+// ../forms-content-author/forms-content-update/scripts/src/find-field.js
 var import_fs = require("fs");
 
-// ../lib/content-model-walk.js
+// ../forms-shared/scripts/content-model-walk.js
 var PANEL_FIELD_TYPES = /* @__PURE__ */ new Set([
   "panelcontainer",
   "accordion",
@@ -17,20 +17,20 @@ var PANEL_FIELD_TYPES = /* @__PURE__ */ new Set([
 var FIELD_TYPE_TO_TYPE = {
   "text-input": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
   "multiline-input": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
-  "email": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+  email: "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
   "telephone-input": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
   "number-input": "AFCOMPONENT|FIELD|NUMBER FIELD|NUMBER",
   "date-input": "AFCOMPONENT|FIELD|DATE FIELD|DATE",
   "drop-down": "AFCOMPONENT|FIELD|DROPDOWN|STRING",
   "radio-group": "AFCOMPONENT|FIELD|RADIO BUTTON|STRING",
-  "checkbox": "AFCOMPONENT|FIELD|BOOLEAN",
+  checkbox: "AFCOMPONENT|FIELD|BOOLEAN",
   "checkbox-group": "AFCOMPONENT|FIELD|STRING[]",
-  "switch": "AFCOMPONENT|FIELD|BOOLEAN",
+  switch: "AFCOMPONENT|FIELD|BOOLEAN",
   "file-input": "AFCOMPONENT|FIELD",
   "plain-text": "AFCOMPONENT|STATIC TEXT|STRING",
-  "image": "AFCOMPONENT|IMAGE|STRING",
-  "button": "AFCOMPONENT|FIELD|BUTTON",
-  "form": "FORM"
+  image: "AFCOMPONENT|IMAGE|STRING",
+  button: "AFCOMPONENT|FIELD|BUTTON",
+  form: "FORM"
 };
 function fieldTypeToType(fieldType) {
   if (!fieldType) return "AFCOMPONENT|FIELD";
@@ -53,11 +53,18 @@ function walkItems(itemsObj, parentQualifiedId, parentCapiKey, parentPointer, de
     const capiKey = parentCapiKey ? `${parentCapiKey}:${idx}` : idx;
     const pointer = `${parentPointer}/items/${idx}`;
     visitor(entry, { name: name2, qualifiedId, capiKey, pointer, depth });
-    walkItems(entry.items || {}, qualifiedId, capiKey, pointer, depth + 1, visitor);
+    walkItems(
+      entry.items || {},
+      qualifiedId,
+      capiKey,
+      pointer,
+      depth + 1,
+      visitor
+    );
   }
 }
 
-// ../forms-content-update/scripts/src/find-field.js
+// ../forms-content-author/forms-content-update/scripts/src/find-field.js
 function capiToPointer(capiKey) {
   return capiKey.split(":").map((s) => `/items/${s}`).join("");
 }

@@ -119,7 +119,7 @@ First match wins.
 
 | Dependency | Domain | Purpose |
 |------------|--------|---------|
-| `review-screen-doc` → form JSON | infra (`sync-forms`) | Review skill needs the synced form JSON to validate Screen.md against |
+| `review-screen-doc` → form JSON | `content-author` | Review skill needs the form JSON (fetched via MCP) to validate Screen.md against |
 
 ---
 

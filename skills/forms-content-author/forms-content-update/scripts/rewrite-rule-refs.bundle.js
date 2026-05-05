@@ -33,10 +33,10 @@ var require_stub_CustomFunctionParser = __commonJS({
   }
 });
 
-// ../forms-content-update/scripts/src/rewrite-rule-refs.js
+// ../forms-content-author/forms-content-update/scripts/src/rewrite-rule-refs.js
 var import_fs = require("fs");
 
-// ../lib/content-model-walk.js
+// ../forms-shared/scripts/content-model-walk.js
 function sortedValues(itemsObj) {
   if (!itemsObj || typeof itemsObj !== "object") return [];
   return Object.entries(itemsObj).sort(([a], [b]) => parseInt(a, 10) - parseInt(b, 10)).map(([idx, entry]) => ({ idx, entry }));
@@ -53,7 +53,14 @@ function walkItems(itemsObj, parentQualifiedId, parentCapiKey, parentPointer, de
     const capiKey = parentCapiKey ? `${parentCapiKey}:${idx}` : idx;
     const pointer = `${parentPointer}/items/${idx}`;
     visitor(entry, { name, qualifiedId, capiKey, pointer, depth });
-    walkItems(entry.items || {}, qualifiedId, capiKey, pointer, depth + 1, visitor);
+    walkItems(
+      entry.items || {},
+      qualifiedId,
+      capiKey,
+      pointer,
+      depth + 1,
+      visitor
+    );
   }
 }
 
@@ -499,7 +506,7 @@ function rewriteComponentRefs(node, oldId2, newId2) {
   return result;
 }
 
-// ../forms-content-update/scripts/src/rewrite-rule-refs.js
+// ../forms-content-author/forms-content-update/scripts/src/rewrite-rule-refs.js
 function findFdRulesChild(itemsObj) {
   if (!itemsObj || typeof itemsObj !== "object") return null;
   for (const val of Object.values(itemsObj)) {

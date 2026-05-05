@@ -57,13 +57,13 @@ The template defines these required sections in order:
 
 ## Script References in SKILL.md
 
-When a skill needs to invoke a CLI tool (e.g., `eds-code-sync`, `rule-validate`, `form-sync`), follow these rules:
+When a skill needs to invoke a CLI tool (e.g., `eds-code-sync`, `rule-validate`, `api-skill`), follow these rules:
 
 ### Always use `${CLAUDE_PLUGIN_ROOT}`
 
 ```
 "${CLAUDE_PLUGIN_ROOT}/skills/forms-shared/scripts/<tool-name>" <args>
-"${CLAUDE_PLUGIN_ROOT}/skills/forms-logic/scripts/<tool-name>" <args>
+"${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-creator/scripts/<tool-name>" <args>
 "${CLAUDE_PLUGIN_ROOT}/skills/forms-infra/scripts/<tool-name>" <args>
 ```
 
@@ -72,7 +72,7 @@ When a skill needs to invoke a CLI tool (e.g., `eds-code-sync`, `rule-validate`,
 | # | Rule |
 |---|------|
 | 1 | **Use `${CLAUDE_PLUGIN_ROOT}` for all script paths** — never construct paths from the skill's base directory. Claude Code injects a `Base directory for this skill:` header into each skill at runtime — this is for resolving skill-local files (`assets/`, `references/`), **not** for locating scripts. |
-| 2 | **Always include the module name** — `${CLAUDE_PLUGIN_ROOT}` points to the plugin root (the directory containing `.claude-plugin/`). Scripts live in the owning module: `forms-shared/scripts/`, `forms-logic/scripts/`, `forms-infra/scripts/`. |
+| 2 | **Always include the module name** — `${CLAUDE_PLUGIN_ROOT}` points to the plugin root (the directory containing `.claude-plugin/`). Scripts live in the owning module: `forms-shared/scripts/`, `forms-rule-creator/scripts/`, `forms-infra/scripts/`. |
 | 3 | **Never hardcode absolute paths** — no `/Users/...` or machine-specific paths in any SKILL.md. Use `${CLAUDE_PLUGIN_ROOT}` for plugin-relative paths and `<cwd>/<name>` style placeholders for documentation examples. |
 | 4 | **Use relative paths only for skill-local assets** — files within the skill's own directory tree (e.g., `assets/`, `references/`) should use relative paths from the SKILL.md, not `${CLAUDE_PLUGIN_ROOT}`. |
 

@@ -27,7 +27,7 @@ Standard structure for plan files. Copy this template when creating a new plan.
 <!-- Optional: Jira/ticket ID and story points -->
 
 **Skills:** `<skill-1>`, `<skill-2>`, `<skill-3>`
-<!-- Which skills does this plan invoke? e.g. create-form, add-rules, create-function, manage-apis, create-component -->
+<!-- Which skills does this plan invoke? e.g. forms-content-author, forms-rule-creator, manage-apis, forms-custom-components -->
 
 **Depends on:** Plan <NN> (<what it provides>), Plan <NN> (<what it provides>)
 <!-- Explicit dependency chain. Use "Nothing (first plan)" for the first plan. -->
@@ -154,10 +154,8 @@ Algorithm:
    ```
 
 4. **Push to AEM:**
-   <!-- Always ASK before pushing — never push silently. Token may be expired. -->
-   > "Ready to push to AEM? (yes / skip — you can push manually later with `form-sync push <aem-content-path>`)"
-   - If **yes**: run `form-sync push <aem-content-path>` and confirm success.
-   - If **no** / **skip**: note that push is pending and move on.
+   <!-- Content is written directly via MCP — no separate push step needed. -->
+   Use `forms-content-author` — `patch-aem-page-content` writes changes directly to AEM. Confirm the patch response shows success before proceeding.
 
 ## Acceptance Criteria
 
@@ -188,11 +186,11 @@ Each type has its own detailed reference with specification patterns, typical st
 
 | Type | Purpose | Primary Skills | Reference |
 |------|---------|----------------|-----------|
-| **Structure** | Form skeleton — panels, fields, basic validations | `create-form`, `scaffold-form` | [`references/structure-plan.md`](../references/structure-plan.md) |
-| **Workflow** | Specific user flow or conditional branch | `create-form`, `add-rules`, `create-function` | [`references/workflow-plan.md`](../references/workflow-plan.md) |
-| **Logic** | Cross-cutting validations and business rules | `add-rules`, `create-function` | [`references/logic-plan.md`](../references/logic-plan.md) |
-| **Integration** | API wiring — data loading, save/submit, external calls | `manage-apis`, `create-function`, `add-rules` | [`references/integration-plan.md`](../references/integration-plan.md) |
-| **Infrastructure** | Error handling, session mgmt, toasts, sanitization | `create-function`, `add-rules` | [`references/infrastructure-plan.md`](../references/infrastructure-plan.md) |
+| **Structure** | Form skeleton — panels, fields, basic validations | `forms-content-author` | [`references/structure-plan.md`](../references/structure-plan.md) |
+| **Workflow** | Specific user flow or conditional branch | `forms-content-author`, `forms-rule-creator` | [`references/workflow-plan.md`](../references/workflow-plan.md) |
+| **Logic** | Cross-cutting validations and business rules | `forms-rule-creator` | [`references/logic-plan.md`](../references/logic-plan.md) |
+| **Integration** | API wiring — data loading, save/submit, external calls | `manage-apis`, `forms-rule-creator` | [`references/integration-plan.md`](../references/integration-plan.md) |
+| **Infrastructure** | Error handling, session mgmt, toasts, sanitization | `forms-rule-creator` | [`references/infrastructure-plan.md`](../references/infrastructure-plan.md) |
 
 ---
 

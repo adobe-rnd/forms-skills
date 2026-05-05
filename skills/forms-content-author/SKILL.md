@@ -19,8 +19,8 @@ Routes form authoring requests to the appropriate sub-skill based on intent.
 
 If an internal sub-skill's content is not in context, load it with the `Read` tool:
 ```
-Read $SKILL_DIR/forms-content-update/SKILL.md
-Read $SKILL_DIR/forms-content-generate/SKILL.md
+Read $SKILL_DIR/skills/forms-content-author/forms-content-update/SKILL.md
+Read $SKILL_DIR/skills/forms-content-author/forms-content-generate/SKILL.md
 ```
 
 ---
@@ -131,7 +131,7 @@ Rule intent patterns: `when`, `if...then`, `show when`, `hide when`, `required w
 
 1. Resolve ALL fields mentioned in the rule intent (target field + every referenced field) in one call (use `--content-model-file` — never pass large JSON inline):
    ```bash
-   node $SKILL_DIR/forms-content-update/scripts/find-field.bundle.js \
+   node $SKILL_DIR/skills/forms-content-author/forms-content-update/scripts/find-field.bundle.js \
      --content-model-file /tmp/content-model.json \
      --names "<targetField>,<refField1>,<refField2>,..."
    # → [{ name, qualifiedId, pointer, capiKey, ... }]

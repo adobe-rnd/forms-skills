@@ -1,0 +1,13 @@
+{
+  "name": "forms-skills",
+  "owner": {
+    "name": "Adobe"
+  },
+  "plugins": [
+    {
+      "name": "aem-forms",
+      "source": "./",
+      "description": "Skills for building AEM Adaptive Forms through AI conversation"
+    }
+  ]
+}

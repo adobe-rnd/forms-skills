@@ -33,7 +33,7 @@ var require_stub_CustomFunctionParser = __commonJS({
   }
 });
 
-// ../forms-content-update/scripts/src/find-rule-refs.js
+// ../forms-content-author/forms-content-update/scripts/src/find-rule-refs.js
 var import_fs = require("fs");
 
 // node_modules/@aemforms/rule-editor-transformer/src/scope/TypesRegistry.js
@@ -456,7 +456,7 @@ var RULE_AST_KEYS = Object.keys(FD_KEY_TO_EVENT);
 // node_modules/@aemforms/rule-editor-transformer/src/index.js
 var CustomFunctionParser = __toESM(require_stub_CustomFunctionParser(), 1);
 
-// ../lib/content-model-walk.js
+// ../forms-shared/scripts/content-model-walk.js
 function sortedValues(itemsObj) {
   if (!itemsObj || typeof itemsObj !== "object") return [];
   return Object.entries(itemsObj).sort(([a], [b]) => parseInt(a, 10) - parseInt(b, 10)).map(([idx, entry]) => ({ idx, entry }));
@@ -473,11 +473,18 @@ function walkItems(itemsObj, parentQualifiedId, parentCapiKey, parentPointer, de
     const capiKey = parentCapiKey ? `${parentCapiKey}:${idx}` : idx;
     const pointer = `${parentPointer}/items/${idx}`;
     visitor(entry, { name, qualifiedId: qualifiedId2, capiKey, pointer, depth });
-    walkItems(entry.items || {}, qualifiedId2, capiKey, pointer, depth + 1, visitor);
+    walkItems(
+      entry.items || {},
+      qualifiedId2,
+      capiKey,
+      pointer,
+      depth + 1,
+      visitor
+    );
   }
 }
 
-// ../forms-content-update/scripts/src/find-rule-refs.js
+// ../forms-content-author/forms-content-update/scripts/src/find-rule-refs.js
 function findFdRulesChild(itemsObj) {
   if (!itemsObj || typeof itemsObj !== "object") return null;
   for (const val of Object.values(itemsObj)) {

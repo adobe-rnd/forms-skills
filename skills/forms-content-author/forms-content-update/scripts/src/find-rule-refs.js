@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { RULE_AST_KEYS } from '@aemforms/rule-editor-transformer';
-import { walkItems, findFormRoot } from '../../../lib/content-model-walk.js';
+import { walkItems, findFormRoot } from '../../../../forms-shared/scripts/content-model-walk.js';
 
 // Find the fd:rules child node inside a field's items
 function findFdRulesChild(itemsObj) {

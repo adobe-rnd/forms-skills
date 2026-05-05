@@ -190,7 +190,7 @@ function fetchData(mobileNumber, globals) {
 export { fetchData };
 ```
 
-**Note:** Generated api-clients are `async` functions — they won't appear in the visual rule editor directly. Always create a sync wrapper (see **create-function** skill for the full pattern).
+**Note:** Generated api-clients are `async` functions — they won't appear in the visual rule editor directly. Always create a sync wrapper (see **forms-rule-creator** skill for the full pattern).
 
 ## File Structure
 

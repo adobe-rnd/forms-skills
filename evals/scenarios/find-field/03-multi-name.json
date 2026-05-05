@@ -1,14 +1,24 @@
 {
   "id": "find-field-multi-name",
   "description": "Multi-name lookup returns results keyed by field name",
-  "script": "forms-content-update/scripts/find-field.bundle.js",
+  "script": "skills/forms-content-author/forms-content-update/scripts/find-field.bundle.js",
   "args": {
     "--content-model": "@fixtures/content-model-contact-us.json",
     "--names": "full_name,email_address"
   },
   "expectedExitCode": 0,
   "expectedOutput": [
-    { "name": "full_name",     "found": true, "capiKey": "0:0", "qualifiedId": "$form.full_name" },
-    { "name": "email_address", "found": true, "capiKey": "0:2", "qualifiedId": "$form.email_address" }
+    {
+      "name": "full_name",
+      "found": true,
+      "capiKey": "0:0",
+      "qualifiedId": "$form.full_name"
+    },
+    {
+      "name": "email_address",
+      "found": true,
+      "capiKey": "0:2",
+      "qualifiedId": "$form.email_address"
+    }
   ]
 }

@@ -9,7 +9,7 @@ compatibility: "Requires Node.js. Scripts are pre-bundled in scripts/ — no npm
 Generate AEM Forms business rules from a CONTENT_MODEL (Sites Content API format) and a natural language prompt.
 Produces `{ fd:rules, fd:events }` ready for insertion into the rule store.
 
-> **Script paths:** Rule creator CLIs (`content-model-to-tree`, `validate-rule`, `generate-formula`, `validate-merge`, `parse-functions`) are in `$SKILL_DIR/forms-rule-creator/scripts/`. Content-update scripts (`find-field`, `apply-rule-patch`, etc.) are in `$SKILL_DIR/forms-content-update/scripts/`. No `npm install` required.
+> **Script paths:** Rule creator CLIs (`content-model-to-tree`, `validate-rule`, `generate-formula`, `validate-merge`, `parse-functions`) are in `$SKILL_DIR/skills/forms-rule-creator/scripts/`. Content-update scripts (`find-field`, `apply-rule-patch`, etc.) are in `$SKILL_DIR/skills/forms-content-author/forms-content-update/scripts/`. No `npm install` required.
 
 ## Inputs
 
@@ -50,9 +50,9 @@ Look up the STATEMENT type in the matrix at the bottom and **Read each listed gr
 
 Example for SHOW_EXPRESSION:
 ```
-Read $SKILL_DIR/forms-rule-creator/assets/grammar/visibility-expressions.md
-Read $SKILL_DIR/forms-rule-creator/assets/grammar/conditions.md
-Read $SKILL_DIR/forms-rule-creator/references/component-lookup.md
+Read $SKILL_DIR/skills/forms-rule-creator/assets/grammar/visibility-expressions.md
+Read $SKILL_DIR/skills/forms-rule-creator/assets/grammar/conditions.md
+Read $SKILL_DIR/skills/forms-rule-creator/references/component-lookup.md
 ```
 
 ### Step 3: Load agent-kb articles
@@ -63,8 +63,8 @@ Look up the STATEMENT type in the matrix at the bottom and Read each listed arti
 
 Example:
 ```
-Read $SKILL_DIR/forms-rule-creator/assets/agent-kb/05-rule-events-by-scenario.md
-Read $SKILL_DIR/forms-rule-creator/assets/agent-kb/06-rule-properties-by-field-type.md
+Read $SKILL_DIR/skills/forms-rule-creator/assets/agent-kb/05-rule-events-by-scenario.md
+Read $SKILL_DIR/skills/forms-rule-creator/assets/agent-kb/06-rule-properties-by-field-type.md
 ```
 
 ### Step 4: Run `content-model-to-tree.bundle.js` → treeJson
@@ -72,7 +72,7 @@ Read $SKILL_DIR/forms-rule-creator/assets/agent-kb/06-rule-properties-by-field-t
 Write the content model to `/tmp/content-model.json` first (using the `Write` tool), then pass it via `--content-model-file`. Do NOT pass large JSON inline — shell quoting fails on complex content models.
 
 ```bash
-node $SKILL_DIR/forms-rule-creator/scripts/content-model-to-tree.bundle.js \
+node $SKILL_DIR/skills/forms-rule-creator/scripts/content-model-to-tree.bundle.js \
   --content-model-file /tmp/content-model.json
 # Output: { success: true, treeJson: {...} }
 # Writes /tmp/treeJson.json automatically
@@ -83,7 +83,7 @@ The CONTENT_MODEL comes from `get-aem-page-content` (`response.data`). For compo
 ### Step 5: Run `parse-functions.bundle.js` (skip if no functions file)
 
 ```bash
-node $SKILL_DIR/forms-rule-creator/scripts/parse-functions.bundle.js <functions.js>
+node $SKILL_DIR/skills/forms-rule-creator/scripts/parse-functions.bundle.js <functions.js>
 # Output: { success: true, customFunction: [...], imports: [...] }
 ```
 
@@ -96,7 +96,7 @@ Save `customFunction[]` to `/tmp/customFunctions.json` for subsequent tool calls
 If not already resolved, extract all field names from the rule intent (e.g. `"show phone when country is US"` → `["phone", "country"]`) and pass CONTENT_MODEL **inline**:
 
 ```bash
-node $SKILL_DIR/forms-content-update/scripts/find-field.bundle.js \
+node $SKILL_DIR/skills/forms-content-author/forms-content-update/scripts/find-field.bundle.js \
   --content-model '<CONTENT_MODEL_JSON>' \
   --names "phone,country"
 # → [{ name, found, qualifiedId, type, displayName, capiKey, pointer }]
@@ -120,7 +120,7 @@ Using the grammar file(s) for the STATEMENT type, construct the rule AST. All CO
 ### Step 9: Validate — loop until `valid: true`
 
 ```bash
-node $SKILL_DIR/forms-rule-creator/scripts/validate-rule.bundle.js \
+node $SKILL_DIR/skills/forms-rule-creator/scripts/validate-rule.bundle.js \
   /tmp/rule.json \
   --tree /tmp/treeJson.json \
   --functions /tmp/customFunctions.json \
@@ -134,7 +134,7 @@ Fix any errors using the `code` field and the grammar files, then re-validate.
 ### Step 10: Generate formula
 
 ```bash
-node $SKILL_DIR/forms-rule-creator/scripts/generate-formula.bundle.js \
+node $SKILL_DIR/skills/forms-rule-creator/scripts/generate-formula.bundle.js \
   /tmp/rule.json \
   --tree /tmp/treeJson.json \
   --functions /tmp/customFunctions.json \
@@ -162,7 +162,7 @@ Before outputting the result, validate that `fd:rules` and `fd:events` are corre
 
 ```bash
 echo '{ "fd:rules": ..., "fd:events": ... }' > /tmp/merged-rule.json
-node $SKILL_DIR/forms-rule-creator/scripts/validate-merge.bundle.js /tmp/merged-rule.json
+node $SKILL_DIR/skills/forms-rule-creator/scripts/validate-merge.bundle.js /tmp/merged-rule.json
 # Output (valid): { valid: true, errors: [], warnings: [], fdRulesNode: {...}, fdEventsNode: {...} }
 # Output (invalid): { valid: false, errors: [...], warnings: [] }
 # fdRulesNode / fdEventsNode are only present when the respective object is non-empty.

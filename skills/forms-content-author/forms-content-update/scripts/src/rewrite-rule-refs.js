@@ -25,7 +25,7 @@
 // Exit codes: 0=success (zero or more rewrites), 1=error, 2=bad args
 
 import { readFileSync } from 'fs';
-import { walkItems, findFormRoot } from '../../../lib/content-model-walk.js';
+import { walkItems, findFormRoot } from '../../../../forms-shared/scripts/content-model-walk.js';
 import { RULE_AST_KEYS, rewriteComponentRefs } from '@aemforms/rule-editor-transformer';
 
 function findFdRulesChild(itemsObj) {

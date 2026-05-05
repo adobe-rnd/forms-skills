@@ -34,11 +34,8 @@ fi
 
 # ── Set PYTHONPATH for all plugin Python packages ────────────────────────────
 PLUGIN_PYTHONPATH="$PLUGIN_ROOT/scripts"
-PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-infra/references/sync-forms/scripts"
 PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-infra/references/sync-eds-code/scripts"
 PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-infra/references/git-sandbox/scripts"
-PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-build/references/create-form/scripts"
-PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-build/references/scaffold-form/scripts"
 PLUGIN_PYTHONPATH="$PLUGIN_PYTHONPATH:$PROJECT_ROOT/skills/forms-integration/references/manage-apis/scripts"
 export PYTHONPATH="$PLUGIN_PYTHONPATH${PYTHONPATH:+:$PYTHONPATH}"
 

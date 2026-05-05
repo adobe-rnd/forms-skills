@@ -16,7 +16,7 @@ Wires APIs and data flows — loading data into the form, submitting data out, o
 
 | Attribute | Value |
 |-----------|-------|
-| **Primary skills** | `manage-apis`, `create-function`, `add-rules` |
+| **Primary skills** | `manage-apis`, `forms-rule-creator` |
 | **Specification focus** | API endpoint definitions, request/response schemas, prefill mapping tables (API field → form field → transform), response handling matrices, state management |
 | **Typical steps** | Register API definitions → create data-loading/submission functions → create prefill mapping functions → wire form triggers (load, button click) → validate → push |
 | **Example** | Plan 06: API Integration — Data Loading, Plan 07: API Integration — Save & Submit |
@@ -96,16 +96,16 @@ One row per field that receives data from the API response.
    - Create OpenAPI spec or cURL-based definition
    - Generate JS API client at `refs/apis/api-clients/`
 
-2. **Create orchestrator function** using `create-function`:
+2. **Create orchestrator function** using `forms-rule-creator`:
    - Entry point function (e.g., `loadFormData`, `submitPersonalDetails`)
    - Calls the API client, handles response routing
 
-3. **Create mapping functions** using `create-function`:
+3. **Create mapping functions** using `forms-rule-creator`:
    - Prefill mapping (API response → form fields)
    - Request assembly (form fields → API request body)
    - Data transformations (date conversion, enum mapping, etc.)
 
-4. **Wire form triggers** using `add-rules`:
+4. **Wire form triggers** using `forms-rule-creator`:
    - `fd:init` → data loading function
    - Button `fd:click` → save/submit function
    - Custom events for async flows
@@ -116,9 +116,7 @@ One row per field that receives data from the API response.
    ```
 
 6. **Push to AEM:**
-   ```
-   form-sync push <aem-content-path>
-   ```
+   Use `forms-content-author` — content is written directly to AEM via `patch-aem-page-content`.
 
 ---
 

@@ -1,7 +1,7 @@
 {
   "id": "validate-rule-valid-grammar",
   "description": "Rule with syntactically correct grammar passes — validate-rule checks grammar, not component existence",
-  "script": "forms-rule-creator/scripts/validate-rule.bundle.js",
+  "script": "skills/forms-rule-creator/scripts/validate-rule.bundle.js",
   "positionalArgs": ["fixture:rule-ast-broken-ref.json"],
   "args": {
     "--tree": "fixture:tree-contact-us.json",

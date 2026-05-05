@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 var __import_meta_url__ = require('url').pathToFileURL(__filename).href;
 
-// ../forms-content-update/scripts/src/apply-rule-patch.js
+// ../forms-content-author/forms-content-update/scripts/src/apply-rule-patch.js
 var import_fs = require("fs");
 function capiToPointer(capiKey) {
   return capiKey.split(":").map((s) => `/items/${s}`).join("");
