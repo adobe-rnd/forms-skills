@@ -298,6 +298,12 @@ function getDataChunks(rumBundles) {
   dataChunks.addFacet('fill.source', checkpointSource('fill'), 'some', 'never');
   dataChunks.addFacet('loadresource.source', checkpointSource('loadresource'), 'some');
   dataChunks.addFacet('viewmedia.target', checkpointTarget('viewmedia'), 'some', 'never');
+  dataChunks.addFacet('missingresource.source', checkpointSource('missingresource'), 'some', 'never');
+  // checkpointTarget returns the raw numeric target (e.g. 405 as a number); coerce to string
+  // so that filter values from JSON ("405") match via strict equality.
+  const mrTargetRaw = checkpointTarget('missingresource');
+  dataChunks.addFacet('missingresource.target', (bundle) => (mrTargetRaw(bundle) || []).map(String), 'some', 'never');
+  dataChunks.addFacet('period', (bundle) => [new Date(bundle.timeSlot).toISOString().slice(0, 10)], 'some', 'none');
   dataChunks.addFacet('acquisitionSource', acquisitionSource, 'some', 'none');
   return dataChunks;
 }
@@ -390,6 +396,7 @@ async function getFacetValues(domain, startDate, endDate, facetName, queryFilter
   const dataChunks = await getData(domain, startDate, endDate, interval);
   const totalPageViews = dataChunks.totals.pageViews.sum;
   const totalSamplingRatios = getSamplingRatios(dataChunks);
+
   dataChunks.filter = queryFilter;
   const filteredPageViews = dataChunks.totals.pageViews.sum;
   const filteredSamplingRatios = getSamplingRatios(dataChunks);
@@ -426,15 +433,20 @@ Core Facets:
   error            - Error details (source | target)
 
 Checkpoint-Specific Facets (source):
-  navigate.source      - Navigation source
-  click.source         - Clicked element selector
-  viewblock.source     - Viewed content block
-  fill.source          - Form field filled
-  loadresource.source  - Resource loaded
+  navigate.source          - Navigation source
+  click.source             - Clicked element selector
+  viewblock.source         - Viewed content block
+  fill.source              - Form field filled
+  loadresource.source      - Resource loaded
+  missingresource.source   - URL of failed resource (404, 405, etc.)
 
 Checkpoint-Specific Facets (target):
-  click.target      - Click destination URL
-  viewmedia.target  - Media viewed
+  click.target             - Click destination URL
+  viewmedia.target         - Media viewed
+  missingresource.target   - HTTP status code of failed resource (e.g. 404, 405)
+
+Time:
+  period            - Calendar date of the bundle (YYYY-MM-DD); use with --facet-values for daily trends
 
 Acquisition:
   acquisitionSource - Acquisition source (parsed from enter events)

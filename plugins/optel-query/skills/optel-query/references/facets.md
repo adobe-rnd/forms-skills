@@ -243,7 +243,55 @@ dataChunks.filter = {
 
 ---
 
-### 13. `acquisitionSource`
+### 13. `missingresource.source`
+**Combiner**: `some` | **Negative Support**: ❌ No
+
+**What it does**: Extracts the URL of each resource that failed to load (any HTTP error — 404, 405, 500, etc.).
+
+**Use with**: `checkpoint: ['missingresource']` filter to scope to failure events; pair with `missingresource.target` to filter by a specific HTTP status code.
+
+**Filter Example**:
+```javascript
+dataChunks.filter = {
+  checkpoint: ['missingresource'],
+  'missingresource.source': ['/api/v1/loan-apply', '/api/otp/send']
+};
+// Page views where these specific endpoints failed to load
+```
+
+**Facet-values Example**:
+```bash
+# enumerate all resource URLs that failed on a page
+--query '{"checkpoint":["missingresource"],"url":["https://example.com/page"]}' --facet-values missingresource.source
+```
+
+---
+
+### 14. `missingresource.target`
+**Combiner**: `some` | **Negative Support**: ❌ No
+
+**What it does**: Extracts the HTTP status code returned when a resource failed to load (e.g. `"404"`, `"405"`, `"500"`).
+
+**Use with**: `checkpoint: ['missingresource']` filter; pair with `missingresource.source` to also identify which URLs are affected.
+
+**Filter Example**:
+```javascript
+dataChunks.filter = {
+  checkpoint: ['missingresource'],
+  'missingresource.target': ['405']
+};
+// Page views where any resource returned HTTP 405
+```
+
+**Facet-values Example**:
+```bash
+# see the breakdown of HTTP status codes across all failed resources
+--query '{"checkpoint":["missingresource"],"url":["https://example.com/page"]}' --facet-values missingresource.target
+```
+
+---
+
+### 15. `acquisitionSource`
 **Combiner**: `some` | **Negative Support**: ❌ No
 
 **What it does**: Classifies how visitors were acquired — paid, owned, or earned — by reclassifying `paid`, `email`, and `utm` checkpoints into a unified hierarchical source string. Format: `{paidOwned}:{category}:{vendor}`. Each level is returned as a separate value so you can filter at any granularity.
@@ -415,6 +463,8 @@ dataChunks.filter = {
 
 ### Resources
 - `loadresource.source` - Loaded resources (some)
+- `missingresource.source` - Failed resource URLs (some)
+- `missingresource.target` - HTTP status of failed resources, e.g. `"404"`, `"405"` (some)
 
 ### User Interactions
 - `click.source` - Clicked elements (some)
@@ -455,7 +505,7 @@ Checkpoint types observed in RUM data and their source/target semantics. Only th
 | `viewblock` | Block class name or identifier (e.g. hero, features) | — | `viewblock.source` |
 | `viewmedia` | — | Media URL (image/video/audio), cleaned of query params | `viewmedia.target` |
 | `loadresource` | Resource URL (fragment, .json, .js, API) | Duration in ms (optional) | `loadresource.source` |
-| `missingresource` | Resource URL that failed to load | HTTP response status (e.g. 404) | checkpoint only |
+| `missingresource` | Resource URL that failed to load | HTTP response status (e.g. 404) | `missingresource.source` / `missingresource.target` |
 | `fill` | CSS selector of form field that was filled | — | `fill.source` |
 | `formsubmit` | Form selector / identifier | Form action URL | checkpoint only |
 | `search` | Search field selector or form identifier | — | checkpoint only |
@@ -490,9 +540,9 @@ Checkpoint types observed in RUM data and their source/target semantics. Only th
 
 ## Summary
 
-This skill defines **12 facets** for filtering RUM data:
+This skill defines **14 facets** for filtering RUM data:
 - **4 basic facets**: url, userAgent, checkpoint, error
-- **8 checkpoint-specific facets**: navigate.source, loadresource.source, click.source, click.target, viewblock.source, fill.source, viewmedia.target
+- **10 checkpoint-specific facets**: navigate.source, loadresource.source, click.source, click.target, viewblock.source, fill.source, viewmedia.target, missingresource.source, missingresource.target
 
 **Facets with negative support** (can use `!facetName`): url, userAgent, checkpoint, error
 
