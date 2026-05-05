@@ -1,0 +1,82 @@
+{
+  "_description": "Validate the email field when it loses focus (value changes)",
+  "_natural_language": "When email field is changed, validate email field",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Validate Email on Change",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.contactDetails.email",
+                  "displayName": "Email",
+                  "type": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/ContactDetails/Email",
+                  "name": "email",
+                  "parent": "$form.contactDetails"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is changed"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": null
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "VALIDATE_FORM",
+                          "items": [
+                            {
+                              "nodeName": "AFCOMPONENT",
+                              "value": {
+                                "id": "$form.contactDetails.email",
+                                "displayName": "Email",
+                                "type": "AFCOMPONENT|FIELD|TEXT FIELD|STRING",
+                                "isDuplicate": false,
+                                "displayPath": "FORM/ContactDetails/Email",
+                                "name": "email",
+                                "parent": "$form.contactDetails"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

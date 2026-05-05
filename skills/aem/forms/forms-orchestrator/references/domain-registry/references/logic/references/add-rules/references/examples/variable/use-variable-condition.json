@@ -1,0 +1,140 @@
+{
+  "_description": "Check if variable 'formSubmitted' is true before allowing re-submit",
+  "_natural_language": "When ReSubmit button is clicked, if variable 'formSubmitted' from form equals true, show alreadySubmittedMessage",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Check Already Submitted",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.resubmitButton",
+                  "displayName": "Re-Submit Button",
+                  "type": "AFCOMPONENT|FIELD|BUTTON",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/Re-Submit Button/",
+                  "name": "resubmitButton",
+                  "parent": "$form"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is clicked"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": {
+                      "nodeName": "COMPARISON_EXPRESSION",
+                      "items": [
+                        {
+                          "nodeName": "EXPRESSION",
+                          "choice": {
+                            "nodeName": "GET_VARIABLE",
+                            "items": [
+                              {
+                                "nodeName": "key",
+                                "value": null
+                              },
+                              {
+                                "nodeName": "VARIABLE_NAME",
+                                "choice": {
+                                  "nodeName": "STRING_LITERAL",
+                                  "value": "formSubmitted"
+                                }
+                              },
+                              {
+                                "nodeName": "from",
+                                "value": null
+                              },
+                              {
+                                "nodeName": "AFCOMPONENT",
+                                "value": {
+                                  "id": "$form",
+                                  "displayName": "FORM",
+                                  "type": "FORM",
+                                  "displayPath": "FORM/",
+                                  "name": "FORM",
+                                  "parent": "",
+                                  "metadata": {
+                                    "isAncestorRepeatable": false
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "nodeName": "OPERATOR",
+                          "choice": {
+                            "nodeName": "EQUALS_TO",
+                            "value": null
+                          }
+                        },
+                        {
+                          "nodeName": "EXPRESSION",
+                          "choice": {
+                            "nodeName": "BOOLEAN_LITERAL",
+                            "choice": {
+                              "nodeName": "True",
+                              "value": null
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "SHOW_STATEMENT",
+                          "items": [
+                            {
+                              "nodeName": "AFCOMPONENT",
+                              "value": {
+                                "id": "$form.messages.alreadySubmittedMessage",
+                                "displayName": "Already Submitted Message",
+                                "type": "AFCOMPONENT|STATIC TEXT|STRING",
+                                "isDuplicate": false,
+                                "displayPath": "FORM/Messages/Already Submitted Message/",
+                                "name": "alreadySubmittedMessage",
+                                "parent": "$form.messages"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

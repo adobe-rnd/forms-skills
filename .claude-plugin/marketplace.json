@@ -53,6 +53,11 @@
       "description": "Project lifecycle management for AEM Edge Delivery Services"
     },
     {
+      "name": "aem-forms",
+      "source": "./skills/aem/forms",
+      "description": "Skills for building AEM Adaptive Forms through AI conversation"
+    },
+    {
       "name": "app-builder",
       "source": "./plugins/app-builder",
       "description": "Development, customization, testing, and deployment skills for Adobe App Builder projects"
