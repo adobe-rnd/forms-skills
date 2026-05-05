@@ -8,7 +8,7 @@ type: reference
 
 ## By fileUrl pattern
 
-Used in Phase E (Mode B) and Phase 0.2 (telemetry).
+Used in Phase 2C (Mode B) and Phase 2A (telemetry) of `auto-fix-form`.
 
 | Condition | Fix type |
 |-----------|----------|
@@ -19,7 +19,7 @@ Used in Phase E (Mode B) and Phase 0.2 (telemetry).
 | Network error / CDN failure | Skip |
 | 3rd-party URL (adobedtm.com, etc.) | Skip |
 
-## Telemetry deduplication (Phase 0.2)
+## Telemetry deduplication (Phase 2A)
 
 Merge entries with the **same message + file** (different line/casing). Sum `count`. Prefer the entry with the higher count as the canonical record.
 

@@ -1,9 +1,10 @@
 # Performance-Bot Fix Sub-Agent Prompt Template
 
-Use this template verbatim for each per-violation fix sub-agent spawned in **Phase 3.6**. Substitute the bracketed values from the parsed `.perf-bot-report.md` entry before invoking the `Agent` tool.
+Used by **Phase 5.2** of `auto-fix-form` for each violation parsed from `.perf-bot-report.md`. Substitute the bracketed values before invoking the `Agent` tool. The plan-approval gate from Phase 3 does **not** apply to perf-bot violations — those are caught from a deterministic CLI rulebook and applied without further user iteration; remaining violations after iteration 3 surface in the PR body's "Performance follow-ups" section.
 
 ```
-You are fixing a performance-bot violation in an AEM Adaptive-Forms codebase.
+You are analyzing a performance-bot violation in an AEM Adaptive-Forms codebase.
+You will produce a JSON fix description; the orchestrator will apply the Edit.
 
 Violation type : <type>            # e.g. window-access-in-custom-function
 File           : <REPO_PATH>/<file>
@@ -14,7 +15,7 @@ Recommendation : <recommendation from report, if present>
 Repo root      : <REPO_PATH>
 Branch         : <FIX_BRANCH>      # already checked out — do not switch
 
-Recipe (from knowledge/perf-bot-violations.md):
+Recipe (from references/perf-bot-violations.md):
 <paste the row for this <type> from the recipe table>
 
 Task:
@@ -24,9 +25,8 @@ Task:
    surrounding code, do NOT rename symbols, do NOT widen scope.
 3. Validate that `old_string` appears EXACTLY ONCE in the file. If not, expand
    with more surrounding context until it is unique.
-4. Apply the patch with the Edit tool. Read the file once more and confirm the
-   pattern is gone (or the count dropped to the threshold for excessive-* rules).
-5. Return ONLY this JSON:
+4. Return ONLY this JSON — do NOT call the Edit tool yourself, the orchestrator
+   owns all writes so the run stays atomic and re-entrant:
    {
      "file_relative" : "<file>",
      "type"          : "<type>",
@@ -44,21 +44,21 @@ Task:
 
 Constraints:
 - Do not run `git`, `npm`, or any shell command. The orchestrator handles commit/push.
-- Do not call any browser/MCP tool. Pure file edit only.
+- Do not call the Edit, Write, or any browser/MCP tool. Read-only analysis + JSON return.
 - Do not touch files other than <file>.
 - If <file> is under /node_modules/, /dist/, or any vendored path: return needs_review.
 ```
 
-## Parallelism rules (mirror Phase 2)
+## Parallelism rules (mirror Phase 4.2)
 
-- **Different files** → spawn ALL sub-agents in parallel (single message, multiple `Agent` tool uses).
+- **Different files** → spawn ALL sub-agents in parallel via a **single message with multiple `Agent` tool uses**.
 - **Same file** → spawn sequentially. Re-read the file between sub-agents so the next `old_string` reflects the previous fix.
 - **CSS file with N violations** → run sequentially even though the patches are usually independent — line numbers shift after each edit.
 
-## Aggregating results
+## Aggregating results (orchestrator side)
 
 After all sub-agents return:
 
-- Apply each `(file_relative, old_string, new_string)` patch with the Edit tool from the orchestrator (the sub-agent already applied it; this is a defensive re-apply if the sub-agent reported the JSON without writing). Detect "already applied" by reading the file before re-edit.
-- Collect every `needs_review` entry; append them to the PR body's **"Performance follow-ups"** section.
-- Re-run `node ~/.performance-bot/index.js --diff --output ./.perf-bot-report.md` and re-parse. Loop until 0 violations or 3 iterations — whichever comes first.
+- For each non-`needs_review` JSON result: `Read` the file, verify `old_string` appears exactly once, then apply with the `Edit` tool. Track the file in `perfFixedFiles[]` and the violation in `fixedViolations[]`.
+- Collect every `needs_review` entry; append them to `needsReview[]` for the PR body's **"Performance follow-ups"** section.
+- Re-run `node ~/.performance-bot/index.js --diff HEAD --output ./.perf-bot-report.md` and re-parse. Loop until 0 violations or 3 iterations — whichever comes first.

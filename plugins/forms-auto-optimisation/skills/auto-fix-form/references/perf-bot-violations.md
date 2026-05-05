@@ -1,12 +1,12 @@
 ---
 name: perf-bot-violations
-description: Maps each performance-bot --diff violation type to a fix recipe used by the Phase 3.6 sub-agents.
+description: Maps each performance-bot --diff HEAD violation type to a fix recipe used by the Phase 5.2 sub-agents of auto-fix-form.
 type: reference
 ---
 
 # Performance-Bot Violation Recipes
 
-Used by Phase 3.6 (after the error-fix commit, before the PR is raised). The CLI is local-only and reads only git-changed JS/CSS — no URL, no browser.
+Used by **Phase 5** of `auto-fix-form` — after Phase 4.3 has applied the approved error fixes to the working tree but **not yet committed them**, and before the single combined commit at Phase 6.1. The CLI is local-only and reads only git-changed JS/CSS — no URL, no browser.
 
 ## Install command (run once if `~/.performance-bot/index.js` is missing)
 
@@ -16,13 +16,17 @@ mkdir -p ~/.performance-bot \
      | tar -xz -C ~/.performance-bot
 ```
 
-## Run command (from `REPO_PATH`, after the fix commit)
+## Run command (from `REPO_PATH`, against the dirty working tree)
 
 ```bash
-node ~/.performance-bot/index.js --diff --output ./.perf-bot-report.md
+node ~/.performance-bot/index.js --diff HEAD --output ./.perf-bot-report.md
 ```
 
-`--diff` auto-detects the merge-base against `origin/main` or `main`. Uncommitted changes are also picked up — so you can run it before OR after the commit; running it after gives a stable diff against `BASE_BRANCH`. The exit code is `0` even when violations are found, so the report file MUST be parsed.
+`--diff HEAD` diffs the working tree (uncommitted changes) against the current `HEAD` commit. Because the auto-fix-form orchestrator **defers** the combined commit to Phase 6.1, `HEAD` still points at `BASE_BRANCH`'s tip during Phase 5.2 — so this command captures all uncommitted error+perf changes in one cumulative scan.
+
+This avoids the older `--diff` mode's reliance on `origin/main`, which would silently scan the wrong baseline whenever `BASE_BRANCH` ≠ `main`.
+
+The CLI exits `0` even when violations are found, so the report file MUST be parsed. Iteration N+1 sees iteration N's uncommitted edits — this is intentional.
 
 ## Parsing the report
 
@@ -42,7 +46,7 @@ For deterministic parsing, the skill should:
 2. Count violations as the number of `- ⚠` lines under the four sections above.
 3. For each violation, capture: section header, file (in backticks), line, and the message text after the warning glyph.
 
-If the count is `0`, skip Phase 3.6 entirely. Otherwise spawn one sub-agent per violation (parallelism rules from Phase 2 apply — different files in parallel, same file sequential).
+If the count is `0`, exit Phase 5.2 and proceed directly to the combined commit at Phase 6.1. Otherwise spawn one sub-agent per violation (parallelism rules from Phase 4.2 apply — different files in parallel, same file sequential).
 
 ## Fix recipes
 
@@ -94,8 +98,8 @@ A sub-agent must return `needs_review: true` (rather than guess) when:
 - The recommended replacement (e.g. moving DOM logic to a custom component) needs new files.
 - The CSS rule's intent is unclear (e.g. `large-css-file` with no obvious split).
 
-Phase 3.6 collects `needs_review` items and adds them to the **PR body's "Performance follow-ups"** section instead of failing the run.
+Phase 5 collects `needs_review` items and adds them to the **PR body's "Performance follow-ups"** section instead of failing the run.
 
 ## Iteration cap
 
-Phase 3.6 runs the perf-bot, applies fixes, re-runs, applies fixes — **at most 3 iterations**. After iteration 3 any remaining violations are listed under "Performance follow-ups" in the PR body and the PR is opened anyway. This prevents infinite loops when a violation cannot be auto-fixed.
+Phase 5.2 runs the perf-bot, applies fixes, re-runs, applies fixes — **at most 3 iterations**. After iteration 3 any remaining violations are listed under "Performance follow-ups" in the PR body and the combined commit (Phase 6.1) + PR are opened anyway. This prevents infinite loops when a violation cannot be auto-fixed.
