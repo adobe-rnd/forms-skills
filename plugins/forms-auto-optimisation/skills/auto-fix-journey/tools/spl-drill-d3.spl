@@ -7,4 +7,5 @@ search index=ams_cq host="__HOST__" "*ERROR*" "__SHORT_CLASS__"
 | where isnotnull(jid)
 | dedup jid
 | table jid _time
+-- head 10: a small sample is enough to identify affected journeys; increase only if needed
 | head 10

@@ -1,7 +1,6 @@
 ---
 name: error-categories
 description: Named category patterns for Splunk result grouping and the analyst-narrative output format for the auto-fix-journey skill.
-type: reference
 ---
 
 # Error Category Naming Rules
@@ -15,7 +14,7 @@ Group raw `(short_class, error_summary/err_code)` rows into named categories. Ro
 | `FormsRelationServiceImpl Error finding dependency` | **Form Fragment Config** |
 | `AdaptiveFormDataServlet` | **Form Data Servlet / Path Encoding** |
 | `NullPointerException` in prefill classes | **Prefill / Missing Journey Context** |
-| Unknown Java exception class | **\<short_class\> Exception** |
+| Unknown Java exception class | Named after the class (e.g., **MyServiceImpl Exception**) |
 
 ---
 

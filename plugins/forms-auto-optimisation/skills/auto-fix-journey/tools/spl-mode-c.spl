@@ -13,4 +13,5 @@ search index=ams_cq host="__HOST__" "__JOURNEY_ID__" __LEVEL_FILTER__
 | rex field=_raw "\*(?<level>[A-Z]+)\*"
 | eval short_class=mvindex(split(java_class, "."), -1)
 | table _time level short_class msg host
+-- head 30: 30 most recent trace entries covers most journeys; increase for long multi-step flows
 | sort _time | head 30

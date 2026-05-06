@@ -12,4 +12,5 @@ search index=ams_cq host="__HOST__" "*ERROR*"
 | eval error_summary=substr(error_msg, 1, 120)
 | stats count as occurrences, max(_time) as last_ts by short_class, error_summary
 | eval last_seen=strftime(last_ts, "%Y-%m-%d %H:%M:%S") | fields - last_ts
+-- head 25: surfaces the 25 most frequent errors; increase to 50 for broader coverage
 | sort -occurrences | head 25

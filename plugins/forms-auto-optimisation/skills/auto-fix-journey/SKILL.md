@@ -99,6 +99,22 @@ If missing, `AskUserQuestion("Enter SPLUNK_PASS (will not be stored):")` and set
 
 `SPLUNK_HOST` defaults to `splunk-api.or1.adobe.net`, `SPLUNK_USER` defaults to `api_aem_forms` — override via env vars if needed.
 
+### Resolve IA tooling
+
+Resolve now so Step 8.3.5 can use it without re-checking:
+
+```bash
+if command -v ia >/dev/null 2>&1; then
+  IA_CMD="ia"
+elif [ -f "/Users/subodhj/Desktop/workspace/impact-analyser/impact-analyser/src/cli.js" ]; then
+  IA_CMD="node /Users/subodhj/Desktop/workspace/impact-analyser/impact-analyser/src/cli.js"
+else
+  IA_UNAVAILABLE="ia CLI not found"
+fi
+```
+
+`IA_CONFIG` and `IA_GRAPH` are resolved per target repo in Step 8.3.5 once the repo path is known.
+
 ---
 
 ## Step 2 — Write and run the query script
@@ -281,11 +297,19 @@ For each `structural` or `logic` error:
 
 1. Read `knowledge/repos.md`. Match `short_class` to a row by `java_package_prefix`.
    - If no match: ask the user for the git URL and branch (one `AskUserQuestion` covering all unmatched classes). Append new rows to `knowledge/repos.md`.
-2. Clone the repo if `local_clone_path` does not exist:
-   ```bash
-   git clone <git_url> <local_clone_path>
-   git -C <local_clone_path> checkout <branch>
-   ```
+2. Resolve the local clone path. The orchestrator **never auto-clones** repos.
+   - If `local_clone_path` is set in `repos.md` AND the path exists as a valid git repo (`git -C "<local_clone_path>" rev-parse --is-inside-work-tree`) → use it directly; no user prompt needed.
+   - Otherwise, ask the user once per distinct unresolved repo (group all affected classes together):
+     ```
+     ⚠️  Source repo not found at the path in repos.md (or no path set).
+     Repo    : <repo_name>  (<git_url>)
+     Classes : <short_class_1>, <short_class_2>
+
+     Do you have this repo cloned locally? Enter path (or 'skip' to flag for manual review):
+     ```
+   - Validate the supplied path (`git -C "<path>" rev-parse --is-inside-work-tree`); re-ask once if invalid.
+   - If valid: set `local_clone_path` to the validated path for all errors in this repo; update the in-memory `repos.md` entry so later steps use it.
+   - If 'skip' or second validation fails: set `fix_type = needs_review` for all errors in this repo and continue to the next repo.
 3. Find the source file:
    ```bash
    find <local_clone_path> -name "<short_class>.java" -not -path "*/test/*"
@@ -326,12 +350,66 @@ FIX_BRANCH="fix/auto-fix-journey-<short_class_slug>-$(date +%Y%m%d)"
 git -C <local_clone_path> checkout <branch>
 git -C <local_clone_path> pull origin <branch>
 git -C <local_clone_path> checkout -b $FIX_BRANCH
-# (apply fixes with Edit tool)
+# (apply fixes with Edit tool — already done in 8.2 for structural fixes)
 git -C <local_clone_path> add <changed files>
 git -C <local_clone_path> commit -m "fix: <N> backend errors in AEM Forms journey
 <bullet per fix: ClassName:line — explanation>
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 git -C <local_clone_path> push origin $FIX_BRANCH
+```
+
+### 8.3.5 Impact analysis (best-effort — runs after commit, before PR)
+
+Analyses what other repos, forms, and journeys are affected by the Java changes. Result is embedded in the PR body. This step is **best-effort** — if the config or CLI is missing it degrades gracefully and the PR still opens.
+
+```bash
+if [ -z "$IA_UNAVAILABLE" ]; then
+  # Config — search target repo first, fall back to current working directory
+  IA_CONFIG=$(find "<local_clone_path>" -maxdepth 3 \
+    \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
+    2>/dev/null | head -1)
+  [ -z "$IA_CONFIG" ] && IA_CONFIG=$(find "$PWD" -maxdepth 3 \
+    \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
+    2>/dev/null | head -1)
+  [ -z "$IA_CONFIG" ] && IA_UNAVAILABLE="no impact-analyzer.config.yaml found"
+
+  # Graph DB — enables D1 code-impact + D3 journey-impact sections
+  IA_GRAPH=$(find "<local_clone_path>" -maxdepth 3 -name "impact-graph.sqlite" 2>/dev/null | head -1)
+  [ -z "$IA_GRAPH" ] && IA_GRAPH=$(find "$HOME/.impact-analyser" -name "impact-graph.sqlite" 2>/dev/null | head -1)
+  IA_GRAPH_FLAG=""; [ -n "$IA_GRAPH" ] && IA_GRAPH_FLAG="--graph \"$IA_GRAPH\""
+  [ -z "$IA_GRAPH" ] && IA_CONCEPT_ONLY="--concept-only"
+fi
+
+if [ -z "$IA_UNAVAILABLE" ]; then
+  # Build diff file — one absolute path per changed Java file
+  git -C "<local_clone_path>" diff HEAD~1 HEAD --name-only \
+    | while IFS= read -r f; do echo "<local_clone_path>/$f"; done \
+    > /tmp/ia-journey-diff.txt
+
+  eval $IA_CMD analyse \
+    --config "$IA_CONFIG" \
+    --diff   /tmp/ia-journey-diff.txt \
+    $IA_GRAPH_FLAG $IA_CONCEPT_ONLY \
+    --format json \
+    > /tmp/ia-journey-output.json 2>/tmp/ia-journey-stderr.txt
+
+  if [ $? -eq 0 ] && [ -s /tmp/ia-journey-output.json ]; then
+    node -e "
+      try {
+        const d = JSON.parse(require('fs').readFileSync('/tmp/ia-journey-output.json', 'utf8'));
+        require('fs').writeFileSync('/tmp/ia-journey-report.md', d.markdown || '');
+      } catch(e) { process.exit(1); }
+    " 2>/dev/null || cp /tmp/ia-journey-output.json /tmp/ia-journey-report.md
+    IA_OUTPUT=$(cat /tmp/ia-journey-report.md)
+    echo "✅ Impact analysis complete"
+  else
+    IA_UNAVAILABLE="ia exited with error — $(head -5 /tmp/ia-journey-stderr.txt)"
+    echo "⚠️  Impact analysis skipped: $IA_UNAVAILABLE"
+  fi
+fi
+
+[ -z "$IA_OUTPUT" ] && \
+  IA_OUTPUT="<!-- Impact analysis unavailable: ${IA_UNAVAILABLE:-not run} -->"
 ```
 
 ### 8.4 Raise PR
@@ -345,11 +423,14 @@ gh pr create \
   --body "..."
 ```
 
-PR body must include:
-- Splunk host and query period
-- Errors-fixed table: class, exception, fix type, explanation
-- Errors flagged for manual review: class, analysis, test checklist
-- Framework recommendations (if any)
+PR body sections, in order:
+
+1. **Splunk context** — host, query period, mode (A/B/C), journey ID if applicable.
+2. **Errors fixed** — table: class, exception, fix type, explanation (structural fixes only).
+3. **Flagged for manual review** — logic-type errors: class, analysis, test checklist.
+4. **Framework recommendations** — config-type errors: class, recommendation, CRX/FDM path.
+5. **Impact Analysis** — full `IA_OUTPUT` embedded verbatim. Covers blast-radius summary, D1 code-impact cross-repo consumers, D2 concepts touched, D3 forms/journeys to validate. When `IA_UNAVAILABLE`, renders: `> ⚠️ Impact analysis unavailable — <reason>. Run \`ia analyse\` manually before merging.`
+6. **Test plan** — checklist focused on the journeys identified in the Splunk trace and IA D3 output.
 
 Return the PR URL. If `gh` is not installed, print the GitHub compare URL.
 
@@ -371,6 +452,13 @@ Return the PR URL. If `gh` is not installed, print the GitHub compare URL.
 | Minified or generated `.java` file | Return `needs_review: true` with "Minified/generated — cannot auto-fix" |
 | `old_string` not unique in file | Expand with more surrounding lines before retrying |
 | `git push` fails | Print push command for user to run manually |
+| `local_clone_path` not set or path missing | Ask user for local clone path (Step 7.2); never auto-clone |
+| User-supplied repo path invalid / not a git repo | Re-ask once; if still invalid, set `needs_review` for all errors in that repo |
+| User types 'skip' for a repo | Flag all errors in that repo as `needs_review`; continue with other repos |
+| `ia` CLI not found at known path | Set `IA_UNAVAILABLE`; skip 8.3.5; PR section shows callout to run manually |
+| No `impact-analyzer.config.yaml` in target repo or cwd | Set `IA_UNAVAILABLE`; skip analysis; PR shows callout |
+| No graph DB found | Use `--concept-only`; D1 + D3 sections will be empty but D2 concept analysis still runs |
+| `ia analyse` exits non-zero or empty output | Set `IA_UNAVAILABLE`; log stderr; continue to 8.4 |
 
 ---
 
