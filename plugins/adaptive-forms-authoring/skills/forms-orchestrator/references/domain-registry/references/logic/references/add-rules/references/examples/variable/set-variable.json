@@ -1,0 +1,113 @@
+{
+  "_description": "Set a boolean variable 'formSubmitted' to true on the form when Submit button is clicked",
+  "_natural_language": "When Submit button is clicked, set variable 'formSubmitted' to true on form",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Set Form Submitted Flag",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.submitButton",
+                  "displayName": "Submit Button",
+                  "type": "AFCOMPONENT|FIELD|BUTTON",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/Submit Button/",
+                  "name": "submitButton",
+                  "parent": "$form"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is clicked"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": null
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "SET_VARIABLE",
+                          "items": [
+                            {
+                              "nodeName": "key",
+                              "value": null
+                            },
+                            {
+                              "nodeName": "VARIABLE_NAME",
+                              "choice": {
+                                "nodeName": "STRING_LITERAL",
+                                "value": "formSubmitted"
+                              }
+                            },
+                            {
+                              "nodeName": "value",
+                              "value": null
+                            },
+                            {
+                              "nodeName": "VARIABLE_VALUE",
+                              "choice": {
+                                "nodeName": "BOOLEAN_LITERAL",
+                                "choice": {
+                                  "nodeName": "True",
+                                  "value": null
+                                }
+                              }
+                            },
+                            {
+                              "nodeName": "on",
+                              "value": null
+                            },
+                            {
+                              "nodeName": "AFCOMPONENT",
+                              "value": {
+                                "id": "$form",
+                                "displayName": "FORM",
+                                "type": "FORM",
+                                "displayPath": "FORM/",
+                                "name": "FORM",
+                                "parent": "",
+                                "metadata": {
+                                  "isAncestorRepeatable": false
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

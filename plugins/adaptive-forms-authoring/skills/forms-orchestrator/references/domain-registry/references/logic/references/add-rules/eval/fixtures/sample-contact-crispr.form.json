@@ -1,0 +1,60 @@
+{
+  "fieldType": "form",
+  "title": "Contact Us",
+  "fd:version": "2.1",
+  "items": [
+    {
+      "fieldType": "panel",
+      "name": "contactInfoPanel",
+      "jcr:title": "Contact Information",
+      "items": [
+        {
+          "fieldType": "text-input",
+          "name": "fullName",
+          "jcr:title": "Full Name",
+          "required": true,
+          "colspan": "6",
+          "minLength": 2,
+          "maxLength": 50
+        },
+        {
+          "fieldType": "email",
+          "name": "email",
+          "jcr:title": "Email",
+          "required": true,
+          "colspan": "6"
+        },
+        {
+          "fieldType": "telephone-input",
+          "name": "phone",
+          "jcr:title": "Phone",
+          "required": false,
+          "colspan": "6"
+        }
+      ]
+    },
+    {
+      "fieldType": "panel",
+      "name": "inquiryPanel",
+      "jcr:title": "Inquiry Details",
+      "items": [
+        {
+          "fieldType": "drop-down",
+          "name": "inquiryType",
+          "jcr:title": "Inquiry Type",
+          "required": true,
+          "enum": ["General", "Support", "Sales"],
+          "enumNames": ["General", "Support", "Sales"]
+        },
+        {
+          "fieldType": "text-input",
+          "name": "message",
+          "jcr:title": "Message",
+          "required": true,
+          "multiLine": true,
+          "minLength": 10
+        }
+      ]
+    }
+  ]
+}

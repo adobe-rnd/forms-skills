@@ -1,0 +1,57 @@
+{
+  "550e8400-e29b-41d4-a716-446655440000": {
+    "componentPath": "inquiryPanel/inquiryType",
+    "componentName": "inquiryType",
+    "fd:rules": {
+      "jcr:primaryType": "nt:unstructured",
+      "fd:change": [
+        {
+          "nodeName": "ROOT",
+          "isValid": true,
+          "enabled": true,
+          "eventName": "Show Message Required Alert",
+          "items": [
+            {
+              "nodeName": "STATEMENT",
+              "choice": {
+                "nodeName": "IF_ELSE_STATEMENT",
+                "condition": {
+                  "nodeName": "CONDITION",
+                  "items": [
+                    {
+                      "nodeName": "COMPARISON_EXPRESSION",
+                      "left": {
+                        "nodeName": "FIELD_REFERENCE",
+                        "value": "inquiryType"
+                      },
+                      "operator": "EQUALS",
+                      "right": {
+                        "nodeName": "STRING_LITERAL",
+                        "value": "Support"
+                      }
+                    }
+                  ]
+                },
+                "thenClause": {
+                  "nodeName": "THEN_CLAUSE",
+                  "items": [
+                    {
+                      "nodeName": "STATEMENT",
+                      "choice": {
+                        "nodeName": "SHOW_STATEMENT",
+                        "field": {
+                          "nodeName": "FIELD_REFERENCE",
+                          "value": "message"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

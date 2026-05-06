@@ -1,0 +1,86 @@
+{
+  "_description": "Remove a row from a repeatable contact panel when Remove button is clicked",
+  "_natural_language": "When Remove button is clicked, remove instance of contactRows",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Remove Contact Row",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.contactSection[getRelativeInstanceIndex($form.contactSection)].removeButton",
+                  "displayName": "Remove Button",
+                  "type": "AFCOMPONENT|FIELD|BUTTON",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/ContactSection/Remove Button",
+                  "name": "removeButton",
+                  "parent": "$form.contactSection[getRelativeInstanceIndex($form.contactSection)]"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is clicked"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": null
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "REMOVE_INSTANCE",
+                          "items": [
+                            {
+                              "nodeName": "of",
+                              "value": null
+                            },
+                            {
+                              "nodeName": "REPEATABLE_COMPONENT",
+                              "value": {
+                                "id": "$form.contactSection",
+                                "displayName": "Contact Rows",
+                                "type": "AFCOMPONENT|PANEL",
+                                "isDuplicate": false,
+                                "displayPath": "FORM/ContactSection/",
+                                "name": "contactRows",
+                                "parent": "$form"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

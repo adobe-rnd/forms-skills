@@ -1,0 +1,17 @@
+{
+  "name": "aemforms-skills",
+  "owner": {
+    "name": "Adobe"
+  },
+  "metadata": {
+    "description": "Official Adobe Experience Manager Forms Skills for AI Agents",
+    "version": "0.0.1"
+  },
+  "plugins": [
+    {
+      "name": "adaptive-forms-authoring",
+      "source": "./plugins/adaptive-forms-authoring",
+      "description": "Build, edit, and integrate AEM Adaptive Forms through conversation — analyze requirements, scaffold forms, add rules and functions, manage APIs, and sync with Edge Delivery Services."
+    }
+  ]
+}

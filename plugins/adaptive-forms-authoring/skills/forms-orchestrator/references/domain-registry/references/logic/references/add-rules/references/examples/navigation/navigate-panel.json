@@ -1,0 +1,93 @@
+{
+  "_description": "Navigate to the next step in a wizard panel when Next button is clicked",
+  "_natural_language": "When Next button is clicked, navigate to next item of wizardPanel",
+  "nodeName": "ROOT",
+  "isValid": true,
+  "enabled": true,
+  "eventName": "Go to Next Step",
+  "items": [
+    {
+      "nodeName": "STATEMENT",
+      "choice": {
+        "nodeName": "TRIGGER_SCRIPTS",
+        "items": [
+          {
+            "nodeName": "SINGLE_TRIGGER_SCRIPTS",
+            "items": [
+              {
+                "nodeName": "COMPONENT",
+                "value": {
+                  "id": "$form.wizardPanel.nextButton",
+                  "displayName": "Next Button",
+                  "type": "AFCOMPONENT|FIELD|BUTTON",
+                  "isDuplicate": false,
+                  "displayPath": "FORM/WizardPanel/Next Button/",
+                  "name": "nextButton",
+                  "parent": "$form.wizardPanel"
+                }
+              },
+              {
+                "nodeName": "TRIGGER_EVENT",
+                "value": "is clicked"
+              },
+              {
+                "nodeName": "When",
+                "value": null
+              },
+              {
+                "nodeName": "TRIGGER_EVENT_SCRIPTS",
+                "items": [
+                  {
+                    "nodeName": "CONDITION",
+                    "nested": false,
+                    "choice": null
+                  },
+                  {
+                    "nodeName": "Then",
+                    "value": null
+                  },
+                  {
+                    "nodeName": "BLOCK_STATEMENTS",
+                    "items": [
+                      {
+                        "nodeName": "BLOCK_STATEMENT",
+                        "choice": {
+                          "nodeName": "NAVIGATE_IN_PANEL",
+                          "items": [
+                            {
+                              "nodeName": "PANEL_FOCUS_OPTION",
+                              "choice": {
+                                "nodeName": "NEXT_ITEM",
+                                "value": null
+                              }
+                            },
+                            {
+                              "nodeName": "of",
+                              "value": null
+                            },
+                            {
+                              "nodeName": "PANEL",
+                              "value": {
+                                "id": "$form.wizardPanel",
+                                "displayName": "Wizard Panel",
+                                "type": "AFCOMPONENT|PANEL",
+                                "isDuplicate": false,
+                                "displayPath": "FORM/Wizard Panel/",
+                                "name": "wizardPanel",
+                                "parent": "$form"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
