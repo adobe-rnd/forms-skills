@@ -1,0 +1,22 @@
+{
+  "name": "optel-query",
+  "version": "0.1.0",
+  "description": "Query and analyze AEM Operational Telemetry (RUM) data — build structured queries for page views, clicks, errors, Core Web Vitals, and form events, then execute them via the bundled optel-query.jsh script.",
+  "author": {
+    "name": "Adobe"
+  },
+  "repository": "https://github.com/adobe/skills",
+  "license": "Apache-2.0",
+  "skills": [
+    "./skills/optel-query",
+    "./skills/optel-analyze-errors"
+  ],
+  "keywords": [
+    "adobe",
+    "aem",
+    "rum",
+    "telemetry",
+    "optel",
+    "analytics"
+  ]
+}

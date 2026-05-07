@@ -17,6 +17,11 @@
       "name": "forms-auto-optimisation",
       "source": "./plugins/forms-auto-optimisation",
       "description": "Automatically detect and fix runtime errors and API failures in AEM Adaptive Forms — diagnoses journey errors, classifies root causes, and applies fixes to backend Java code."
+    },
+    {
+      "name": "optel-query",
+      "source": "./plugins/optel-query",
+      "description": "Query and analyze AEM Operational Telemetry (RUM) data — build structured queries for page views, clicks, errors, Core Web Vitals, and form events, then execute them via the bundled optel-query.jsh script."
     }
   ]
 }
