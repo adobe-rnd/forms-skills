@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Plugin Structure Integration Test
-# Validates that the forms-optimisation plugin has all required files and references.
-# Run from: forms-skills/plugins/forms-optimisation/
+# Validates that the forms-auto-optimisation plugin has all required files and references.
+# Run from: forms-skills/plugins/forms-auto-optimisation/
 #
 # Usage: bash tests/test_plugin_structure.sh
 
@@ -32,10 +32,10 @@ else
   fail "plugin.json missing at .claude-plugin/plugin.json"
 fi
 
-if grep -q '"name": "forms-optimisation"' ".claude-plugin/plugin.json" 2>/dev/null; then
-  pass "plugin.json contains name \"forms-optimisation\""
+if grep -q '"name": "forms-auto-optimisation"' ".claude-plugin/plugin.json" 2>/dev/null; then
+  pass "plugin.json contains name \"forms-auto-optimisation\""
 else
-  fail "plugin.json does not contain name \"forms-optimisation\""
+  fail "plugin.json does not contain name \"forms-auto-optimisation\""
 fi
 
 if grep -q '"skills"' ".claude-plugin/plugin.json" 2>/dev/null; then
@@ -55,10 +55,10 @@ else
   fail "marketplace.json missing at repo root (.claude-plugin/marketplace.json)"
 fi
 
-if grep -q '"forms-optimisation"' "$MARKETPLACE" 2>/dev/null; then
-  pass "marketplace.json contains \"forms-optimisation\" entry"
+if grep -q '"forms-auto-optimisation"' "$MARKETPLACE" 2>/dev/null; then
+  pass "marketplace.json contains \"forms-auto-optimisation\" entry"
 else
-  fail "marketplace.json does not contain \"forms-optimisation\" entry"
+  fail "marketplace.json does not contain \"forms-auto-optimisation\" entry"
 fi
 
 # ── Directory Structure ──

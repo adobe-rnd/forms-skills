@@ -1,7 +1,7 @@
 {
-  "name": "forms-optimisation",
+  "name": "forms-auto-optimisation",
   "version": "0.1.0",
-  "description": "Optimise AEM Adaptive Forms for performance, accessibility, and user experience through AI-driven analysis and recommendations.",
+  "description": "Automatically detect and fix runtime errors and API failures in AEM Adaptive Forms — diagnoses journey errors, classifies root causes, and applies fixes to backend Java code.",
   "author": {
     "name": "Adobe"
   },
@@ -16,7 +16,8 @@
     "aem",
     "forms",
     "adaptive-forms",
-    "optimisation",
-    "performance"
+    "auto-fix",
+    "runtime-errors",
+    "api-errors"
   ]
 }

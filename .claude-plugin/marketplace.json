@@ -14,9 +14,9 @@
       "description": "Build, edit, and integrate AEM Adaptive Forms through conversation — analyze requirements, scaffold forms, add rules and functions, manage APIs, and sync with Edge Delivery Services."
     },
     {
-      "name": "forms-optimisation",
-      "source": "./plugins/forms-optimisation",
-      "description": "Optimise AEM Adaptive Forms for performance, accessibility, and user experience through AI-driven analysis and recommendations."
+      "name": "forms-auto-optimisation",
+      "source": "./plugins/forms-auto-optimisation",
+      "description": "Automatically detect and fix runtime errors and API failures in AEM Adaptive Forms — diagnoses journey errors, classifies root causes, and applies fixes to backend Java code."
     }
   ]
 }
