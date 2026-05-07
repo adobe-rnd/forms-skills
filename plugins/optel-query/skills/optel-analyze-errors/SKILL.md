@@ -1,6 +1,7 @@
 ---
 name: optel-analyze-errors
 description: Analyze JavaScript errors from RUM data, identify duplicates using improved similarity algorithms, and generate comprehensive error analysis reports.
+license: Apache-2.0
 ---
 
 # Analyze Errors Skill

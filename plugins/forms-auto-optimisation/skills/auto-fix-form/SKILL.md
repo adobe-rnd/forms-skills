@@ -3,6 +3,7 @@ name: auto-fix-form
 description: End-to-end workflow for diagnosing and fixing AEM/EDS form errors. Queries telemetry via /optel-query, diagnoses live forms via live-debug-form, generates a per-error fix plan that the user iterates on until approved, applies patches through parallel sub-agents, gates the working tree through performance-bot --diff HEAD, then commits and raises a PR against the user-supplied base branch. Use when the user asks to debug, investigate, or fix errors on an AEM Adaptive Form or EDS form — by URL or by error string.
 compatibility: Requires Chrome DevTools MCP for Mode A. Works with EDS/forms-engine (window.myForm) and AEM Core Components (guideBridge). Requires git + gh CLI for PR creation. Phase 5 requires Node 20+ and the performance-bot CLI at ~/.performance-bot/index.js — installed inline on first run if missing.
 allowed-tools: Read Write Edit Bash Glob Grep Agent Skill WebFetch AskUserQuestion mcp__chrome-devtools__evaluate_script mcp__chrome-devtools__navigate_page mcp__chrome-devtools__new_page mcp__chrome-devtools__list_pages mcp__chrome-devtools__select_page mcp__chrome-devtools__take_snapshot mcp__chrome-devtools__list_console_messages mcp__chrome-devtools__list_network_requests mcp__chrome-devtools__get_network_request
+license: Apache-2.0
 metadata:
   author: adobe-forms
   domain: forms-debugging

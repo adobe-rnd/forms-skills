@@ -1,6 +1,7 @@
 ---
 name: optel-query
 description: Use when analyzing RUM (Real User Monitoring) data from AEM Operational Telemetry — page views, clicks, errors, Core Web Vitals (LCP/CLS/INP), form fills, traffic sources, or any analytics question about a domain. Builds structured queries and executes them via the bundled optel-query.jsh script.
+license: Apache-2.0
 ---
 
 # Optel-Query Skill

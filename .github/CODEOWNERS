@@ -8,4 +8,10 @@
 *                                                     @vdua @arnehjain
 
 # AEM Form Authoring
-# /plugins/adaptive-forms-authoring/                              @vdua @arnehjain
+/plugins/adaptive-forms-authoring/                              @vdua @arnehjain
+
+# Forms Auto Optimisation
+/plugins/forms-auto-optimisation/                               @vdua @arnehjain
+
+# Optel Query
+/plugins/optel-query/                                           @vdua @arnehjain

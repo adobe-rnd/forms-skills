@@ -3,7 +3,7 @@ name: auto-fix-journey
 description: Queries Splunk for AEM Forms journey logs and errors, analyzes root causes, presents structured findings with actionable recommendations, and fixes backend Java errors in customer code. Supports aggregated ERROR/INFO analysis, per-journey traces, FDM API analytics, and end-to-end Java fix generation with PR creation. Use when the user asks about AEM Forms errors, Splunk logs, journey traces, API failure rates, FDM performance, or asks to fix backend Java errors in AEM Forms.
 compatibility: Requires Python 3 with splunk-sdk installed (`pip install splunk-sdk`). SPLUNK_PASS must be provided via env var or entered when prompted. Git + gh CLI required for fix branch and PR creation (Steps 5-8).
 allowed-tools: Read Write Edit Bash Agent AskUserQuestion
-user_invocable: true
+license: Apache-2.0
 metadata:
   author: adobe-forms
   domain: forms-debugging
