@@ -7,7 +7,10 @@
   },
   "repository": "https://github.com/adobe/skills",
   "license": "Apache-2.0",
-  "skills": [],
+  "skills": [
+    "./skills/auto-fix-form",
+    "./skills/auto-fix-journey"
+  ],
   "keywords": [
     "adobe",
     "aem",
