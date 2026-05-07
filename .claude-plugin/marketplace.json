@@ -12,6 +12,11 @@
       "name": "adaptive-forms-authoring",
       "source": "./plugins/adaptive-forms-authoring",
       "description": "Build, edit, and integrate AEM Adaptive Forms through conversation — analyze requirements, scaffold forms, add rules and functions, manage APIs, and sync with Edge Delivery Services."
+    },
+    {
+      "name": "forms-optimisation",
+      "source": "./plugins/forms-optimisation",
+      "description": "Optimise AEM Adaptive Forms for performance, accessibility, and user experience through AI-driven analysis and recommendations."
     }
   ]
 }

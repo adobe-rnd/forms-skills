@@ -1,0 +1,19 @@
+{
+  "name": "forms-optimisation",
+  "version": "0.1.0",
+  "description": "Optimise AEM Adaptive Forms for performance, accessibility, and user experience through AI-driven analysis and recommendations.",
+  "author": {
+    "name": "Adobe"
+  },
+  "repository": "https://github.com/adobe/skills",
+  "license": "Apache-2.0",
+  "skills": [],
+  "keywords": [
+    "adobe",
+    "aem",
+    "forms",
+    "adaptive-forms",
+    "optimisation",
+    "performance"
+  ]
+}
