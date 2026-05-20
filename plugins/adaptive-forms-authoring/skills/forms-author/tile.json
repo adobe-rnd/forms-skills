@@ -1,0 +1,9 @@
+{
+  "name": "forms-author",
+  "version": "0.1.0",
+  "summary": "All AEM Adaptive Forms content operations — add, modify, delete, move, read, metadata, rule application.",
+  "private": true,
+  "skills": {
+    "forms-author": { "path": "SKILL.md" }
+  }
+}

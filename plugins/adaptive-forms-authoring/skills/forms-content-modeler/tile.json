@@ -1,0 +1,9 @@
+{
+  "name": "forms-content-modeler",
+  "version": "0.1.0",
+  "summary": "Builds and validates AEM Adaptive Forms component JSON from a definition and content model. Pure computation — no MCP calls.",
+  "private": true,
+  "skills": {
+    "forms-content-modeler": { "path": "SKILL.md" }
+  }
+}
