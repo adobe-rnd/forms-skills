@@ -1,0 +1,26 @@
+-- Mode E: API Error lookup — find Java exceptions associated with a specific API route
+-- Placeholders: __HOST__, __API_PATH__, __HOURS__
+--
+-- Searches for ERROR log entries within a time window that mention the API path,
+-- then extracts the Java class and exception to feed into Fix mode.
+-- Run with HOURS=24 first; if total_errors < 5, caller should retry with HOURS=48.
+
+search index=ams_cq host="__HOST__" "*ERROR*" earliest=-__HOURS__h
+| search "__API_PATH__"
+| rex field=_raw "HTTP/1\.1\]\s+(?<java_class>[\w.\$]+)\s+(?<error_msg>[^\n]{1,200})"
+| rex field=_raw "\[(?:qtp|0x)[^\]]+\]\s+(?<java_class2>[\w.\$]+)\s+(?<error_msg2>[^\n]{1,200})"
+| eval java_class=coalesce(java_class, java_class2)
+| eval error_msg=coalesce(error_msg, error_msg2)
+| where isnotnull(java_class)
+| rex field=error_msg "(?<exception_type>[\w.]+Exception[:\s]|ServiceException[:\s]|RuntimeException[:\s])(?<exception_msg>[^\n]{1,150})"
+| eval short_class=mvindex(split(java_class, "."), -1)
+| eval error_summary=coalesce(exception_type . exception_msg, substr(error_msg, 1, 150))
+| rex field=_raw "journeyId[=:\s]+(?<journey_id>[a-f0-9\-]{30,40})"
+| stats
+    count as occurrences,
+    max(_time) as last_ts,
+    values(journey_id) as sample_journey_ids
+    by short_class, error_summary
+| eval last_seen=strftime(last_ts, "%Y-%m-%d %H:%M:%S") | fields - last_ts
+| sort -occurrences
+| head 10

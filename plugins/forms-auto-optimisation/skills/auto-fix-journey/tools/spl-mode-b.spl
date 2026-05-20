@@ -11,4 +11,5 @@ search index=ams_cq host="__HOST__" "*INFO*" (FAILURE OR "Error Code" OR ErrorCo
 | where isnotnull(err_code) AND err_code!="00" AND err_code!="0" AND err_code!="null"
 | stats count as occurrences, max(_time) as last_ts by short_class, err_code
 | eval last_seen=strftime(last_ts, "%Y-%m-%d %H:%M:%S") | fields - last_ts
+-- head 20: top 20 error codes; deployments with many distinct error types may need head 50
 | sort -occurrences | head 20

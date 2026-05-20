@@ -24,16 +24,19 @@ When `short_class` is found in Splunk results, the skill matches its full class 
 
 ## How the skill uses this file
 
-1. After Mode A, the user triggers "fix #N" or "fix all structural".
-2. The skill reads this file and matches `short_class` from Splunk against `java_package_prefix`.
-3. If a match is found and `local_clone_path` does not exist: `git clone <git_url> <local_clone_path>`.
-4. If no match: the skill asks the user for the repo URL and branch, then appends a new row here.
+This file is a **fallback only** — the skill prefers impact-analyser (`ia triage`) to route errors to repos and files. This file is consulted when IA is unavailable or triage produces no output.
+
+1. The skill matches `SHORT_CLASS` / `FULL_CLASS` against `java_package_prefix`.
+2. If a match is found and `local_clone_path` is set and valid: uses it directly.
+3. If `local_clone_path` is missing or the path is not a valid git repo: asks the user for the local clone path — **never auto-clones**.
+4. If no match: asks the user for the repo URL and branch, then appends a new row here.
 5. Source file is located with: `find <local_clone_path> -name "<short_class>.java" -not -path "*/test/*"`.
 
 ---
 
 ## Notes
 
-- `local_clone_path` must be writable by the current user.
+- If `local_clone_path` is missing or invalid but `git_url` is set, the skill auto-clones to `~/auto-fix-journey-clones/<repo-name>` and updates this entry.
+- If no row matches the error class at all, the skill asks for the git URL once, clones automatically, then appends a new row here.
 - The skill never force-pushes and always creates a fix branch (`fix/auto-fix-journey-<slug>-<date>`).
 - Keep `branch` set to the base branch the PR should target.

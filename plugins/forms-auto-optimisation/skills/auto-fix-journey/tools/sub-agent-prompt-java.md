@@ -70,10 +70,32 @@ OR if the fix requires payload context or manual verification:
 }
 ```
 
+OR if you cannot generate a safe fix without more runtime data — **return this instead of speculating**:
+
+```json
+{
+  "need_more_info": true,
+  "fix_type": "logic | structural",
+  "questions": [
+    "<specific question 1 — name the exact field, config key, or runtime value needed>",
+    "<specific question 2>"
+  ],
+  "what_i_know": "<one paragraph: what the code does, what the throw site is, why it throws — so the orchestrator can relay this to the user without re-reading the file>"
+}
+```
+
+Use `need_more_info` when:
+- The fix depends on a runtime value (API response field, OSGi config value, DB state) not visible in the stack trace
+- Multiple root causes are plausible and you cannot tell which is actually firing from source alone
+- The correct fix would differ significantly depending on data you don't have
+
+Do NOT use `need_more_info` as a default hedge — only when genuinely blocked. A structural null-guard you can see in the source is always fixable without more data.
+
 ## Constraints
 
 - `old_string` must be an exact substring of the current file content — verify by reading the file.
 - Do not change method signatures, access modifiers, or surrounding logic.
 - Do not add imports unless required by the fix.
 - Do not change indentation style (match the file's existing style).
+- **Never change log levels** — if the existing code uses `LOGGER.info(...)`, keep it `LOGGER.info`. Do not upgrade to `LOGGER.error` or `LOGGER.warn`, and do not downgrade to `LOGGER.debug`. You may add new log statements at the same level as the nearest existing statement in the method.
 - If the source file is minified or generated, return `{ "needs_review": true, "analysis": "Minified/generated file — cannot auto-fix." }`.
