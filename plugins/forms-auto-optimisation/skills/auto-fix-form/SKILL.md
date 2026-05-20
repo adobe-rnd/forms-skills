@@ -1,7 +1,7 @@
 ---
 name: auto-fix-form
 description: End-to-end workflow for diagnosing and fixing AEM/EDS form errors. Queries telemetry via /optel-query, presents errors to the user for selection, uses the impact-analyser graph to trace error origins across the repo landscape, generates a per-error fix plan the user iterates on until approved, applies patches through parallel sub-agents, gates the working tree through performance-bot --diff HEAD, runs impact analysis to propagate analogous fixes into dependent repos, and raises a PR per repo. Use when the user provides a form URL to fix.
-compatibility: Requires git + gh CLI for PR creation. Phase 5 requires Node 20+ and the performance-bot CLI at ~/.performance-bot/index.js — installed inline on first run if missing. Phases 5.5/5.6 require the impact-analyser CLI (`ia`) at /Users/subodhj/Desktop/workspace/impact-analyser/impact-analyser/src/cli.js (or `ia` in PATH) and a customer config YAML + graph DB in the repo; degrade gracefully if absent.
+compatibility: Requires git + gh CLI for PR creation. Phase 5 requires Node 20+ and the performance-bot CLI at ~/.performance-bot/index.js — installed inline on first run if missing. Phases 5.5/5.6 require the impact-analyser CLI (`ia` in PATH, or auto-installed from adobe-aem-forms/impact-analyser GitHub releases to ~/.impact-analyser/cli/) and the impact-graph SQLite DB (auto-downloaded from adobe-aem-forms/impact-analyser-graph); degrade gracefully if either is unavailable.
 allowed-tools: Read Write Edit Bash Glob Grep Agent Skill WebFetch AskUserQuestion
 metadata:
   author: adobe-forms
@@ -103,24 +103,84 @@ When you reach the end of Phase 2.M, the **next thing you do** is print the plan
 
    If the user-supplied path does not exist or is not a git repo, tell them and ask again. Do not continue with an invalid path.
 
-3. **Resolve IA tooling early** (same logic as Phase 5.5.1 — do it now so 2.M can use it):
+3. **Resolve IA tooling early** — done once here; Phase 5.5 reuses these variables, never re-resolves:
+
+   > ⚠️ **`IA_CMD` must always be called with `eval $IA_CMD …`, never as `$IA_CMD …` directly.** When `IA_CMD` is `node /path/to/cli.js` (contains a space), bare variable expansion in zsh/bash treats the entire string as the executable name and fails with "no such file or directory". Every `ia` invocation in this skill uses `eval`; any new invocation (version check, test call, etc.) must too.
 
    ```bash
+   # ── CLI ──────────────────────────────────────────────────────────────────
+   IA_INSTALL_DIR="$HOME/.impact-analyser/cli"
    if command -v ia >/dev/null 2>&1; then
      IA_CMD="ia"
-   elif [ -f "/Users/subodhj/Desktop/workspace/impact-analyser/impact-analyser/src/cli.js" ]; then
-     IA_CMD="node /Users/subodhj/Desktop/workspace/impact-analyser/impact-analyser/src/cli.js"
+   elif [ -f "$IA_INSTALL_DIR/index.js" ]; then
+     IA_CMD="node $IA_INSTALL_DIR/index.js"   # already installed from a previous run
    else
-     IA_UNAVAILABLE="ia CLI not found"
+     echo "📥 Installing ia CLI from adobe-aem-forms/impact-analyser..."
+     _OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+     _ARCH=$(uname -m)
+     case "$_ARCH" in arm64|aarch64) _ARCH_TAG="arm64" ;; *) _ARCH_TAG="x64" ;; esac
+     case "$_OS" in darwin) _OS_TAG="darwin" ;; *) _OS_TAG="linux" ;; esac
+     mkdir -p "$HOME/.impact-analyser"
+     gh release download \
+       --repo adobe-aem-forms/impact-analyser \
+       --pattern "impact-analyser-cli-${_OS_TAG}-${_ARCH_TAG}.tar.gz" \
+       --dir /tmp --clobber 2>/tmp/ia-install-stderr.txt \
+     && tar -xzf "/tmp/impact-analyser-cli-${_OS_TAG}-${_ARCH_TAG}.tar.gz" \
+              -C "$HOME/.impact-analyser" \
+     && IA_CMD="node $IA_INSTALL_DIR/index.js" \
+     || { IA_CMD_MISSING=1
+          IA_UNAVAILABLE="ia CLI install failed: $(head -2 /tmp/ia-install-stderr.txt)"; }
    fi
 
+   # ── Config (optional — omit flag if not found, ia analyse still runs) ────
    IA_CONFIG=$(find "$REPO_PATH" -maxdepth 3 \
      \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
      2>/dev/null | head -1)
-   [ -z "$IA_CONFIG" ] && IA_UNAVAILABLE="${IA_UNAVAILABLE:+$IA_UNAVAILABLE; }no impact-analyzer.config.yaml found"
+   IA_CONFIG_FLAG=""; [ -n "$IA_CONFIG" ] && IA_CONFIG_FLAG="--config \"$IA_CONFIG\""
 
+   # ── Graph DB ─────────────────────────────────────────────────────────────
    IA_GRAPH=$(find "$REPO_PATH" -maxdepth 3 -name "impact-graph.sqlite" 2>/dev/null | head -1)
    [ -z "$IA_GRAPH" ] && IA_GRAPH=$(find "$HOME/.impact-analyser" -name "impact-graph.sqlite" 2>/dev/null | head -1)
+
+   if [ -z "$IA_GRAPH" ]; then
+     echo "📥 No local graph — downloading from adobe-aem-forms/impact-analyser-graph..."
+     mkdir -p "$HOME/.impact-analyser"
+     gh release download impact-graph-hdfc \
+       --repo adobe-aem-forms/impact-analyser-graph \
+       --pattern impact-graph.sqlite \
+       --dir "$HOME/.impact-analyser" --clobber 2>/tmp/ia-graph-dl-stderr.txt \
+       && IA_GRAPH="$HOME/.impact-analyser/impact-graph.sqlite" \
+       || { IA_GRAPH_MISSING=1
+            echo "⚠️  Graph download failed: $(head -2 /tmp/ia-graph-dl-stderr.txt)"; }
+   fi
+
+   # ── Node ABI check (better-sqlite3 compiled for Node 20, ABI 115) ──────────
+   # The pre-built IA CLI tarball bundles a better_sqlite3.node binary compiled for
+   # Node 20. Running under Node 21+ (ABI 130+) causes an immediate "MODULE_VERSION
+   # mismatch" crash. Detect early and rewrite IA_CMD to use an NVM Node 20 binary.
+   _NODE_MAJOR=$(node -v 2>/dev/null | sed -E 's/^v([0-9]+).*/\1/')
+   if [ "${_NODE_MAJOR:-0}" -ge 21 ] && [ -z "$IA_CMD_MISSING" ]; then
+     _NODE20=$(ls "$HOME/.nvm/versions/node/v20".*/bin/node 2>/dev/null | sort -V | tail -1)
+     if [ -n "$_NODE20" ]; then
+       IA_CMD="$_NODE20 $IA_INSTALL_DIR/index.js"
+       echo "⚠️  System Node ${_NODE_MAJOR} — IA re-routed to Node 20 ($_NODE20) for better-sqlite3 ABI compatibility"
+     else
+       IA_UNAVAILABLE="IA CLI needs Node 20 (better_sqlite3 ABI 115); system is Node ${_NODE_MAJOR} and no Node 20 found in ~/.nvm. Fix: nvm install 20"
+       echo "❌ $IA_UNAVAILABLE"
+     fi
+   fi
+
+   # ── Graph flags (set once, reused by 2.M and 5.5.3) ─────────────────────
+   IA_GRAPH_FLAG="";    [ -n "$IA_GRAPH" ] && IA_GRAPH_FLAG="--graph \"$IA_GRAPH\""
+   IA_CONCEPT_ONLY="";  [ -z "$IA_GRAPH" ] && IA_CONCEPT_ONLY="--concept-only"
+   ```
+
+   Always print status before continuing:
+   ```
+   IA status:
+     CLI   : ✅ found  (or ❌ not found)
+     Graph : ✅ <path> (or ❌ download failed — triage unavailable; D1+D3 will be empty)
+     Config: ✅ <path> (or ⚠️  not found — analyse runs concept-only)
    ```
 
 Print resolved values once. `BASE_BRANCH` is asked in Phase 4.1 unless provided.
@@ -165,33 +225,118 @@ Wait for the user's reply. Filter to `selectedErrors[]`. If `allErrors[]` is emp
 
 ```bash
 for each entry in selectedErrors[]:
-  # Write the error's stack-trace-like signature to a tmp file
-  echo "<type>: <message>\n  at <file>:<line>" > /tmp/ia-triage-input.txt
+  # AEM clientlib resolver — minified served URLs are never in the graph.
+  # /etc.clientlibs/{app}/clientlibs/{lib}.min.ACSHASH<hash>.js is what AEM serves.
+  # Graph node IDs have the format: {RepoName}/{relative-path}#{symbol}
+  # e.g. HDFC_PLForms/ui.apps/src/.../clientlib-personal-loan/js/bre3.js#showPreviewScreen
+  #
+  # AEM clientlib triage — two known failure modes fixed here:
+  #
+  # FAILURE 1 — directory path: passing js/ as the path matches nothing; the graph
+  #   stores individual file nodes, not directory nodes.
+  #
+  # FAILURE 2 — bare function name as --symbol: ia triage --symbol only resolves
+  #   JavaClass / OSGiService / file-path suffixes. JsFunction nodes (e.g.
+  #   HDFC_PLForms/.../bre3.js#showPreviewScreen) are NEVER matched by a bare name
+  #   like "showPreviewScreen". This always returns "unresolved" regardless of whether
+  #   the function is in the graph.
+  #
+  # Correct strategy for clientlib errors:
+  #   1. Extract the function name from the stack frame.
+  #   2. Query the graph SQLite directly for a JsFunction node matching that name.
+  #   3. Strip #functionName to get the source .js file path.
+  #   4. Use the last 3 path segments (e.g. clientlib-personal-loan/js/bre3.js) as
+  #      the --symbol value — this IS a file-suffix and resolves correctly.
+  #   5. Fall back to path-based stack-trace triage if the SQLite lookup finds nothing.
+  resolved_url="<fileUrl>"
+  symbol_name=""
+  clientlib_app=""
+  clientlib_lib=""
+  if [[ "<fileUrl>" =~ /etc\.clientlibs/([^/]+)/clientlibs/([^.]+)\.min\.ACSHASH[^.]+\.js ]]; then
+    clientlib_app="${BASH_REMATCH[1]}"
+    clientlib_lib="${BASH_REMATCH[2]}"
+    # Repo-prefixed path (matches graph ID format: {app}/ui.apps/...)
+    resolved_url="${clientlib_app}/ui.apps/src/main/content/jcr_root/apps/${clientlib_app}/clientlibs/${clientlib_lib}/js/"
+    # Extract function/symbol name from the stack frame (e.g. "showPreviewScreen@https://...")
+    symbol_name=$(echo "<raw_stack_frame>" | sed 's/@.*//')
+  fi
 
-  eval $IA_CMD triage --graph "$IA_GRAPH" < /tmp/ia-triage-input.txt \
-    > "$RUN_OUTPUT_DIR/ia-triage-<error_id>.json" 2>/dev/null
+  # Strategy 1 (clientlib primary): SQLite lookup → file-path suffix → triage.
+  # DO NOT pass the bare function name as --symbol — it will always return unresolved.
+  # Instead, find the JsFunction node in the graph to get the actual source file path.
+  if [[ -n "$symbol_name" ]] && [[ -n "$IA_GRAPH" ]]; then
+    _js_node=$(sqlite3 "$IA_GRAPH" \
+      "SELECT id FROM nodes WHERE id LIKE '%#${symbol_name}' AND type='JsFunction' LIMIT 1;" \
+      2>/dev/null)
+    if [[ -n "$_js_node" ]]; then
+      # Strip #functionName suffix, take last 3 path segments as the file-suffix symbol
+      _src_file=$(echo "$_js_node" | sed 's/#.*//')
+      _triage_symbol=$(echo "$_src_file" | awk -F'/' '{print $(NF-2)"/"$(NF-1)"/"$NF}')
+      eval $IA_CMD triage \
+        --graph "$IA_GRAPH" \
+        --symbol "$_triage_symbol" \
+        --format json \
+        > "$RUN_OUTPUT_DIR/ia-triage-<error_id>.json" 2>/dev/null
+    fi
+    # If sqlite lookup found nothing, _triage_symbol is unset → fall through to Strategy 2
+  fi
+
+  # Strategy 2: path-based triage using the repo-prefixed source path.
+  # Run when: (a) no symbol name, OR (b) Strategy 1 found no JsFunction node in graph,
+  #           OR (c) triage output is empty after Strategy 1.
+  if [[ -z "$symbol_name" ]] || [[ -z "$(cat $RUN_OUTPUT_DIR/ia-triage-<error_id>.json 2>/dev/null)" ]]; then
+    cat > /tmp/ia-triage-<error_id>.txt <<EOF
+  <type>: <message>
+    at ${resolved_url}:<line>
+  EOF
+
+    eval $IA_CMD triage \
+      --graph "$IA_GRAPH" \
+      --stack-trace /tmp/ia-triage-<error_id>.txt \
+      --format json \
+      > "$RUN_OUTPUT_DIR/ia-triage-<error_id>.json" 2>/dev/null
+  fi
 
   # Attach the triage JSON as iaContext on the allErrors[] entry (best-effort)
   entry.iaContext = (parse $RUN_OUTPUT_DIR/ia-triage-<error_id>.json) || null
 ```
 
-If `IA_GRAPH` is absent, skip triage — `iaContext` is null for all entries and plan sub-agents fall back to source-only analysis.
+If `IA_GRAPH` is absent (download failed or `IA_GRAPH_MISSING` set), skip triage — `iaContext` is null for all entries and plan sub-agents fall back to source-only analysis.
 
-**After triage, check if the fix targets a different repo.** For each entry where `iaContext` identifies a source repo that differs from `basename("$REPO_PATH")`, collect the distinct foreign repo names. If any are found, print a summary and ask once:
+**CWD-first check for clientlib entries where triage returned no graph matches.** When `entry.iaContext` is null AND the error came from a minified clientlib URL (i.e. `resolved_url` was rewritten to a `ui.apps/…/js/` source path), check whether that source path exists inside `REPO_PATH` before treating it as a foreign repo:
+
+```bash
+for each entry where entry.iaContext == null AND entry.resolvedClientlibPath is set:
+  clientlib_src="$REPO_PATH/${entry.resolvedClientlibPath}"
+  if [ -d "$clientlib_src" ] && ls "$clientlib_src"*.js 2>/dev/null | head -1 >/dev/null; then
+    # Source lives in the current repo — no cross-repo ask needed
+    entry.targetRepoPatch = null
+    echo "✅ Clientlib source found in current repo: $clientlib_src"
+  else
+    # Source not found in current repo — will surface in the cross-repo ask below
+    entry.clientlibNotInCurrentRepo = true
+    echo "⚠️  Clientlib source '$clientlib_src' not in current repo — will ask for clone path"
+  fi
+```
+
+**After triage, check if the fix targets a different repo.** Collect foreign repos from two sources: (a) entries where `iaContext` identifies a source repo that differs from `basename("$REPO_PATH")`, and (b) entries where `entry.clientlibNotInCurrentRepo == true`. For all such entries, print a summary and ask once:
 
 ```
-⚠️  The impact-analyser traces the following errors to a different repo:
+⚠️  The following errors cannot be fixed in the current repo:
 
   Error [1] — TypeError: fdPanel.forEach is not a function
-    Origin repo : HDFC_FormsCommon  (trail: ← Calls ← MavenDependsOn ← changed)
+    Reason : IA graph traces origin to HDFC_FormsCommon  (trail: ← Calls ← MavenDependsOn ← changed)
+  Error [2] — ReferenceError: param is not defined
+    Reason : Clientlib source 'ui.apps/src/main/content/jcr_root/apps/HDFC_PLForms/clientlibs/clientlib-personal-loan/js/' not found in current repo
   Error [3] — ReferenceError: _satellite is not defined
-    Origin repo : HDFC_Analytics
+    Reason : IA graph traces origin to HDFC_Analytics
 
   Your current working repo is: hdfc-bank-uat
 
 Do you have these repos cloned locally?
-  • HDFC_FormsCommon → enter path (or 'skip' to fix in current repo):
-  • HDFC_Analytics   → enter path (or 'skip' to fix in current repo):
+  • HDFC_FormsCommon (for Error [1]) → enter path (or 'skip' to fix in current repo):
+  • HDFC_PLForms     (for Error [2]) → enter path (or 'skip' to search in current repo anyway):
+  • HDFC_Analytics   (for Error [3]) → enter path (or 'skip' to fix in current repo):
 ```
 
 Wait for the user's reply for each repo. For each supplied path:
@@ -221,7 +366,9 @@ Parallelism rules:
 - **Different files** → spawn ALL sub-agents in parallel (single message, multiple `Agent` tool uses).
 - **Same file** → sequential. Re-read the file between sub-agents so each has fresh context.
 
-Each sub-agent returns JSON only:
+Each sub-agent returns JSON only — one of three shapes:
+
+**Normal plan entry:**
 ```json
 {
   "error_id": 1,
@@ -236,6 +383,28 @@ Each sub-agent returns JSON only:
 ```
 
 If `needs_review: true`, the entry is still added to the plan with status `needs_review` so the user can decide what to do — this never silently drops an error.
+
+**Needs more information (confidence gate):**
+```json
+{
+  "error_id": 1,
+  "need_more_info": true,
+  "questions": [
+    "<specific question 1 — name the exact field, config key, or runtime value needed>",
+    "<specific question 2>"
+  ],
+  "what_i_know": "one paragraph: what the code does, what the throw site is, why the root cause is ambiguous without the missing data"
+}
+```
+
+Use `need_more_info` only when the correct fix genuinely depends on runtime data not visible from source (e.g. an OSGi config value, an API response field, a DB row). Do NOT use it as a default hedge — a null-guard visible in source is always plannable without more data.
+
+When a sub-agent returns `need_more_info: true`:
+- Add the entry to `plan[]` with status `needs_more_info`.
+- Surface the questions to the user in Phase 3.2 (separate "Awaiting answers" section).
+- Block `approve` until all `needs_more_info` entries are either answered (triggering a sub-agent re-run with the new context) or explicitly skipped by the user.
+- On user answer: re-spawn the planning sub-agent for that entry, seeding the prompt with the original error + `what_i_know` + the user's answers. The sub-agent must now return a normal plan entry or `needs_review`.
+- On user `skip <N>`: move the entry to `needs_review` status with reason "skipped by user — insufficient data".
 
 ### 3.2 Present plan
 
@@ -255,7 +424,30 @@ Print a numbered table:
     root cause : <one line>
     approach   : <one line>
     scope      : page-level    risk : medium
+```
 
+If any entries have status `needs_more_info`, print them in a separate section **before** the command line:
+
+```
+⚠️  Awaiting answers before these can be planned:
+
+[3] ServiceException — Journey state mismatch
+    what I know : <what_i_know paragraph>
+    Questions:
+      a) <question 1>
+      b) <question 2>
+```
+
+**`approve` is blocked** while any `needs_more_info` entries exist. Remind the user:
+
+```
+Commands: answer <N>: <text> | skip <N> | approve | skip <N> | redo <N>: <guidance> | add: <error> | regenerate | cancel
+(approve is blocked — answer or skip entries [3] first)
+```
+
+Once all entries are resolved (answered → re-planned, or skipped → needs_review), `approve` is unblocked and the standard command line applies:
+
+```
 Commands: approve | skip <N> | redo <N>: <guidance> | add: <error> | regenerate | cancel
 ```
 
@@ -331,11 +523,28 @@ For each approved entry, spawn a fix sub-agent using `assets/fix-sub-agent-promp
 
 For page-level and repo-search entries, run the grep / find recipe from `references/fix-classification.md` first, then pass the results to the sub-agent.
 
-Each sub-agent returns:
+Each sub-agent returns one of:
+
+**Normal patch:**
 ```json
 { "file_relative": "...", "old_string": "...", "new_string": "...", "explanation": "one sentence" }
 ```
-or `{ "needs_review": true, "analysis": "..." }` if the patch turned out to be non-trivial after deeper inspection. `needs_review` here is rare (the plan was already approved); if it happens, append to `needsReview[]` and continue.
+
+**Needs review** (patch too complex after deeper inspection — rare, plan was already approved):
+```json
+{ "needs_review": true, "analysis": "..." }
+```
+Append to `needsReview[]` and continue.
+
+**Needs more information** (fix sub-agent safety net — should be caught at Phase 3.1, but may occur if runtime data requirements only become clear when reading the exact patch site):
+```json
+{
+  "need_more_info": true,
+  "questions": ["<specific question 1>", "<specific question 2>"],
+  "what_i_know": "one paragraph: what the code does, what the throw site is, why the root cause is ambiguous"
+}
+```
+When this happens: pause immediately, surface the questions to the user, wait for their answer, then re-spawn this sub-agent with the original prompt + the user's answers. Do not apply any subsequent patches until this entry is resolved. If the user says "skip it", treat as `needs_review: true`.
 
 ### 4.3 Apply patches (NO commit)
 
@@ -402,40 +611,42 @@ Runs after the working tree is fully patched (Phase 4.3 + Phase 5 perf fixes) an
 
 This phase is **best-effort**: if the config or CLI is missing it degrades gracefully — the commit and PR still happen. Never block Phase 6 due to an IA failure.
 
-### 5.5.1 Resolve IA tooling
+### 5.5.1 + 5.5.2 — Reuse Phase 1 IA variables
+
+`IA_CMD`, `IA_GRAPH`, `IA_GRAPH_FLAG`, `IA_CONCEPT_ONLY`, `IA_CONFIG`, `IA_CONFIG_FLAG`, and `IA_UNAVAILABLE` were all resolved and set in Phase 1. Prefer reusing them. However, **context compaction can erase in-memory variables** mid-session. Guard and re-resolve if needed:
 
 ```bash
-# Locate the ia CLI (try PATH first, then the known local dev install)
-if command -v ia >/dev/null 2>&1; then
-  IA_CMD="ia"
-elif [ -f "/Users/subodhj/Desktop/workspace/impact-analyser/impact-analyser/src/cli.js" ]; then
-  IA_CMD="node /Users/subodhj/Desktop/workspace/impact-analyser/impact-analyser/src/cli.js"
-else
-  IA_UNAVAILABLE="ia CLI not found"
-fi
-```
-
-### 5.5.2 Resolve config and graph DB
-
-```bash
-# Config — mandatory for ia analyse; search the repo first, then well-known locations
-IA_CONFIG=$(find "$REPO_PATH" -maxdepth 3 \
-  \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
-  2>/dev/null | head -1)
-
-if [ -z "$IA_CONFIG" ]; then
-  IA_UNAVAILABLE="${IA_UNAVAILABLE}; no impact-analyzer.config.yaml found in $REPO_PATH"
+# Re-resolve IA_CMD if lost (e.g. context compaction between phases)
+if [ -z "$IA_CMD" ] && [ -z "$IA_CMD_MISSING" ]; then
+  IA_INSTALL_DIR="$HOME/.impact-analyser/cli"
+  if command -v ia >/dev/null 2>&1; then
+    IA_CMD="ia"
+  elif [ -f "$IA_INSTALL_DIR/index.js" ]; then
+    IA_CMD="node $IA_INSTALL_DIR/index.js"
+  else
+    IA_CMD_MISSING=1
+    IA_UNAVAILABLE="ia CLI not found — install will be attempted if Phase 1 runs again"
+  fi
 fi
 
-# Graph DB — optional; enables D1 code-impact and D3 journey-impact sections
-IA_GRAPH=$(find "$REPO_PATH" -maxdepth 3 -name "impact-graph.sqlite" 2>/dev/null | head -1)
+# Verify CLI works — MUST use eval (IA_CMD may contain spaces)
+if [ -n "$IA_CMD" ] && ! eval $IA_CMD --version >/dev/null 2>&1; then
+  IA_UNAVAILABLE="ia CLI found but not executable (eval $IA_CMD --version failed)"
+fi
+
+# Re-resolve graph if lost
 [ -z "$IA_GRAPH" ] && IA_GRAPH=$(find "$HOME/.impact-analyser" -name "impact-graph.sqlite" 2>/dev/null | head -1)
-
-# --concept-only when no graph (suppresses the "D1+D3 will be empty" warning)
-IA_GRAPH_FLAG=""
-[ -n "$IA_GRAPH" ] && IA_GRAPH_FLAG="--graph \"$IA_GRAPH\""
 [ -z "$IA_GRAPH" ] && IA_CONCEPT_ONLY="--concept-only"
+IA_GRAPH_FLAG=""; [ -n "$IA_GRAPH" ] && IA_GRAPH_FLAG="--graph \"$IA_GRAPH\""
+
+if [ -n "$IA_UNAVAILABLE" ]; then
+  echo "⚠️  IA unavailable: $IA_UNAVAILABLE — skipping impact analysis"
+fi
 ```
+
+- `IA_CONFIG_FLAG` is already set to `--config "<path>"` or empty string — use as-is.
+- `IA_GRAPH_FLAG` is already set to `--graph "<path>"` or empty string — use as-is.
+- `IA_CONCEPT_ONLY` is `--concept-only` when no graph, empty otherwise.
 
 ### 5.5.3 Generate diff file and run analysis
 
@@ -454,7 +665,7 @@ if [ -z "$IA_UNAVAILABLE" ]; then
   IA_REPORT="$RUN_OUTPUT_DIR/impact-analysis.md"
 
   eval $IA_CMD analyse \
-    --config \"$IA_CONFIG\" \
+    $IA_CONFIG_FLAG \
     --diff   \"$IA_DIFF_FILE\" \
     $IA_GRAPH_FLAG \
     $IA_CONCEPT_ONLY \
@@ -782,6 +993,8 @@ Print: `📄 Run report saved: $RUN_OUTPUT_DIR/auto-fix-report.md`
 | Phase 3 — `redo N` / `regenerate` | Re-spawn planning sub-agent(s) per `references/plan-iteration.md` |
 | Phase 3 — unrecognised input | Print grammar; remain in `AWAITING_INPUT` |
 | Phase 3 — plan empty after skips | Ask `add: <error>` or `cancel`; never auto-approve empty |
+| Phase 3.1 sub-agent returns `need_more_info` | Add to plan as `needs_more_info`; block `approve`; surface questions; re-run after user answers or `skip <N>` moves to `needs_review` |
+| Phase 4.2 sub-agent returns `need_more_info` | Pause; surface questions to user; re-spawn sub-agent with answers; if user skips → `needs_review` |
 | Phase 4.2 sub-agent returns `needs_review` | Add to PR "Manual review needed"; continue |
 | `old_string` not unique | Expand context; re-spawn sub-agent if needed |
 | Phase 5 CLI missing / Node < 20 / install fails | Set `PERF_BOT_INSTALL_FAILED`; skip 5.2; commit error fixes; surface in PR |
@@ -795,7 +1008,7 @@ Print: `📄 Run report saved: $RUN_OUTPUT_DIR/auto-fix-report.md`
 | Run interrupted between 4.3 and 6.1 | On retry, ask whether to discard or stash — never auto-discard |
 | `git push` fails | Show command; continue to 6.3 with `needs_review "branch not pushed"` |
 | Phase 5.5 — `ia` CLI not found and not at known local path | Set `IA_UNAVAILABLE`; skip 5.5.2–5.5.3; PR section shows callout to run manually |
-| Phase 5.5 — no `impact-analyzer.config.yaml` found | Set `IA_UNAVAILABLE`; skip analysis; PR section shows callout |
+| Phase 5.5 — no `impact-analyzer.config.yaml` found | `IA_CONFIG_FLAG` is empty string; `ia analyse` still runs without `--config`; PR notes "config not found — concept-only analysis" |
 | Phase 5.5 — no graph DB found | Use `--concept-only`; D1 + D3 sections will be empty but D2 concept analysis still runs |
 | Phase 5.5 — `ia analyse` exits non-zero or produces empty output | Set `IA_UNAVAILABLE`; log stderr to `ia-stderr.txt`; continue to Phase 6 |
 | Phase 5.6 — `IA_JSON` missing or Phase 5.5 failed | Skip Phase 5.6 entirely; note in PR "cross-repo propagation skipped — IA unavailable" |
