@@ -1,0 +1,11 @@
+-- Drill D3: Sample journey IDs
+-- Placeholders: __HOST__, __SHORT_CLASS__
+-- For multi-class categories: __SHORT_CLASS__ → "ClassA" OR "ClassB"
+
+search index=ams_cq host="__HOST__" "*ERROR*" "__SHORT_CLASS__"
+| rex field=_raw "journeyId[=:\s]+(?<jid>[a-f0-9\-]{10,})"
+| where isnotnull(jid)
+| dedup jid
+| table jid _time
+-- head 10: a small sample is enough to identify affected journeys; increase only if needed
+| head 10

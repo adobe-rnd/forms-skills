@@ -1,0 +1,14 @@
+-- Full exception stack for a class within a journey
+-- Placeholders: __HOST__, __SHORT_CLASS__, __JOURNEY_ID__
+-- msg length 500 chars captures multi-line exceptions truncated to a single log line
+
+search index=ams_cq host="__HOST__" "__JOURNEY_ID__" "__SHORT_CLASS__"
+| rex field=_raw "HTTP/1\.1\]\s+(?<java_class>[\w.\$]+)\s+(?<msg>[^\n]{1,500})"
+| rex field=_raw "\[(?:qtp|0x)[^\]]+\]\s+(?<java_class2>[\w.\$]+)\s+(?<msg2>[^\n]{1,500})"
+| eval java_class=coalesce(java_class, java_class2) | eval msg=coalesce(msg, msg2)
+| rex field=_raw "\*(?<level>[A-Z]+)\*"
+| eval short_class=mvindex(split(java_class, "."), -1)
+| where short_class="__SHORT_CLASS__"
+| table _time level short_class msg host
+-- head 10: enough stack lines to reconstruct the exception and pinpoint the throw site
+| sort _time | head 10
