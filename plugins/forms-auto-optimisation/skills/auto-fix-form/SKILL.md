@@ -79,6 +79,26 @@ When you reach the end of Phase 2.M, the **next thing you do** is print the plan
 | `BASE_BRANCH` | No | Base branch for the fix PR — asked in Phase 4.1 if omitted |
 | `DATE_RANGE` | No | Telemetry date range (`YYYY-MM-DD:YYYY-MM-DD`); defaults to `<TODAY>:<TODAY>` |
 
+### Error-in-invocation fast path
+
+**If the user's message contains a JS stack frame or exception**, extract it immediately and set `ERROR_INPUT_PROVIDED=1`. Pattern to detect:
+- JS stack frame: `<symbol>@<url>:<line>:<col>` (e.g. `updatedJsonObject@https://applyonline…js:3524:53`)
+- JS exception: `TypeError:` / `ReferenceError:` / `RangeError:` / `EvalError:` / `URIError:` followed by a message
+
+When `ERROR_INPUT_PROVIDED=1`:
+1. Extract `EXCEPTION_TYPE` (e.g. `TypeError`), `EXCEPTION_MESSAGE` (e.g. `undefined is not an object (evaluating '…')`), `STACK_FRAME_URL` (the minified JS URL), `STACK_LINE` and `STACK_COL`.
+2. **Skip Phase 2A entirely.** Do NOT invoke optel-query.
+3. Pre-populate `selectedErrors[]` with a single entry built from the extracted fields: `{ type: EXCEPTION_TYPE, message: EXCEPTION_MESSAGE, fileUrl: STACK_FRAME_URL, line: STACK_LINE, col: STACK_COL, source: "invocation", count: null, pct_sessions_affected: null }`.
+4. Jump directly to Phase 2.M (IA triage) after Phase 1 completes.
+
+Print once after extraction:
+```
+Error extracted from invocation — skipping telemetry query.
+Type    : <EXCEPTION_TYPE>
+Message : <EXCEPTION_MESSAGE>
+Frame   : <STACK_FRAME_URL>:<STACK_LINE>:<STACK_COL>
+```
+
 ---
 
 ## Phase 1 — Input Resolution
@@ -92,22 +112,71 @@ When you reach the end of Phase 2.M, the **next thing you do** is print the plan
      REPO_REMOTE=$(git -C "$REPO_PATH" remote get-url origin 2>/dev/null || echo "no remote")
      echo "Resolved REPO_PATH: $REPO_PATH (origin: $REPO_REMOTE)"
    else
-     # Not in a git repo — ask the user immediately. Do not proceed until answered.
-     AskUserQuestion("The current directory is not inside a git repository.
+     # Not in the target repo — try to auto-locate before asking.
+     # If the invocation arguments contain a clientlib app name (e.g.
+     # /etc.clientlibs/HDFC_PLForms/…), extract it and search known locations.
+     _APP_NAME=$(echo "$FORM_URL $@" | grep -oE '/etc\.clientlibs/([^/]+)/' | head -1 | cut -d/ -f3)
+     REPO_PATH=""
+     if [ -n "$_APP_NAME" ]; then
+       # Search $HOME broadly (maxdepth 6) — no assumption about Desktop/workspace.
+       # The auto-clone landing zone ~/auto-fix-form-clones is checked first since
+       # it is the canonical location for skill-managed clones.
+       _FOUND=$(find "$HOME/auto-fix-form-clones" "$HOME" \
+         -maxdepth 6 -type d -name "$_APP_NAME" 2>/dev/null | head -1)
+       if [ -n "$_FOUND" ] && git -C "$_FOUND" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+         REPO_PATH="$_FOUND"
+         echo "✅ Auto-located $_APP_NAME at $REPO_PATH"
+       fi
+     fi
+     if [ -z "$REPO_PATH" ]; then
+       # Auto-locate failed — try to clone from IA config before asking.
+       # IA_CONFIG is not yet resolved; search $HOME for any IA config.
+       _IA_CFG=$(find "$HOME" -maxdepth 8 \
+         \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
+         2>/dev/null | head -1)
+       if [ -n "$_IA_CFG" ] && [ -n "$_APP_NAME" ]; then
+         REPO_PATH=$(ia_auto_clone "$_APP_NAME" "$_IA_CFG" 2>/dev/null)
+       fi
+     fi
+     if [ -z "$REPO_PATH" ]; then
+       # Last resort — ask the user.
+       AskUserQuestion("Could not auto-locate the target repo.
    Please provide the local path to the cloned repo where the fix should be applied:")
-     REPO_PATH="<user answer>"
+       REPO_PATH="<user answer>"
+     fi
      REPO_REMOTE=$(git -C "$REPO_PATH" remote get-url origin 2>/dev/null || echo "no remote")
      echo "Using REPO_PATH: $REPO_PATH (origin: $REPO_REMOTE)"
    fi
    ```
 
-   If the user-supplied path does not exist or is not a git repo, tell them and ask again. Do not continue with an invalid path.
+   If the resolved path does not exist or is not a git repo, attempt auto-clone (see helper below) before asking again. Only ask the user after both auto-locate and auto-clone have failed.
 
 3. **Resolve IA tooling early** — done once here; Phase 5.5 reuses these variables, never re-resolves:
 
    > ⚠️ **`IA_CMD` must always be called with `eval $IA_CMD …`, never as `$IA_CMD …` directly.** When `IA_CMD` is `node /path/to/cli.js` (contains a space), bare variable expansion in zsh/bash treats the entire string as the executable name and fails with "no such file or directory". Every `ia` invocation in this skill uses `eval`; any new invocation (version check, test call, etc.) must too.
 
    ```bash
+   # ── GitHub account for adobe-aem-forms repos ─────────────────────────────
+   # The IA CLI, graph, and config all live in adobe-aem-forms/* repos on
+   # github.com. Users may have multiple gh accounts (personal + Adobe SSO).
+   # The default active account may not have access. Auto-detect which account
+   # does and use its token for all IA downloads.
+   _GH_IA_TOKEN=""
+   _GH_IA_USER=""
+   for _gh_u in $(gh auth status 2>&1 | grep -oE 'account [^ ]+' | awk '{print $2}'); do
+     _tok=$(gh auth token --hostname github.com --user "$_gh_u" 2>/dev/null)
+     if [ -n "$_tok" ] && GITHUB_TOKEN="$_tok" gh release list \
+         --repo adobe-aem-forms/impact-analyser >/dev/null 2>&1; then
+       _GH_IA_TOKEN="$_tok"
+       _GH_IA_USER="$_gh_u"
+       echo "✅ GitHub account '$_gh_u' has access to adobe-aem-forms"
+       break
+     fi
+   done
+   if [ -z "$_GH_IA_TOKEN" ]; then
+     echo "⚠️  No gh account found with access to adobe-aem-forms — IA install will likely fail"
+   fi
+
    # ── CLI ──────────────────────────────────────────────────────────────────
    IA_INSTALL_DIR="$HOME/.impact-analyser/cli"
    if command -v ia >/dev/null 2>&1; then
@@ -121,7 +190,7 @@ When you reach the end of Phase 2.M, the **next thing you do** is print the plan
      case "$_ARCH" in arm64|aarch64) _ARCH_TAG="arm64" ;; *) _ARCH_TAG="x64" ;; esac
      case "$_OS" in darwin) _OS_TAG="darwin" ;; *) _OS_TAG="linux" ;; esac
      mkdir -p "$HOME/.impact-analyser"
-     gh release download \
+     GITHUB_TOKEN="$_GH_IA_TOKEN" gh release download \
        --repo adobe-aem-forms/impact-analyser \
        --pattern "impact-analyser-cli-${_OS_TAG}-${_ARCH_TAG}.tar.gz" \
        --dir /tmp --clobber 2>/tmp/ia-install-stderr.txt \
@@ -133,19 +202,56 @@ When you reach the end of Phase 2.M, the **next thing you do** is print the plan
    fi
 
    # ── Config (optional — omit flag if not found, ia analyse still runs) ────
+   # Search order:
+   #   1. Inside REPO_PATH (maxdepth 3) — most common for monorepo setups
+   #   2. Sibling directories of REPO_PATH — covers dedicated graph repos like
+   #      impact-analyser-graph/impact-analyser-graph/hdfc/ that live alongside
+   #      the forms repos rather than inside them
+   #   3. $HOME/auto-fix-form-clones — auto-clone landing zone
    IA_CONFIG=$(find "$REPO_PATH" -maxdepth 3 \
      \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
      2>/dev/null | head -1)
+   if [ -z "$IA_CONFIG" ]; then
+     IA_CONFIG=$(find "$(dirname "$REPO_PATH")" -maxdepth 5 \
+       \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
+       2>/dev/null | head -1)
+   fi
+   if [ -z "$IA_CONFIG" ]; then
+     IA_CONFIG=$(find "$HOME/auto-fix-form-clones" -maxdepth 5 \
+       \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
+       2>/dev/null | head -1)
+   fi
+   # 4. Broader $HOME search — catches configs in any subdirectory regardless of
+   #    the user's folder structure (no assumption about Desktop/workspace).
+   if [ -z "$IA_CONFIG" ]; then
+     IA_CONFIG=$(find "$HOME" -maxdepth 8 \
+       \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
+       2>/dev/null | head -1)
+   fi
+   # 5. Not found anywhere — auto-download from adobe-aem-forms/impact-analyser-graph release.
+   #    The config file itself contains no secrets (credentials are referenced as env vars).
+   #    This makes the skill self-bootstrapping for new users with no local graph repo.
+   if [ -z "$IA_CONFIG" ]; then
+     echo "📥 IA config not found locally — downloading from adobe-aem-forms/impact-analyser-graph..."
+     mkdir -p "$HOME/.impact-analyser"
+     GITHUB_TOKEN="$_GH_IA_TOKEN" gh release download impact-graph-hdfc \
+       --repo adobe-aem-forms/impact-analyser-graph \
+       --pattern "impact-analyser.config.yaml" \
+       --dir "$HOME/.impact-analyser" --clobber 2>/tmp/ia-config-dl-stderr.txt \
+       && IA_CONFIG="$HOME/.impact-analyser/impact-analyser.config.yaml" \
+       || echo "⚠️  Config download failed: $(head -2 /tmp/ia-config-dl-stderr.txt) — running concept-only"
+   fi
    IA_CONFIG_FLAG=""; [ -n "$IA_CONFIG" ] && IA_CONFIG_FLAG="--config \"$IA_CONFIG\""
 
    # ── Graph DB ─────────────────────────────────────────────────────────────
    IA_GRAPH=$(find "$REPO_PATH" -maxdepth 3 -name "impact-graph.sqlite" 2>/dev/null | head -1)
+   [ -z "$IA_GRAPH" ] && IA_GRAPH=$(find "$(dirname "$REPO_PATH")" -maxdepth 5 -name "impact-graph.sqlite" 2>/dev/null | head -1)
    [ -z "$IA_GRAPH" ] && IA_GRAPH=$(find "$HOME/.impact-analyser" -name "impact-graph.sqlite" 2>/dev/null | head -1)
 
    if [ -z "$IA_GRAPH" ]; then
      echo "📥 No local graph — downloading from adobe-aem-forms/impact-analyser-graph..."
      mkdir -p "$HOME/.impact-analyser"
-     gh release download impact-graph-hdfc \
+     GITHUB_TOKEN="$_GH_IA_TOKEN" gh release download impact-graph-hdfc \
        --repo adobe-aem-forms/impact-analyser-graph \
        --pattern impact-graph.sqlite \
        --dir "$HOME/.impact-analyser" --clobber 2>/tmp/ia-graph-dl-stderr.txt \
@@ -319,31 +425,117 @@ for each entry where entry.iaContext == null AND entry.resolvedClientlibPath is 
   fi
 ```
 
-**After triage, check if the fix targets a different repo.** Collect foreign repos from two sources: (a) entries where `iaContext` identifies a source repo that differs from `basename("$REPO_PATH")`, and (b) entries where `entry.clientlibNotInCurrentRepo == true`. For all such entries, print a summary and ask once:
+**After triage, check if the fix targets a different repo.** Collect foreign repos from two sources: (a) entries where `iaContext` identifies a source repo that differs from `basename("$REPO_PATH")`, and (b) entries where `entry.clientlibNotInCurrentRepo == true`. For all such entries, **auto-resolve the path without asking the user**:
 
+```bash
+# ── Auto-resolve helper (ia_auto_clone) ────────────────────────────────────
+# Called whenever a foreign repo is needed. Tries locations in order; only
+# asks the user if every automatic strategy fails.
+ia_auto_clone() {
+  local REPO_NAME="$1"
+  local CFG="${2:-$IA_CONFIG}"
+  local CLONE_DIR="$HOME/auto-fix-form-clones"
+
+  # 1. Already cloned in the standard landing zone?
+  git -C "$CLONE_DIR/$REPO_NAME" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+    && { echo "$CLONE_DIR/$REPO_NAME"; return 0; }
+
+  # 2. Sibling of REPO_PATH?
+  local _SIB="$(dirname "$REPO_PATH")/$REPO_NAME"
+  git -C "$_SIB" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+    && { echo "$_SIB"; return 0; }
+
+  # 3. IA workspace from config?
+  local _WS=""
+  [ -n "$CFG" ] && _WS=$(node -e "
+    try {
+      const y = require('fs').readFileSync('$CFG','utf8');
+      const m = y.match(/^workspace:\s*(.+)/m);
+      if (m) console.log(m[1].replace(/\\\${IA_WORKSPACE}/g, process.env.IA_WORKSPACE||'').trim());
+    } catch(e) {}
+  " 2>/dev/null)
+  if [ -n "$_WS" ]; then
+    git -C "$_WS/$REPO_NAME" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+      && { echo "$_WS/$REPO_NAME"; return 0; }
+  fi
+
+  # 4. Not found locally — auto-clone from IA config.
+  if [ -n "$CFG" ]; then
+    local _INFO
+    _INFO=$(node -e "
+      try {
+        const y = require('fs').readFileSync('$CFG','utf8');
+        // Walk github_orgs blocks; find the one containing 'name: REPO_NAME'
+        const orgs = y.split(/^- name:/m).slice(1);
+        for (const blk of orgs) {
+          // org-level name is the first 'name:' line in the block
+          const orgM = blk.match(/^\s{0,2}(\S[^\n]*)/);
+          const hostM = blk.match(/host:\s*(.+)/);
+          if (hostM && blk.match(new RegExp('- name:\\\\s*$REPO_NAME(\$|\\\\s)', 'm'))) {
+            const orgName = y.match(/^- name:\\s*(\\S+)/m)?.[1] || '';
+            // Find this org's name from the split marker that preceded this block
+            console.log(hostM[1].trim());
+            break;
+          }
+        }
+        // simpler fallback: grep for host near the repo name
+        const lines = y.split('\\n');
+        let host='', inOrg=false;
+        for (const l of lines) {
+          if (/^- name:/.test(l)) { inOrg=true; host=''; }
+          if (inOrg && /host:/.test(l)) host = l.split('host:')[1].trim();
+          if (inOrg && new RegExp('- name:\\\\s*$REPO_NAME').test(l)) {
+            // find org name (first line after '- name:' before this repo)
+            const orgIdx = y.lastIndexOf('- name:', y.indexOf('- name: $REPO_NAME'));
+            const orgLine = y.slice(orgIdx).match(/- name:\\s*(\\S+)/);
+            if (orgLine) console.log(host + ' ' + orgLine[1]);
+            process.exit(0);
+          }
+        }
+      } catch(e) { process.exit(1); }
+    " 2>/dev/null)
+    local _HOST=$(echo "$_INFO" | awk '{print $1}')
+    local _ORG=$(echo  "$_INFO" | awk '{print $2}')
+    if [ -n "$_HOST" ] && [ -n "$_ORG" ]; then
+      mkdir -p "$CLONE_DIR"
+      echo "📥 Auto-cloning $REPO_NAME from $_HOST/$_ORG/$REPO_NAME …"
+      git clone "https://$_HOST/$_ORG/${REPO_NAME}.git" "$CLONE_DIR/$REPO_NAME" --depth 1 \
+        2>/tmp/ia-clone-${REPO_NAME}-stderr.txt \
+        && { echo "$CLONE_DIR/$REPO_NAME"; return 0; } \
+        || echo "❌ Clone failed: $(head -2 /tmp/ia-clone-${REPO_NAME}-stderr.txt)"
+    fi
+  fi
+
+  # 5. All automatic strategies exhausted — ask once.
+  echo "__ASK__"
+  return 1
+}
 ```
-⚠️  The following errors cannot be fixed in the current repo:
 
-  Error [1] — TypeError: fdPanel.forEach is not a function
-    Reason : IA graph traces origin to HDFC_FormsCommon  (trail: ← Calls ← MavenDependsOn ← changed)
-  Error [2] — ReferenceError: param is not defined
-    Reason : Clientlib source 'ui.apps/src/main/content/jcr_root/apps/HDFC_PLForms/clientlibs/clientlib-personal-loan/js/' not found in current repo
-  Error [3] — ReferenceError: _satellite is not defined
-    Reason : IA graph traces origin to HDFC_Analytics
+For each foreign repo:
 
-  Your current working repo is: hdfc-bank-uat
-
-Do you have these repos cloned locally?
-  • HDFC_FormsCommon (for Error [1]) → enter path (or 'skip' to fix in current repo):
-  • HDFC_PLForms     (for Error [2]) → enter path (or 'skip' to search in current repo anyway):
-  • HDFC_Analytics   (for Error [3]) → enter path (or 'skip' to fix in current repo):
+```bash
+for REPO_NAME in <foreign_repo_list>; do
+  _RESOLVED=$(ia_auto_clone "$REPO_NAME")
+  if [ "$_RESOLVED" = "__ASK__" ]; then
+    # Only ask if auto-clone truly failed
+    AskUserQuestion("Could not auto-clone $REPO_NAME.
+Please enter the local path (or 'skip' to search in current repo):")
+    _RESOLVED="<user answer>"
+    [ "$_RESOLVED" = "skip" ] && _RESOLVED=""
+  fi
+  if [ -n "$_RESOLVED" ] && git -C "$_RESOLVED" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "✅ $REPO_NAME → $_RESOLVED"
+    # Set on all errors pointing to this repo:
+    entry.targetRepoPatch = { repoPath: "$_RESOLVED", repoName: "$REPO_NAME" }
+  else
+    echo "⚠️  $REPO_NAME unresolved — plan sub-agents will fall back to REPO_PATH"
+    entry.targetRepoPatch = null
+  fi
+done
 ```
 
-Wait for the user's reply for each repo. For each supplied path:
-- Validate: `git -C "<path>" rev-parse --is-inside-work-tree` — re-ask once if invalid.
-- Set `entry.targetRepoPatch = { repoPath: "<path>", repoName: "<name>" }` on all errors whose `iaContext` points to that repo.
-
-For errors where the user typed `skip` or no path was given: `entry.targetRepoPatch = null` — plan sub-agents will search `REPO_PATH` instead.
+Set `entry.targetRepoPatch = { repoPath: "<path>", repoName: "<name>" }` on all errors whose `iaContext` points to that repo. For unresolved repos: `entry.targetRepoPatch = null` — plan sub-agents search `REPO_PATH` instead.
 
 Display a final confirmation table (error, file:line, count, target repo, iaContext summary). Proceed to Phase 3.
 
@@ -499,7 +691,17 @@ For each `T` in `TARGET_REPOS`:
    ```bash
    git -C "$T" checkout "$BASE_BRANCH"
    git -C "$T" pull origin "$BASE_BRANCH"
+
+   # Build branch name; if it already exists on remote, append -v2, -v3, …
+   # to avoid a "fetch first" push rejection when the same form is fixed twice
+   # on the same day.
    FIX_BRANCH="fix/auto-fix-<form-slug>-<TODAY>"
+   _v=2
+   while git -C "$T" ls-remote --exit-code --heads origin "$FIX_BRANCH" >/dev/null 2>&1; do
+     FIX_BRANCH="fix/auto-fix-<form-slug>-<TODAY>-v${_v}"
+     _v=$((_v + 1))
+   done
+
    git -C "$T" checkout -b "$FIX_BRANCH"
    TARGET_REPOS["$T"]="$FIX_BRANCH"
    ```
@@ -772,12 +974,19 @@ while IFS= read -r REPO_NAME; do
   done
 
   if [ -z "${CROSS_REPO_PATHS[$REPO_NAME]}" ]; then
-    echo "⚠️  Skipping $REPO_NAME — no local clone found (check sibling dirs or IA workspace)"
+    # Auto-clone via ia_auto_clone helper (defined in Phase 2.M)
+    _CLONED=$(ia_auto_clone "$REPO_NAME")
+    if [ "$_CLONED" != "__ASK__" ] && [ -n "$_CLONED" ]; then
+      CROSS_REPO_PATHS["$REPO_NAME"]="$_CLONED"
+      echo "✅ Auto-cloned $REPO_NAME → $_CLONED"
+    else
+      echo "⚠️  Skipping $REPO_NAME — auto-clone failed (check GHE_ADOBE_TOKEN / HDFC_FORMS_TOKEN)"
+    fi
   fi
 done <<< "$IMPACTED_REPOS"
 ```
 
-Repos with no local clone are logged and skipped. The orchestrator **never clones** repos in this phase.
+If auto-clone fails (e.g. missing auth token), log the repo as skipped and list it in the PR as "Clone failed — manual check needed". Do not ask the user unless every automated strategy has been exhausted.
 
 ### 5.6.3 Spawn cross-repo fix sub-agents
 
@@ -1002,7 +1211,7 @@ Print: `📄 Run report saved: $RUN_OUTPUT_DIR/auto-fix-report.md`
 | Phase 5.2 sub-agent returns `needs_review` | Add to "Performance follow-ups" |
 | `.perf-bot-report.md` missing/malformed | `needsReview` entry; break loop; proceed to 6.1 |
 | Both `errorFixedFiles[]` and `perfFixedFiles[]` empty | Skip commit; let 6.3 decide whether to open PR |
-| `pwd` not in any git repo | Ask user for the local path of the cloned repo in Phase 1; re-ask if the supplied path is invalid or not a git repo; never continue with an unset path |
+| `pwd` not in any git repo | Extract app name from clientlib URL; search `$HOME/Desktop/workspace/`, `$HOME/auto-fix-form-clones/`, sibling dirs; auto-clone via `ia_auto_clone` if not found; only ask user after all strategies fail |
 | IA triage in 2.M identifies a different origin repo | Ask the user for its local path in 2.M before proceeding to Phase 3; `skip` proceeds with `REPO_PATH` and source-only analysis |
 | User-supplied target repo path is invalid / not a git repo | Re-ask once; if still invalid, fall back to `REPO_PATH` and note in plan entry |
 | Run interrupted between 4.3 and 6.1 | On retry, ask whether to discard or stash — never auto-discard |
@@ -1013,7 +1222,7 @@ Print: `📄 Run report saved: $RUN_OUTPUT_DIR/auto-fix-report.md`
 | Phase 5.5 — `ia analyse` exits non-zero or produces empty output | Set `IA_UNAVAILABLE`; log stderr to `ia-stderr.txt`; continue to Phase 6 |
 | Phase 5.6 — `IA_JSON` missing or Phase 5.5 failed | Skip Phase 5.6 entirely; note in PR "cross-repo propagation skipped — IA unavailable" |
 | Phase 5.6 — no impacted repos in IA JSON | `IMPACTED_REPOS` empty; skip Phase 5.6; primary PR notes "no dependent repos identified" |
-| Phase 5.6 — dependent repo has no local clone | Log skip; list in PR "Clone not found — manual check needed"; never auto-clone |
+| Phase 5.6 — dependent repo has no local clone | Call `ia_auto_clone` (searches sibling dirs, IA workspace, then git-clones from IA config); if clone fails due to missing auth token, list as "Clone failed — manual check needed" in PR |
 | Phase 5.6 — cross-repo sub-agent returns `needs_review` | Add to `crossRepoNeedsReview[REPO_NAME]`; include in PR "Manual review needed"; continue other repos |
 | Phase 5.6 — `old_string` not unique in dependent repo | Expand context and re-spawn sub-agent once; if still not unique → `needs_review` |
 | Phase 5.6 — `git push` fails for a dependent repo | Log error; add `crossRepoNeedsReview[REPO_NAME] += "branch not pushed"`; continue other repos |

@@ -1,6 +1,6 @@
 ---
 name: auto-fix-journey
-description: Fixes backend Java errors in AEM Forms. Three entry points: (1) Fix mode — user provides a stack trace or class+line; (2) API Error mode — user says an API is returning 500/400, skill queries Splunk, analyzes root cause, then proceeds to fix if confident; (3) Splunk mode — explicit log exploration (aggregated errors, journey traces, FDM analytics). Uses impact-analyser graph for repo/file routing and post-fix blast-radius analysis.
+description: Fixes backend Java errors in AEM Forms. Four entry points: (1) Telemetry mode — user provides a form URL, skill queries optel for API errors in last 1 day and lets user select which to fix; (2) Fix mode — user provides a stack trace or class+line; (3) API Error mode — user provides an API path or error label (e.g. "High API Errors"), skill queries Splunk; (4) Splunk mode — explicit log exploration. Uses impact-analyser graph for repo/file routing and post-fix blast-radius analysis.
 compatibility: Requires git + gh CLI for branch/PR creation. Impact-analyser CLI (`ia`) required for triage and post-PR analysis — degrades gracefully if absent. Python 3 + splunk-sdk required only for Splunk mode.
 allowed-tools: Read Write Edit Bash Agent AskUserQuestion
 user_invocable: true
@@ -11,15 +11,66 @@ metadata:
 
 # Auto Fix Journey
 
-Three distinct entry points. Read the user's message and pick exactly one:
+Four distinct entry points. Read the user's message and pick exactly one:
 
 | User message contains… | Entry point |
 |------------------------|-------------|
+| A form page URL (e.g. `https://applyonline.hdfc.bank.in/…`) without a stack trace or API path | **Telemetry mode** — start at Step T0 |
 | An error, exception, stack trace, class name, or line reference | **Fix mode** — start at Step 1 |
-| An API path/route + "500", "400", "failing", "broken", "error" — without a stack trace | **API Error mode** — start at Step E0 |
+| An API path/route + "500"/"400"/"failing"/"error", OR an API error label (e.g. "High API Errors", "Missing JSON") | **API Error mode** — start at Step E0 |
 | "show errors", "query Splunk", "what's failing", "trace journey", "show logs", "analytics", "FDM performance", "failure rate", "drill deeper" | **Splunk mode** — start at Step S0 |
 
-**Default is Fix mode.** Do not call Splunk unless the user provides an API route (API Error mode) or explicitly asks to query logs (Splunk mode).
+**Default is Fix mode.** Telemetry mode activates only when a bare form URL is the primary input.
+
+---
+
+# TELEMETRY MODE
+
+Use when the user provides a form page URL and wants to discover which backend APIs are erroring.
+
+## Step T0 — Extract form URL and date range
+
+Extract `FORM_URL` from the user's message. Default `DATE_RANGE` = today (`<TODAY>:<TODAY>` from env context — never run `date` in Bash). If the URL host is `localhost`, `aem.page`, `hlx.page`, or `aem.live`, tell the user telemetry is not available for non-production URLs and ask for a production URL.
+
+## Step T1 — Query optel for API errors
+
+```
+Skill("optel-query", "For form URL <FORM_URL> on <DATE_RANGE>, return all backend API calls
+that returned HTTP 4xx or 5xx. Include: api_path, http_status, error_message or response_body_sample,
+count, pct_sessions_affected. Sort by count desc.")
+```
+
+If optel-query returns no results, print:
+```
+No API errors found for <FORM_URL> on <DATE_RANGE>.
+Try a wider date range, or paste a stack trace / API path directly.
+```
+and exit.
+
+## Step T2 — Present API error list and ask user to select
+
+Show a numbered table of fixable API errors:
+
+```
+Backend API Errors — <FORM_URL> — <DATE_RANGE>
+Total: <N> distinct error patterns
+
+#  | API Path                        | Status | Error summary                   | Count | Sessions %
+---|----------------------------------|--------|---------------------------------|-------|----------
+1  | /baas/getCustomerStatus         | 500    | Missing JSON in response body   | 1 204 | 34 %
+2  | /otp/validate                   | 400    | ServiceException: invalid state |   87  |  4 %
+```
+
+Ask: **"Which API error(s) to fix? Enter number(s), comma-separated, or 'all':"**
+
+Wait for the user's selection. For each selected entry:
+- Set `API_PATH` = the api_path value
+- Set `HTTP_STATUS` = the status code
+- Set `ERROR_SUMMARY` = the error message/summary
+
+Then **continue from API Error mode Step E0** for each selected entry, using the extracted `API_PATH` and `HTTP_STATUS` as the inputs. Splunk credentials are checked in Step E1.
+
+---
 
 ---
 
@@ -110,6 +161,22 @@ else
   || { IA_CMD_MISSING=1
        IA_UNAVAILABLE="ia CLI install failed: $(head -2 /tmp/ia-install-stderr.txt)"; }
 fi
+
+# ── Node ABI check (better-sqlite3 compiled for Node 20, ABI 115) ────────────
+# The pre-built IA CLI tarball bundles a better_sqlite3.node binary compiled for
+# Node 20. Running under Node 21+ causes an immediate MODULE_VERSION mismatch crash.
+# Detect early and rewrite IA_CMD to use an NVM Node 20 binary.
+_NODE_MAJOR=$(node -v 2>/dev/null | sed -E 's/^v([0-9]+).*/\1/')
+if [ "${_NODE_MAJOR:-0}" -ge 21 ] && [ -z "$IA_CMD_MISSING" ]; then
+  _NODE20=$(ls "$HOME/.nvm/versions/node/v20".*/bin/node 2>/dev/null | sort -V | tail -1)
+  if [ -n "$_NODE20" ]; then
+    IA_CMD="$_NODE20 $IA_INSTALL_DIR/index.js"
+    echo "⚠️  System Node ${_NODE_MAJOR} — IA re-routed to Node 20 ($_NODE20) for better-sqlite3 ABI compatibility"
+  else
+    IA_UNAVAILABLE="IA CLI needs Node 20 (better_sqlite3 ABI 115); system is Node ${_NODE_MAJOR} and no Node 20 found in ~/.nvm. Fix: nvm install 20"
+    echo "❌ $IA_UNAVAILABLE"
+  fi
+fi
 ```
 
 ### 2.2 Locate or download the graph
@@ -147,9 +214,29 @@ fi
 ### 2.3 Resolve config (optional — for ia analyse in Step 10)
 
 ```bash
+# Search order: $PWD → sibling dirs → $HOME broadly → auto-download.
+# No assumption about Desktop/workspace layout — works for any user.
 IA_CONFIG=$(find "$PWD" -maxdepth 3 \
   \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
   2>/dev/null | head -1)
+[ -z "$IA_CONFIG" ] && IA_CONFIG=$(find "$(dirname "$PWD")" -maxdepth 5 \
+  \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
+  2>/dev/null | head -1)
+[ -z "$IA_CONFIG" ] && IA_CONFIG=$(find "$HOME" -maxdepth 8 \
+  \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
+  2>/dev/null | head -1)
+# Still not found — auto-download from adobe-aem-forms/impact-analyser-graph release.
+# Config contains no secrets (credentials are env vars); safe to download for any user.
+if [ -z "$IA_CONFIG" ]; then
+  echo "📥 IA config not found — downloading from adobe-aem-forms/impact-analyser-graph..."
+  mkdir -p "$HOME/.impact-analyser"
+  gh release download impact-graph-hdfc \
+    --repo adobe-aem-forms/impact-analyser-graph \
+    --pattern "impact-analyser.config.yaml" \
+    --dir "$HOME/.impact-analyser" --clobber 2>/tmp/ia-config-dl-stderr.txt \
+    && IA_CONFIG="$HOME/.impact-analyser/impact-analyser.config.yaml" \
+    || echo "⚠️  Config download failed — ia analyse will run concept-only"
+fi
 ```
 
 ### 2.4 Print status block
@@ -190,7 +277,13 @@ Parse the triage JSON to extract:
 - `IA_FILE` — the relative file path within that repo (if present)
 - `IA_TRAIL` — the graph trail string (for embedding in PR body)
 
-If triage exits non-zero or produces no output: set `IA_TRIAGE_FAILED=1` and fall through to 3.2.
+Parse the triage JSON:
+- If `seeds` is non-empty: extract `IA_REPO`, `IA_FILE`, `IA_TRAIL` from the first seed and proceed to Step 4.
+- If `seeds` is empty AND all stack-trace classes are third-party (e.g. `org.eclipse.jetty`, `org.json`, `org.apache`): the exception fires in a library — the real fix site is the **upstream caller** in custom code. Do NOT fall back to repos.md. Instead:
+  1. Identify the lowest custom frame in the stack (first `com.hdfcbank.*` class above the third-party throw).
+  2. Re-run triage with that custom class as the `--symbol`.
+  3. If still empty: search the IA config for repos whose branch list or name matches the form path / journey context and auto-clone the most likely candidate (Step 3.2.3).
+- If triage exits non-zero or produces no output for a custom class: set `IA_TRIAGE_FAILED=1` and fall through to 3.2.
 
 ### 3.2 Fallback: repos.md match → auto-clone if needed
 
@@ -266,8 +359,41 @@ WORKING_REPO=$(basename "$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null)"
 ```
 
 If `IA_REPO` is set and differs from `WORKING_REPO`:
-- Check if a sibling directory `$(dirname "$PWD")/$IA_REPO` exists as a valid git repo → use it.
-- Otherwise: ask for `GIT_URL` and auto-clone via the same 3.2.3 recipe above.
+```bash
+# Search broadly — no assumption about folder layout.
+_FOUND=$(find "$HOME/auto-fix-journey-clones" "$HOME" \
+  -maxdepth 6 -type d -name "$IA_REPO" 2>/dev/null | head -1)
+if [ -n "$_FOUND" ] && git -C "$_FOUND" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  TARGET_REPO_PATH="$_FOUND"
+  echo "✅ Auto-located $IA_REPO at $TARGET_REPO_PATH"
+else
+  # Not found locally — auto-clone from IA config before asking.
+  CLONE_DIR="$HOME/auto-fix-journey-clones/$IA_REPO"
+  _CLONE_URL=$(node -e "
+    try {
+      const y = require('fs').readFileSync('$IA_CONFIG','utf8');
+      const lines = y.split('\n'); let host='';
+      for (const l of lines) {
+        if (/host:/.test(l)) host = l.split('host:')[1].trim();
+        if (new RegExp('- name:\\\\s*$IA_REPO').test(l) && host) {
+          // find org name from nearest preceding '- name:' at top level
+          console.log(host); break;
+        }
+      }
+    } catch(e) {}
+  " 2>/dev/null)
+  if [ -n "$_CLONE_URL" ]; then
+    mkdir -p "$HOME/auto-fix-journey-clones"
+    echo "📥 Auto-cloning $IA_REPO..."
+    git clone "https://$_CLONE_URL/HDFC/${IA_REPO}.git" "$CLONE_DIR" --depth 50 2>/dev/null \
+      && TARGET_REPO_PATH="$CLONE_DIR" \
+      || { echo "⚠️  Clone failed — asking for path"; TARGET_REPO_PATH=""; }
+  fi
+  # Only ask if every automated strategy failed
+  if [ -z "$TARGET_REPO_PATH" ]; then
+    AskUserQuestion("Could not auto-locate $IA_REPO. Please provide the git URL or local path:")
+  fi
+fi
 
 If `IA_REPO` matches `WORKING_REPO` or is not set: `TARGET_REPO_PATH=$(git -C "$PWD" rev-parse --show-toplevel)`.
 
@@ -340,9 +466,40 @@ Always print before proceeding or asking:
 Fix classification — <SHORT_CLASS>
 Exception : <EXCEPTION_TYPE>: <EXCEPTION_MESSAGE (80 chars)>
 Fix type  : structural | logic | framework
-Confidence: high → proceeding to fix
+Confidence: high → proceeding to plan
             low  → asking for data points (see below)
 ```
+
+### 6.4 — Plan gate (mandatory — mirrors frontend Phase 3)
+
+> 🛑 **Hard gate.** No `Edit`, `git checkout -b`, or `git commit` until the user issues
+> `approve` / `fix it` / `proceed`. This applies even when there is only one error and
+> the fix looks trivial — the user can `approve` immediately if they agree.
+
+After classification is printed (and after any missing-data questions are answered),
+present a numbered fix plan and **wait for user approval**:
+
+```
+# Fix Plan
+
+[1] <EXCEPTION_TYPE> — <SHORT_CLASS>:<LINE_NUMBER>
+    root cause : <one line — what is null/wrong and why>
+    approach   : <one line — minimal-diff fix: null-guard / param rename / etc.>
+    scope      : single-line | multi-line
+    risk       : low | medium | high
+    file       : <SOURCE_FILE relative to repo root>
+
+Commands: approve | skip 1 | redo 1: <guidance> | cancel
+```
+
+**State machine:**
+- `approve` / `fix it` / `proceed` — freeze the plan; move to Step 7.
+- `skip <N>` — remove entry N; if plan becomes empty, ask `add: <error>` or `cancel`.
+- `redo <N>: <guidance>` — re-derive root cause + approach for entry N using the guidance; reprint.
+- `cancel` — print `"Run cancelled — no changes made."` and exit. No branch, no edit.
+
+**Never proceed to Step 7 until `approve` is received.** Telemetry results, Splunk data, or
+an "obvious" null-guard do not bypass this gate. The user drives the transition.
 
 ---
 
@@ -430,18 +587,29 @@ Runs `ia analyse` on the diff between `HEAD~1` and `HEAD` (the fix commit). This
 
 ```bash
 if [ -z "$IA_UNAVAILABLE" ]; then
-  # --config is optional; include it only if found
-  IA_CONFIG=$(find "$TARGET_REPO_PATH" -maxdepth 3 \
-    \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
-    2>/dev/null | head -1)
-  [ -z "$IA_CONFIG" ] && IA_CONFIG=$(find "$PWD" -maxdepth 3 \
-    \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
-    2>/dev/null | head -1)
+  # --config: reuse from Step 2.3 if already resolved; otherwise search broadly.
+  # No hardcoded Desktop/workspace — find $HOME covers any layout.
+  if [ -z "$IA_CONFIG" ]; then
+    IA_CONFIG=$(find "$TARGET_REPO_PATH" "$(dirname "$TARGET_REPO_PATH")" "$HOME" \
+      -maxdepth 8 \
+      \( -name "impact-analyzer.config.yaml" -o -name "impact-analyser.config.yaml" \) \
+      2>/dev/null | head -1)
+    # Last resort: download
+    if [ -z "$IA_CONFIG" ]; then
+      gh release download impact-graph-hdfc \
+        --repo adobe-aem-forms/impact-analyser-graph \
+        --pattern "impact-analyser.config.yaml" \
+        --dir "$HOME/.impact-analyser" --clobber 2>/dev/null \
+        && IA_CONFIG="$HOME/.impact-analyser/impact-analyser.config.yaml"
+    fi
+  fi
   IA_CONFIG_FLAG=""; [ -n "$IA_CONFIG" ] && IA_CONFIG_FLAG="--config \"$IA_CONFIG\""
 
-  # --graph is optional; without it D1+D3 are empty, D2 (concept match) still fires
-  IA_GRAPH=$(find "$TARGET_REPO_PATH" -maxdepth 3 -name "impact-graph.sqlite" 2>/dev/null | head -1)
-  [ -z "$IA_GRAPH" ] && IA_GRAPH=$(find "$HOME/.impact-analyser" -name "impact-graph.sqlite" 2>/dev/null | head -1)
+  # --graph: reuse from Step 2.2 if already resolved; otherwise search + download.
+  if [ -z "$IA_GRAPH" ]; then
+    IA_GRAPH=$(find "$TARGET_REPO_PATH" "$(dirname "$TARGET_REPO_PATH")" "$HOME/.impact-analyser" \
+      -maxdepth 6 -name "impact-graph.sqlite" 2>/dev/null | head -1)
+  fi
   IA_GRAPH_FLAG=""; [ -n "$IA_GRAPH" ] && IA_GRAPH_FLAG="--graph \"$IA_GRAPH\""
   # --concept-only suppresses the missing-graph warning cleanly
   IA_CONCEPT_ONLY=""; [ -z "$IA_GRAPH" ] && IA_CONCEPT_ONLY="--concept-only"
@@ -569,11 +737,28 @@ Total error occurrences: <N>
 2  | OTPValidationServlet            | NullPointerException at line 631     |    38 | 2026-05-12 08:50
 ```
 
-Below the table, add a short analysis paragraph:
-- Which class is the dominant thrower?
-- Is there a clear exception type and message?
-- Is a stack trace visible in the sample data (sample `journey_id` found)?
-- State whether you have enough to proceed to Fix mode or need more data
+Below the table, add a structured analysis paragraph covering all of the following:
+
+1. **Dominant thrower** — name the class with the highest count and its share (e.g. "FDMRestPostProcessor accounts for 94% of errors").
+2. **Exception type** — identify the exception class or error pattern (e.g. "JSONException", "ServiceException", "NPE", or a bank API error code pattern if it's a downstream API error).
+3. **Stack trace availability** — state whether a full Java stack trace was visible in the Splunk sample for the top error, or whether it is a caught-and-logged error with no stack (e.g. "No Java stack — error is logged by FDM post-processor after catching a downstream API error response"). If a stack is available, note the key throw site (class + line).
+4. **Root cause confidence** — state whether you have enough to proceed to Fix mode:
+   - High confidence: single dominant class + exception is recognisable (NPE, ClassCastException, `JSONException`) → say "Transitioning to Fix mode."
+   - Medium confidence: error pattern is recognisable but ambiguous (e.g. multiple classes, bank API error codes) → name the primary candidate and state what additional data is needed.
+   - Low confidence: errors are purely downstream bank API failures (no custom Java stack) → state that this is a bank-side issue not fixable in HDFC custom code, and summarise which bank API operations are failing and their error codes.
+5. **Secondary issues** — briefly list any other error classes or patterns in the table that are worth noting but not the primary focus.
+
+**Example analysis paragraph:**
+
+```
+FDMRestPostProcessor dominates (1629 occurrences, 41% of total). These are downstream bank
+API errors — POST /CustomerIdentification returning XFACE_ERR_359 "No Linked CASA Account
+found". No Java stack is present; FDM logs the bank response body after catching the HTTP
+error. This is a bank-side data issue (customer has no CASA account), not a fixable HDFC
+servlet bug. Secondary patterns: CC_InquireCardDetails_OTPGen (582), CC_OTPVal_CheckEligibility_v2
+(512) — all bank API error responses. Confidence: low for code fix; these are operational
+bank data failures. Recommend escalating to the bank integration team rather than a code fix.
+```
 
 ## Step E4 — Confidence check → Fix mode or ask
 

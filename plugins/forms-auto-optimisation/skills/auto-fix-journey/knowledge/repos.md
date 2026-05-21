@@ -5,20 +5,17 @@ description: Maps Java package prefixes to git repository URLs and local clone p
 
 # Repository Manifest
 
-One-time setup: fill in the entries below. Each row maps a Java package prefix to a git repo.
-When `short_class` is found in Splunk results, the skill matches its full class name against
-`java_package_prefix` to determine which repo to clone.
+No pre-population needed — the skill auto-populates this file as it encounters new repos.
+`local_clone_path` always points to `~/auto-fix-journey-clones/<repo-name>` (the skill's
+standard landing zone); never hardcode user-specific paths like `/tmp/` or `~/Desktop/`.
 
 ## Package → Repo map
 
 | java_package_prefix | git_url | local_clone_path | branch |
 |---------------------|---------|-----------------|--------|
-| `com.hdfc.aem.forms` | `https://github.com/hdfc/aem-forms-core` | `/tmp/aem-forms-core` | `main` |
-| `com.hdfc.journey` | `https://github.com/hdfc/journey-service` | `/tmp/journey-service` | `main` |
 
-> **Add rows here as new repos are encountered.** The skill will ask for a repo URL the first
-> time it encounters a `short_class` whose package prefix does not match any row, and will
-> append the new entry automatically.
+> Rows are appended automatically when the skill resolves a new repo. Do not add `/tmp/` or
+> other session-scoped paths — they will be invalid on the next run.
 
 ---
 
@@ -28,7 +25,7 @@ This file is a **fallback only** — the skill prefers impact-analyser (`ia tria
 
 1. The skill matches `SHORT_CLASS` / `FULL_CLASS` against `java_package_prefix`.
 2. If a match is found and `local_clone_path` is set and valid: uses it directly.
-3. If `local_clone_path` is missing or the path is not a valid git repo: asks the user for the local clone path — **never auto-clones**.
+3. If `local_clone_path` is missing or the path is not a valid git repo: searches `$HOME` broadly with `find $HOME -maxdepth 6 -type d -name <repo>`, then auto-clones to `~/auto-fix-journey-clones/<repo>` using `git_url`. Only asks the user if both strategies fail.
 4. If no match: asks the user for the repo URL and branch, then appends a new row here.
 5. Source file is located with: `find <local_clone_path> -name "<short_class>.java" -not -path "*/test/*"`.
 
