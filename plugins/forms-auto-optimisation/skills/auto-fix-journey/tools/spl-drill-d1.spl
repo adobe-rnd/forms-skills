@@ -1,0 +1,7 @@
+-- Drill D1: Volume by hour
+-- Placeholders: __HOST__, __SHORT_CLASS__
+-- For multi-class categories: __SHORT_CLASS__ → "ClassA" OR "ClassB"
+
+search index=ams_cq host="__HOST__" "*ERROR*" "__SHORT_CLASS__"
+| timechart span=1h count as errors
+| head 24

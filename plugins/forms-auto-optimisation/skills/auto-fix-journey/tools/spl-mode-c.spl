@@ -1,0 +1,17 @@
+-- Mode C: Journey trace (journeyId provided)
+-- Placeholders: __HOST__, __JOURNEY_ID__, __LEVEL_FILTER__
+--
+-- __LEVEL_FILTER__ values:
+--   ERROR only  → "*ERROR*"
+--   INFO only   → "*INFO*"
+--   both        → (omit the token entirely — remove __LEVEL_FILTER__ from the search line)
+
+search index=ams_cq host="__HOST__" "__JOURNEY_ID__" __LEVEL_FILTER__
+| rex field=_raw "HTTP/1\.1\]\s+(?<java_class>[\w.\$]+)\s+(?<msg>[^\n]{1,250})"
+| rex field=_raw "\[(?:qtp|0x)[^\]]+\]\s+(?<java_class2>[\w.\$]+)\s+(?<msg2>[^\n]{1,250})"
+| eval java_class=coalesce(java_class, java_class2) | eval msg=coalesce(msg, msg2)
+| rex field=_raw "\*(?<level>[A-Z]+)\*"
+| eval short_class=mvindex(split(java_class, "."), -1)
+| table _time level short_class msg host
+-- head 30: 30 most recent trace entries covers most journeys; increase for long multi-step flows
+| sort _time | head 30

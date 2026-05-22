@@ -1,0 +1,20 @@
+-- Mode D: FDM API Analytics
+-- Placeholders: __INDEX__, __HOST__, __HEAD__
+--
+-- A call with time_ms == 0 is treated as a failure.
+-- __HEAD__: replace with "| head <limit>" if the user specified a max routes cap; omit otherwise.
+
+search index="__INDEX__" host="__HOST__" "<<<<< Executing FDM Operation"
+| rex field=_raw "POST (?<api_route>/[^\s,]+)"
+| rex field=_raw "Time taken\s*:\s*(?<time_ms>\d+)\s*ms"
+| eval time_ms = tonumber(time_ms)
+| eval is_failure = if(time_ms == 0, 1, 0)
+| stats
+    count as total_calls,
+    sum(is_failure) as failed_calls,
+    avg(eval(if(time_ms > 0, time_ms, null()))) as avg_time_ms,
+    max(time_ms) as max_time_ms
+    by api_route
+| eval failure_rate = round((failed_calls / total_calls * 100), 2)
+| sort -total_calls
+__HEAD__

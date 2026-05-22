@@ -1,0 +1,15 @@
+-- Non-PII journey context: API codes, timing, step markers (no user payload)
+-- Placeholders: __HOST__, __JOURNEY_ID__
+-- Returns INFO+ERROR log lines sorted chronologically; used to reconstruct journey flow
+-- without accessing PII data (name, PAN, DOB are not logged)
+
+search index=ams_cq host="__HOST__" "__JOURNEY_ID__"
+| rex field=_raw "HTTP/1\.1\]\s+(?<java_class>[\w.\$]+)\s+(?<msg>[^\n]{1,300})"
+| rex field=_raw "\[(?:qtp|0x)[^\]]+\]\s+(?<java_class2>[\w.\$]+)\s+(?<msg2>[^\n]{1,300})"
+| eval java_class=coalesce(java_class, java_class2) | eval msg=coalesce(msg, msg2)
+| rex field=_raw "\*(?<level>[A-Z]+)\*"
+| eval short_class=mvindex(split(java_class, "."), -1)
+| rex field=msg "(?:Error[_\s]?[Cc]ode|ErrorCode|errorCode)[\s:=]*(?<err_code>[A-Z0-9]{2,20})"
+| table _time level short_class msg err_code host
+-- head 50: captures multi-step journeys; increase for unusually long flows
+| sort _time | head 50
