@@ -1,6 +1,6 @@
 ---
 name: auto-fix-journey
-description: Fixes backend Java errors in AEM Forms. Four entry points: (1) Telemetry mode — user provides a form URL, skill queries optel for API errors in last 1 day and lets user select which to fix; (2) Fix mode — user provides a stack trace or class+line; (3) API Error mode — user provides an API path or error label (e.g. "High API Errors"), skill queries Splunk; (4) Splunk mode — explicit log exploration. Uses impact-analyser graph for repo/file routing and post-fix blast-radius analysis.
+description: Fixes backend Java errors in AEM Forms. Five entry points: (1) Telemetry mode — user provides a form URL, skill queries optel for API errors in last 1 day and lets user select which to fix; (2) Fix mode — user provides a stack trace or class+line; (3) API Error mode — user provides an API path or error label (e.g. "High API Errors"), skill queries Splunk; (4) Splunk mode — explicit log exploration; (5) Infrastructure mode — WAF/CDN/ELB layer diagnosis when ams_cq returns no Java results or user targets a specific infra layer. Uses impact-analyser graph for repo/file routing and post-fix blast-radius analysis.
 compatibility: Requires git + gh CLI for branch/PR creation. Impact-analyser CLI (`ia`) required for triage and post-PR analysis — degrades gracefully if absent. Python 3 + splunk-sdk required only for Splunk mode.
 allowed-tools: Read Write Edit Bash Agent AskUserQuestion
 user_invocable: true
@@ -19,6 +19,7 @@ Four distinct entry points. Read the user's message and pick exactly one:
 | An error, exception, stack trace, class name, or line reference | **Fix mode** — start at Step 1 |
 | An API path/route + "500"/"400"/"failing"/"error", OR an API error label (e.g. "High API Errors", "Missing JSON") | **API Error mode** — start at Step E0 |
 | "show errors", "query Splunk", "what's failing", "trace journey", "show logs", "analytics", "FDM performance", "failure rate", "drill deeper" | **Splunk mode** — start at Step S0 |
+| "check WAF", "WAF block", "403 blocked", "request blocked", "check CDN", "CloudFront", "cache", "asset not loading", "check ELB", "check ALB", "502", "503", "504", "load balancer", "instance down", "check infra", "check all layers", "where is it failing" | **Infrastructure mode** — start at Step F0 |
 
 **Default is Fix mode.** Telemetry mode activates only when a bare form URL is the primary input.
 
@@ -800,6 +801,39 @@ To proceed I need one of:
 
 Wait for user input. Once they clarify, extract the error context and continue from Fix mode Step 2.
 
+## Step E5 — Infrastructure escalation
+
+Fires automatically when ANY of these is true after Step E2/E3:
+- Step E2 returned zero rows for the API path in `ams_cq`
+- Step E3 rows have no extractable Java class (pure HTTP log, no exception)
+- `HTTP_STATUS` is known and `knowledge/infra-routing.md` maps it to a non-`ams_cq` primary layer
+
+```
+Read knowledge/infra-routing.md → look up HTTP_STATUS → primary layer
+        ↓
+Run validation probe: search index=<PRIMARY_INDEX> host="<HOST>" earliest=-24h | stats count
+        ↓
+count == 0 → ask user to confirm hostname/time window
+count > 0  → query primary layer using spl-infra-<layer>.spl + splunk-runner-infra.py
+        ↓
+Results found?
+  YES → present layer-specific root cause report (format in knowledge/infra-routing.md), stop
+  NO  → query secondary layer (per routing table)
+        ↓
+  Results found?
+    YES → present report, stop
+    NO  → correlate all three layers in sequence (WAF → ELB → CDN)
+          → present unified failure-chain report
+```
+
+**Hostname for infra layers** — host filter format differs per index. Ask per layer if not in message:
+```
+AskUserQuestion:
+  Which host/resource filter for <WAF|CDN|ELB> logs?
+  (Leave blank for "*" — may be slow on large indexes)
+  Examples: hdfc-prod-waf* / E1ABC2* / hdfc-prod-alb*
+```
+
 ---
 
 # SPLUNK MODE
@@ -882,6 +916,121 @@ When the user says "fix #N", "fix all structural", or "fix all" after viewing Sp
 
 ---
 
+# INFRASTRUCTURE MODE
+
+Use when the user explicitly names an infrastructure layer or error code, OR when Step E5 auto-escalation fires.
+
+## Step F0 — Parse inputs and identify target layer(s)
+
+Extract from user message:
+- `INFRA_LAYER` — `WAF` / `CDN` / `ELB` / `ALL` (if "check all layers" or "where is it failing")
+- `API_PATH` — route or page URL (e.g. `/baas/getCustomerStatus`, `/digital/pl-journey`)
+- `HTTP_STATUS` — numeric status code if mentioned
+- `HOURS` — look-back window [default: 24]
+
+If `INFRA_LAYER` is not determinable from the message AND `HTTP_STATUS` is provided:
+→ read `knowledge/infra-routing.md`, look up `HTTP_STATUS` → set `INFRA_LAYER` to primary layer.
+
+If neither is determinable: ask once:
+```
+AskUserQuestion:
+  1. Which layer to check? WAF / CDN / ELB / all
+  2. API path or page URL affected
+  3. HTTP status code (if known)
+  4. Time window in hours [default: 24]
+```
+
+## Step F1 — Resolve hostnames
+
+Host filter format differs per index. Check message first; ask per layer if missing:
+
+| Layer | Index | Ask prompt example |
+|---|---|---|
+| WAF | `dx_ams_aws_waf` | "WAF host filter? e.g. hdfc-prod-waf* (blank = *)" |
+| CDN | `dx_ams_aws_cf` | "CloudFront distribution filter? e.g. E1ABC2* (blank = *)" |
+| ELB | `ams_aws_elb_access` / `aws_elb_access` | "ALB/ELB name filter? e.g. hdfc-prod-alb* (blank = *)" |
+
+Blank answer → use `"*"` and warn: `"Using wildcard host — query may be slow on large indexes."`
+
+## Step F2 — Validation probe
+
+Before running full SPL, confirm the index has data:
+
+```bash
+# Run for each target layer
+search index=<TARGET_INDEX> host="<HOST_FILTER>" earliest=-<HOURS>h | stats count
+```
+
+- `count == 0` → tell user, ask to adjust hostname or time window; do not proceed
+- `count > 0`  → proceed to Step F3
+
+## Step F3 — Query target layer(s)
+
+Read `tools/splunk-runner-infra.py`. For each target layer, read the matching SPL file, substitute placeholders, write to `/tmp/fji_infra_<layer>.py`, run:
+
+```bash
+SPLUNK_PASS="<pass>" python3 /tmp/fji_infra_<layer>.py 2>/dev/null
+```
+
+| Layer | SPL file | Placeholders |
+|---|---|---|
+| WAF | `spl-infra-waf.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__` |
+| CDN | `spl-infra-cdn.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__` |
+| ELB | `spl-infra-elb.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__` |
+
+`__URI_FILTER__` → `API_PATH` if provided, else `"*"`.
+`__EARLIEST__` / `__LATEST__` → ISO timestamps computed by runner from `HOURS`.
+
+**Parallelism:** when `INFRA_LAYER=ALL`, run all three queries in parallel (single message, multiple `Agent` uses each running one query). Collect all results before Step F4.
+
+## Step F4 — Present root cause analysis
+
+Follow the output format in `knowledge/infra-routing.md`.
+
+**Single layer result:**
+
+```
+Infrastructure Analysis — <LAYER> — <URI> — last <N>h
+
+Root cause: <one sentence — what rule/condition is causing the failure>
+
+| Metric        | Value                                           |
+|---------------|-------------------------------------------------|
+| Occurrences   | <N>                                             |
+| First seen    | <timestamp>                                     |
+| Last seen     | <timestamp>                                     |
+| Pattern       | <WAF rule ID / CDN status+cache / ELB backend>  |
+| Affected URIs | <list>                                          |
+
+Sample events:
+  [<timestamp>] <raw log excerpt — 200 chars>
+
+Recommended action: <specific next step>
+```
+
+**Correlated result (ALL layers or Step E5 failure-chain):**
+
+```
+Failure Chain Analysis — <URI> — last <N>h
+
+Layer        | Status     | Finding
+-------------|------------|---------------------------------------------------
+WAF          | ✅ clean   | No blocks matching this path
+ELB          | ❌ hit     | 847 × 502 — backend <IP> unhealthy since 09:14
+AEM (ams_cq) | ⚠️  silent | 0 logs — request never reached AEM
+
+Root cause: <one sentence identifying the exact break in the chain>
+
+Recommended action: <specific next step>
+```
+
+Severity classification (from `knowledge/infra-routing.md`):
+- **systemic** — > 1 000 occurrences or affects all requests to the path
+- **recurring** — 100–1 000 occurrences
+- **sporadic** — < 100 occurrences
+
+---
+
 # Error Handling
 
 | Situation | Action |
@@ -906,6 +1055,12 @@ When the user says "fix #N", "fix all structural", or "fix all" after viewing Sp
 | API path not found in logs (Mode E) | Retry with 48h; if still empty ask user to confirm path format as it appears in logs |
 | Mode E — multiple scattered classes, no dominant thrower | Do not auto-proceed; present table and ask user to select or provide more context |
 | Mode E — < 5 total errors after 48h | Report to user; ask whether to proceed or provide a different path |
+| Mode F — validation probe returns count=0 | Tell user; ask to adjust hostname pattern or widen time window; do not run full query |
+| Mode F — index inaccessible (connection refused / permissions) | "Cannot reach `<INDEX>` — check VPN and Splunk permissions for this index" |
+| Mode F — WAF/CDN/ELB host pattern unknown | Ask once; blank → use `"*"` with slowness warning |
+| Mode F — all three infra layers return empty | "No infra signal found for `<PATH>` in last `<N>`h. AEM app logs (ams_cq) are the best next step." |
+| Mode F — ams_cq has partial results AND infra hit | Present both: AEM partial findings + infra root cause side-by-side |
+| Step E5 fires but HTTP_STATUS not known | Default escalation order: ELB → WAF → CDN |
 
 ---
 

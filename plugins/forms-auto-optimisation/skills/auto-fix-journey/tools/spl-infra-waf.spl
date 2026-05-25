@@ -1,0 +1,32 @@
+-- Infrastructure Mode / WAF: Block and rule-match analysis for a specific URI
+-- Placeholders: __HOST__, __URI_FILTER__, __EARLIEST__, __LATEST__
+--
+-- __HOST__       : AWS WAF resource name filter (e.g. hdfc-prod-waf*). Use "*" if unknown.
+-- __URI_FILTER__ : API path or page URL (e.g. /baas/getCustomerStatus). Use "*" for all.
+-- __EARLIEST__   : ISO timestamp — substituted by splunk-runner-infra.py
+-- __LATEST__     : ISO timestamp — substituted by splunk-runner-infra.py
+--
+-- Returns: BLOCK/COUNT rule hits grouped by rule group + action, sorted by occurrence count.
+-- Use count probe (| stats count) before running this query to confirm data exists.
+
+search index=dx_ams_aws_waf host="__HOST__" earliest=__EARLIEST__ latest=__LATEST__
+| search "__URI_FILTER__"
+| rex field=_raw "\"action\":\"(?<action>[^\"]+)\""
+| rex field=_raw "\"ruleId\":\"(?<rule_id>[^\"]+)\""
+| rex field=_raw "\"ruleGroupId\":\"(?<rule_group>[^\"]+)\""
+| rex field=_raw "\"uri\":\"(?<uri>[^\"]+)\""
+| rex field=_raw "\"clientIp\":\"(?<client_ip>[^\"]+)\""
+| rex field=_raw "\"httpMethod\":\"(?<http_method>[^\"]+)\""
+| where action="BLOCK" OR action="COUNT"
+| stats
+    count as occurrences,
+    max(_time) as last_ts,
+    min(_time) as first_ts,
+    values(rule_id) as rule_ids,
+    values(uri) as uris,
+    dc(client_ip) as distinct_ips
+    by action, rule_group
+| eval last_seen=strftime(last_ts,"%Y-%m-%d %H:%M:%S")
+| eval first_seen=strftime(first_ts,"%Y-%m-%d %H:%M:%S")
+| fields - last_ts, first_ts
+| sort -occurrences
