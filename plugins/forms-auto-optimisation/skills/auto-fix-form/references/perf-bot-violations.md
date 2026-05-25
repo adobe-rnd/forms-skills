@@ -8,25 +8,18 @@ type: reference
 
 Used by **Phase 5** of `auto-fix-form` — after Phase 4.3 has applied the approved error fixes to the working tree but **not yet committed them**, and before the single combined commit at Phase 6.1. The CLI is local-only and reads only git-changed JS/CSS — no URL, no browser.
 
-## Install command (run once if `~/.performance-bot/index.js` is missing)
+## Install + run via the shared helper
 
 ```bash
-mkdir -p ~/.performance-bot \
-  && curl -L https://github.com/adobe-aem-forms/performance-bot/releases/latest/download/performance-bot-cli.tar.gz \
-     | tar -xz -C ~/.performance-bot
+bash shared/scripts/perf-bot.sh --mode install
+bash shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
 ```
 
-## Run command (from `REPO_PATH`, against the dirty working tree)
+The helper installs the CLI into `${HOME}/.performance-bot/` on first call, ensures `.perf-bot-report.md` is in `.gitignore`, then runs `--diff HEAD` and writes the report to `<repo>/.perf-bot-report.md`. It prints a one-line JSON summary including `violations` (line count of `- ⚠`).
 
-```bash
-node ~/.performance-bot/index.js --diff HEAD --output ./.perf-bot-report.md
-```
+`--diff HEAD` diffs the working tree (uncommitted changes) against the current `HEAD` commit. Because the auto-fix-form orchestrator **defers** the combined commit to Phase 6, `HEAD` still points at `BASE_BRANCH`'s tip during the perf-bot loop — so this command captures all uncommitted error+perf changes in one cumulative scan.
 
-`--diff HEAD` diffs the working tree (uncommitted changes) against the current `HEAD` commit. Because the auto-fix-form orchestrator **defers** the combined commit to Phase 6.1, `HEAD` still points at `BASE_BRANCH`'s tip during Phase 5.2 — so this command captures all uncommitted error+perf changes in one cumulative scan.
-
-This avoids the older `--diff` mode's reliance on `origin/main`, which would silently scan the wrong baseline whenever `BASE_BRANCH` ≠ `main`.
-
-The CLI exits `0` even when violations are found, so the report file MUST be parsed. Iteration N+1 sees iteration N's uncommitted edits — this is intentional.
+The CLI exits `0` even when violations are found, so the report file MUST be parsed. Iteration N+1 sees iteration N's uncommitted edits — that's intentional.
 
 ## Parsing the report
 
