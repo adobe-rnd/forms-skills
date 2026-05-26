@@ -1,6 +1,20 @@
 ---
 name: forms-content-modeler
-description: "Builds and validates AEM Adaptive Forms component JSON from a content definition and content model. Accepts field intents, returns validated component array. Two modes: build (new components) and update (edit existing). Triggers: build component, model field, validate component, resolve field type, check name collision."
+description: >
+  Use when building or validating AEM Adaptive Forms component JSON from field
+  intents and a content model. Typically invoked by forms-author; use directly
+  only when building or validating a component payload in isolation.
+license: Apache-2.0
+metadata:
+  author: Adobe
+  version: "0.1"
+  type: skill
+  triggers:
+    - build component
+    - model field
+    - validate component
+    - resolve field type
+    - check name collision
 ---
 
 # forms-content-modeler

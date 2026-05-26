@@ -1,7 +1,27 @@
 ---
 name: forms-rule-author
-description: "Generates AEM Forms business rules from a JCR form definition or Sites Content API content model and a natural language prompt. Produces { fd:rules, fd:events } ready for insertion into the rule store. Use when creating show/hide, validate, calculate, event, enabled, format, or trigger rules for AEM Adaptive Form fields."
+description: >
+  Use when creating business rules for AEM Adaptive Form fields — show/hide,
+  validate, calculate, event handlers (click, value-commit, init),
+  enabled/disabled, or format rules. Input is a form definition (JCR or Sites
+  Content API) and a natural language prompt.
+license: Apache-2.0
 compatibility: "Scripts are pre-bundled in $SKILL_DIR/scripts/ — no npm install required at runtime."
+metadata:
+  author: Adobe
+  version: "0.1"
+  type: skill
+  triggers:
+    - rule
+    - show hide
+    - validate
+    - calculate
+    - event handler
+    - click event
+    - value commit
+    - enabled disabled
+    - format rule
+    - business rule
 ---
 
 Generate AEM Forms business rules from a form definition (JCR or Sites Content API), a natural language prompt, and an optional custom functions JS file. Produces `{ fd:rules, fd:events }` ready for insertion into the rule store.
