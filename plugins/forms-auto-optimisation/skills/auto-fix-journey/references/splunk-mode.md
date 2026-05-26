@@ -37,7 +37,10 @@ Ask all inputs in a single `AskUserQuestion`.
 
 ## Step 2 — Credentials
 
-`bash shared/scripts/load-env.sh --require SPLUNK_PASS`. If missing, ask once and offer to append to `${HOME}/form-auto-fix/.env`.
+```bash
+bash ../../shared/scripts/load-env.sh --require SPLUNK_PASS
+```
+If missing, ask once and offer to append to `${HOME}/form-auto-fix/.env`.
 
 ## Step 3 — Build and run
 

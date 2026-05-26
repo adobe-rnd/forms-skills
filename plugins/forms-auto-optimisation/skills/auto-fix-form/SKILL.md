@@ -71,10 +71,10 @@ See `shared/references/branch-and-commit.md` for the full table. Summary:
 ## Phase 1 — Resolve
 
 ```bash
-eval "$(bash shared/scripts/resolve-workspace.sh)"
-eval "$(bash shared/scripts/load-env.sh)"
-eval "$(bash shared/scripts/resolve-repo.sh)"
-eval "$(bash shared/scripts/resolve-ia.sh)"
+eval "$(bash ../../shared/scripts/resolve-workspace.sh)"
+eval "$(bash ../../shared/scripts/load-env.sh)"
+eval "$(bash ../../shared/scripts/resolve-repo.sh)"
+eval "$(bash ../../shared/scripts/resolve-ia.sh)"
 ```
 
 After this block `FORM_AUTO_FIX_ROOT`, `FORM_AUTO_FIX_RUNS`, `REPO_PATH`, `REPO_NAME`, `IA_CMD`, `IA_GRAPH`, `IA_CONFIG`, `IA_UNAVAILABLE` are all set.
@@ -114,7 +114,7 @@ Apply classification + dedup per `references/fix-classification.md`. Render a nu
 For each selected error:
 
 ```bash
-bash shared/scripts/ia-triage.sh \
+bash ../../shared/scripts/ia-triage.sh \
   --type "<type>" --message "<message>" \
   --file-url "<fileUrl>" --line "<line>" --col "<col>" \
   --symbol "<extracted-from-stack-frame>" \
@@ -126,7 +126,7 @@ The triage summary JSON gives `ia_repo`, `ia_file`, `ia_trail`. Attach to the en
 If `ia_repo` differs from `$REPO_NAME`, that error targets a foreign repo. Resolve once:
 
 ```bash
-eval "$(bash shared/scripts/resolve-repo.sh --name "$ia_repo" --clone-url "<from IA config>")"
+eval "$(bash ../../shared/scripts/resolve-repo.sh --name "$ia_repo" --clone-url "<from IA config>")"
 ```
 
 Set `entry.targetRepoPatch = { repoPath, repoName }` or leave null if resolution failed.
@@ -185,7 +185,7 @@ If `old_string` is not unique: re-spawn the sub-agent with wider context once. W
 ## Phase 5 — Performance-bot gate
 
 ```bash
-bash shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
+bash ../../shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
 ```
 
 Parse the resulting `.perf-bot-report.md` per `references/perf-bot-violations.md`. For each violation, spawn one sub-agent using `assets/perf-bot-fix-prompt.md`. Loop until 0 violations or 3 iterations — remaining go to PR's "Performance follow-ups".

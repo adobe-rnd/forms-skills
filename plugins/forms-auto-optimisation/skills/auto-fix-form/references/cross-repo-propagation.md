@@ -68,7 +68,7 @@ Empty list → skip the rest of this file.
 For each `REPO_NAME` in `$IMPACTED`:
 
 ```bash
-eval "$(bash shared/scripts/resolve-repo.sh --name "$REPO_NAME" \
+eval "$(bash ../../shared/scripts/resolve-repo.sh --name "$REPO_NAME" \
         --clone-url "$(extract_clone_url_from_ia_config "$REPO_NAME")")"
 ```
 
@@ -95,7 +95,7 @@ Same loop as the primary repo: `Read` → verify `old_string` uniqueness → `Ed
 ## Step 6 — Perf-bot gate per dependent repo
 
 ```bash
-bash shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
+bash ../../shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
 ```
 
 Max 3 iterations, same loop as the primary perf-bot gate (see `references/perf-bot-violations.md`). Skip silently if perf-bot is unavailable — the fix still ships.

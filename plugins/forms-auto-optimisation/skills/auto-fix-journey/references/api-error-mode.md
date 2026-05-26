@@ -18,7 +18,10 @@ Ask once only if `API_PATH` is missing.
 
 ## Step 2 — Splunk credentials
 
-Run `bash shared/scripts/load-env.sh --require SPLUNK_PASS`. If `SPLUNK_PASS` is in the `missing` list, ask the user once and offer to append it to `${HOME}/form-auto-fix/.env`.
+```bash
+bash ../../shared/scripts/load-env.sh --require SPLUNK_PASS
+```
+If `SPLUNK_PASS` is in the `missing` list, ask the user once and offer to append it to `${HOME}/form-auto-fix/.env`.
 
 `SPLUNK_HOST` defaults to `splunk-api.or1.adobe.net`, `SPLUNK_USER` defaults to `api_aem_forms`.
 

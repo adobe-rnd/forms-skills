@@ -76,9 +76,9 @@ Full table in `shared/references/branch-and-commit.md`. Summary:
 ## Step 1 — Resolve
 
 ```bash
-eval "$(bash shared/scripts/resolve-workspace.sh)"
-eval "$(bash shared/scripts/load-env.sh)"
-eval "$(bash shared/scripts/resolve-ia.sh)"
+eval "$(bash ../../shared/scripts/resolve-workspace.sh)"
+eval "$(bash ../../shared/scripts/load-env.sh)"
+eval "$(bash ../../shared/scripts/resolve-ia.sh)"
 ```
 
 Now `IA_CMD`, `IA_GRAPH`, `IA_CONFIG`, `IA_UNAVAILABLE` are set. If `IA_UNAVAILABLE` is set, triage falls back to manual repo resolution (Step 3).
@@ -88,7 +88,7 @@ Now `IA_CMD`, `IA_GRAPH`, `IA_CONFIG`, `IA_UNAVAILABLE` are set. If `IA_UNAVAILA
 Run the shared triage helper:
 
 ```bash
-bash shared/scripts/ia-triage.sh \
+bash ../../shared/scripts/ia-triage.sh \
   --type "$EXCEPTION_TYPE" --message "$EXCEPTION_MESSAGE" \
   --file-url "${FULL_CLASS:-$SHORT_CLASS}.java" --line "$LINE_NUMBER" \
   --symbol "$SHORT_CLASS" \
@@ -108,7 +108,7 @@ If still empty → continue without IA context; Step 3 auto-clones via IA config
 ## Step 3 — Resolve target repo
 
 ```bash
-eval "$(bash shared/scripts/resolve-repo.sh --name "$ia_repo" \
+eval "$(bash ../../shared/scripts/resolve-repo.sh --name "$ia_repo" \
         --clone-url "<extracted-from-IA-config>")"
 ```
 

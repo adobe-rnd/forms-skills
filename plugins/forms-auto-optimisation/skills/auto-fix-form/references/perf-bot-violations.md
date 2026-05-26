@@ -11,8 +11,8 @@ Used by **Phase 5** of `auto-fix-form` — after Phase 4.3 has applied the appro
 ## Install + run via the shared helper
 
 ```bash
-bash shared/scripts/perf-bot.sh --mode install
-bash shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
+bash ../../shared/scripts/perf-bot.sh --mode install
+bash ../../shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
 ```
 
 The helper installs the CLI into `${HOME}/.performance-bot/` on first call, ensures `.perf-bot-report.md` is in `.gitignore`, then runs `--diff HEAD` and writes the report to `<repo>/.perf-bot-report.md`. It prints a one-line JSON summary including `violations` (line count of `- ⚠`).
