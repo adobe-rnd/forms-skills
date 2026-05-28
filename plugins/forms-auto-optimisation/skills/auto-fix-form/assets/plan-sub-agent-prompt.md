@@ -1,11 +1,12 @@
 # Planning Sub-Agent Prompt Template
 
-Used by **Phase 3.1** (and Phase 3.3 `redo` / `regenerate` / `add`) of `auto-fix-form`. Substitute the bracketed values from the `allErrors[]` entry before invoking the `Agent` tool. The sub-agent **does not produce a patch** — it produces an analysis the user can review and iterate on.
+Used by **Phase 3.1** (and `redo` / `regenerate` / `add` in 3.3). Substitute the bracketed values from the `allErrors[]` entry before invoking the `Agent` tool. The sub-agent produces an **analysis**, not a patch — the user reviews and may iterate before any code changes.
+
+Return JSON per `shared/references/sub-agent-contract.md`. The planning variant uses the extra fields documented below.
 
 ```
 You are analysing a JavaScript error in an AEM/EDS form codebase. Produce a fix
-PLAN, not a patch — the user will review and may ask you to revise before any
-code is changed.
+PLAN, not a patch — the user will review and may ask you to revise.
 
 Error      : <type> — <message>
 File URL   : <fileUrl>            # may be a JS file, a page URL, or absent
@@ -25,22 +26,18 @@ Tasks:
    Distinguish "bug at the call site" vs "bug in the function body".
 3. Propose ONE primary APPROACH for the fix, in one paragraph. Prefer the
    minimal-diff option (optional chaining, null guard, argument-order fix,
-   missing default). Do not write the patch yet — just describe it.
-4. List up to 3 ALTERNATIVES briefly. Mark the trade-off of each in one phrase
-   (wider blast radius / requires refactor / depends on framework version / etc.).
-5. Estimate SCOPE and RISK:
-   - scope  : single-line | multi-line | page-level | repo-wide
-   - risk   : low | medium | high (low = local change in one file; medium = touches
-             multiple call sites or rule-editor wiring; high = changes a public
-             API or shared utility)
-6. List the AFFECTED FILES (paths relative to REPO_PATH). For "page-level" or
-   "repo-search" cases, run grep first and include the matching files.
-7. If the user provided extra guidance, weight your APPROACH toward it. If the
-   guidance contradicts code reality (e.g. "use Array.from" but the file has no
-   reference to Array — a different fix is required), explain the conflict in
-   the analysis instead of forcing the guidance.
+   missing default). Do not write the patch yet — describe it.
+4. List up to 3 ALTERNATIVES with a one-phrase trade-off each.
+5. Estimate SCOPE (single-line | multi-line | page-level | repo-wide) and
+   RISK (low | medium | high).
+6. List AFFECTED FILES (paths relative to REPO_PATH). For "page-level" or
+   "repo-search" cases, run grep first and include matching files.
+7. If user guidance is supplied, weight your APPROACH toward it. If the
+   guidance contradicts code reality, explain the conflict in the analysis
+   instead of forcing it.
 
-Return ONLY this JSON:
+Return ONLY this JSON shape (a planning variant of the shared sub-agent contract):
+
 {
   "error_id"       : <id>,
   "root_cause"     : "<one paragraph>",
@@ -52,30 +49,24 @@ Return ONLY this JSON:
   "needs_review"   : false
 }
 
-OR, if the error genuinely cannot be planned without human input (e.g. minified
-source with no map, third-party file, requires a decision the agent cannot make):
-{
-  "error_id"     : <id>,
-  "needs_review" : true,
-  "analysis"     : "one paragraph — why this needs human judgement, and what info
-                   would unblock automated planning"
-}
+Or `{ "error_id": <id>, "needs_review": true, "analysis": "..." }` when the
+error needs human judgement (minified source, third-party, ambiguous).
+
+Or `{ "error_id": <id>, "need_more_info": true, "questions": [...], "what_i_know": "..." }`
+when the correct fix genuinely depends on runtime data not visible in source
+(OSGi config value, API response field, DB row). Do NOT use as a default hedge.
 
 Constraints:
-- Do NOT call the Edit tool. Do NOT write the patch. Read-only inspection only.
-- Do NOT run `git`, `npm`, or any shell command beyond Read / Grep / Glob.
-- Do NOT touch files. The orchestrator owns all writes; this is the analysis pass.
-- Do NOT include "step 1 / step 2 / patch hint" sections. Stick to the JSON shape.
+- Read-only. Do NOT call Edit / Write / Bash / any shell or MCP tool.
+- Do NOT touch files. The orchestrator owns all writes.
+- Return JSON only. No prose, no step-by-step output.
 ```
 
-## Parallelism rules
+## Parallelism
 
-- **Different files** → spawn ALL planning sub-agents in parallel via a **single message with multiple `Agent` tool uses**.
-- **Same file** → sequential. Re-read the file between sub-agents so each has fresh context.
-- For `regenerate` (Phase 3.3): group by `affected_files[0]` and apply the same rule.
+- Different files → spawn all sub-agents in parallel (single message, multiple `Agent` tool uses).
+- Same file → sequential; re-read the file between sub-agents.
 
 ## What the orchestrator does with the result
 
-- `needs_review: true` → entry is added to the plan with `status: "needs_review"` and surfaces in the PR body's "Manual review needed" section. It is NOT silently dropped.
-- Otherwise: build the plan entry, render it in the table, wait for user iteration.
-- The orchestrator never calls Edit during Phase 3 — this is strictly the planning pass.
+Per `shared/references/sub-agent-contract.md`. The `needs_review: true` case adds the entry to the plan with `status: "needs_review"` — the user sees it in the plan table and decides; it never silently drops.
