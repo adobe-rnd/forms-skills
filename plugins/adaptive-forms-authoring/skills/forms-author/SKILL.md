@@ -1,10 +1,7 @@
 ---
 name: forms-author
 description: >
-  Use when creating or modifying an AEM Adaptive Form via the Sites Content MCP
-  API — create form, add/edit/delete/move fields and panels, add fragment, set
-  required/options/submit action/prefill/schema, apply rules. NOT for custom EDS
-  components — use forms-custom-components instead.
+  Use when creating or modifying an AEM Adaptive Form via the Sites Content MCP API — create form, add/edit/delete/move fields and panels, add fragment, set required/options/submit action/prefill/schema, apply rules. NOT for custom EDS components — use forms-custom-components instead.
 license: Apache-2.0
 metadata:
   author: Adobe

@@ -40,8 +40,8 @@ You create custom form components by extending out-of-the-box (OOTB) field types
 ## Critical Rules
 
 1. **Always use `npm run create:custom-component`** to scaffold — never manually create component files
-2. **Always register in `mappings.js`** — add the `fd:viewType` to the `customComponents` array in `blocks/form/mappings.js` (EDS repo root)
-3. **Always add `fd:viewType`** to the field in `form.json` — this links the field to its custom component
+2. **Always register in `mappings.js`** — add the `fd:viewType` to the `customComponents` array in `blocks/form/mappings.js`. Without this, the runtime won't look up your custom block — it falls back to the `fieldType` renderer regardless of `fd:viewType` being set in `form.json`.
+3. **Always add `fd:viewType`** to the field in `form.json` — without it, the runtime ignores your custom block and falls back to the `fieldType` renderer
 4. **`decorate()` extends, not replaces** — `fieldDiv` already contains the base field's HTML; modify it, don't rebuild from scratch
 5. **Refer to HTML structures** — use [references/field-html-structure.md](references/field-html-structure.md) to understand the DOM you receive in `decorate()`
 6. **Always use `{ listenChanges: true }`** — all new components must use the recommended subscribe pattern (see [references/subscribe-api.md](references/subscribe-api.md))
@@ -54,7 +54,7 @@ You create custom form components by extending out-of-the-box (OOTB) field types
 ### 1. Identify base type and view type
 
 - **`base_type`**: the OOTB field to extend (see Base Types table below)
-- **`fd:viewType`**: custom identifier — lowercase, hyphen-separated (e.g., `countdown-timer`)
+- **`fd:viewType`**: rendering block identifier. When present and registered in `mappings.js` `customComponents`, the runtime uses this block to render the field — `fieldType` is NOT used for rendering in this case. When absent, the runtime falls back to the `fieldType`-named block. Lowercase, hyphen-separated (e.g., `card-choice`).
 
 ### 2. Add field to form.json
 
