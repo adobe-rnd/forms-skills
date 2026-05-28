@@ -944,13 +944,18 @@ AskUserQuestion:
 
 Host filter format differs per index. Check message first; ask per layer if missing:
 
-| Layer | Index | Ask prompt example |
-|---|---|---|
-| WAF | `dx_ams_aws_waf` | "WAF host filter? e.g. hdfc-prod-waf* (blank = *)" |
-| CDN | `dx_ams_aws_cf` | "CloudFront distribution filter? e.g. E1ABC2* (blank = *)" |
-| ELB | `ams_aws_elb_access` / `aws_elb_access` | "ALB/ELB name filter? e.g. hdfc-prod-alb* (blank = *)" |
+| Layer | Index | Splunk host field | Ask prompt example |
+|---|---|---|---|
+| WAF | `dx_ams_aws_waf` | AWS WAF ACL name | "WAF host filter? e.g. hdfc-prod-waf* (blank = *)" |
+| CDN | `dx_ams_aws_cf` | CloudFront distribution ID | "CloudFront distribution filter? e.g. E1ABC2* (blank = *)" |
+| ELB | `ams_aws_elb_access` / `aws_elb_access` | Shared EC2 node IPs, e.g. `ip-10-153-244-*.or2.adobe.net` | Use `"*"` for host; always add customer keyword (e.g. `"hdfc"`) as `__CUSTOMER__` |
 
-Blank answer → use `"*"` and warn: `"Using wildcard host — query may be slow on large indexes."`
+**ELB is multi-tenant:** `ams_aws_elb_access` contains logs from all AMS customers on shared ELB nodes. The Splunk `host` is always an internal IP. Always set `__CUSTOMER__` to the customer name (e.g. `hdfc`) so the SPL filters by ELB name in the raw log. If unknown, ask:
+```
+AskUserQuestion: "Customer name for ELB filter? (e.g. hdfc, blank = search all tenants — very slow)"
+```
+
+Blank answer → use `"*"` for host, `"*"` for customer, and warn: `"Using wildcard — query covers all tenants and will be slow."`
 
 ## Step F2 — Validation probe
 

@@ -51,10 +51,12 @@ Read this table in Mode F (Step F0) and Mode E (Step E5) to determine which Splu
 |---|---|---|---|
 | WAF | AWS WAF web ACL name or resource ARN | `hdfc-prod-waf*` | Usually contains env name |
 | CDN | CloudFront distribution ID | `E1ABC2DEF3GHI*`, `*` | 13-char alphanumeric ID |
-| ELB | ALB/ELB name | `hdfc-prod-alb*` | From AWS console Load Balancers |
+| ELB | Splunk host (shared EC2 nodes) | `ip-10-153-244-*.or2.adobe.net` | **Shared across AMS tenants** — always add `__CUSTOMER__` keyword (e.g. `"hdfc"`) to filter ELB name in raw log |
 | AEM | AEM publish host | `hdfc-prod-pub*` | Existing pattern, unchanged |
 
-Blank / unknown → use `"*"` and warn user that the query may be slow on large indexes.
+Blank / unknown host → use `"*"` and warn user that the query may be slow on large indexes.
+
+**ELB note:** `ams_aws_elb_access` is a multi-tenant index. The Splunk `host` field is the internal EC2 node IP (`ip-10-x-x-x.or2.adobe.net`), not the ALB name. Customer-specific ALB name is embedded in the raw log field 3 (e.g. `app/hdfc-prod-alb/abc123`). Always search with the customer keyword (e.g. `"hdfc"`) to avoid cross-tenant noise.
 
 ---
 

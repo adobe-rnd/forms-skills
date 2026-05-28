@@ -38,15 +38,13 @@ try:
         scheme=SPLUNK_SCHEME, autologin=True
     )
 
-    # Convert __HOURS__ to absolute ISO window so parallel queries share the same boundary.
-    # The SPL files use earliest=__EARLIEST__ latest=__LATEST__ placeholders which are
-    # replaced below — Splunk's job.create() earliest_time/latest_time params take
-    # precedence over any inline earliest= in the SPL.
+    # Convert __HOURS__ to epoch integers so parallel queries share the same time boundary.
+    # Epoch format works in both inline SPL (earliest=<epoch>) and job.create() params.
     end   = datetime.now(timezone.utc)
     start = end - timedelta(hours=__HOURS__)
 
-    EARLIEST = start.strftime('%Y-%m-%dT%H:%M:%S')
-    LATEST   = end.strftime('%Y-%m-%dT%H:%M:%S')
+    EARLIEST = str(int(start.timestamp()))
+    LATEST   = str(int(end.timestamp()))
 
     def run(spl):
         # Replace SPL-level placeholder timestamps (belt-and-suspenders alongside job params)
@@ -58,8 +56,10 @@ try:
             exec_mode='blocking'
         )
         # count=0 returns all rows — no server-side cap
-        return [dict(r) for r in sr.JSONResultsReader(job.results(output_mode='json', count=0))
+        rows = [dict(r) for r in sr.JSONResultsReader(job.results(output_mode='json', count=0))
                 if isinstance(r, dict)]
+        job.cancel()  # free artifact immediately — avoids role-wide 5GB quota exhaustion
+        return rows
 
     print(json.dumps(run("""__SPL__"""), indent=2, default=str))
 

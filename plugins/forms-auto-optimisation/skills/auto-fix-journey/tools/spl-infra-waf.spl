@@ -3,8 +3,8 @@
 --
 -- __HOST__       : AWS WAF resource name filter (e.g. hdfc-prod-waf*). Use "*" if unknown.
 -- __URI_FILTER__ : API path or page URL (e.g. /baas/getCustomerStatus). Use "*" for all.
--- __EARLIEST__   : ISO timestamp — substituted by splunk-runner-infra.py
--- __LATEST__     : ISO timestamp — substituted by splunk-runner-infra.py
+-- __EARLIEST__   : Unix epoch integer — substituted by splunk-runner-infra.py
+-- __LATEST__     : Unix epoch integer — substituted by splunk-runner-infra.py
 --
 -- Returns: BLOCK/COUNT rule hits grouped by rule group + action, sorted by occurrence count.
 -- Use count probe (| stats count) before running this query to confirm data exists.

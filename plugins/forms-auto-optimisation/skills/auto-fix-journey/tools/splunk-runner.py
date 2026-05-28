@@ -36,13 +36,15 @@ try:
     def run(spl):
         job = svc.jobs.create(
             spl,
-            earliest_time=start.strftime('%Y-%m-%dT%H:%M:%S'),
-            latest_time=end.strftime('%Y-%m-%dT%H:%M:%S'),
+            earliest_time=str(int(start.timestamp())),
+            latest_time=str(int(end.timestamp())),
             exec_mode='blocking'
         )
         # count=0 means return all rows — no server-side row cap
-        return [dict(r) for r in sr.JSONResultsReader(job.results(output_mode='json', count=0))
+        rows = [dict(r) for r in sr.JSONResultsReader(job.results(output_mode='json', count=0))
                 if isinstance(r, dict)]
+        job.cancel()  # free artifact immediately — avoids role-wide 5GB quota exhaustion
+        return rows
 
     print(json.dumps(run("""__SPL__"""), indent=2, default=str))
 

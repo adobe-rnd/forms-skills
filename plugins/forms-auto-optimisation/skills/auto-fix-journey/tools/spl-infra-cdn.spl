@@ -3,8 +3,8 @@
 --
 -- __HOST__       : CloudFront distribution ID filter (e.g. E1ABC2DEF3GHI* or *).
 -- __URI_FILTER__ : API path or asset URL. Use "*" for all.
--- __EARLIEST__   : ISO timestamp — substituted by splunk-runner-infra.py
--- __LATEST__     : ISO timestamp — substituted by splunk-runner-infra.py
+-- __EARLIEST__   : Unix epoch integer — substituted by splunk-runner-infra.py
+-- __LATEST__     : Unix epoch integer — substituted by splunk-runner-infra.py
 --
 -- Returns: 4xx/5xx counts grouped by HTTP status + cache status, with latency stats.
 -- Cache status: Hit = served from cache; Miss = fetched from origin; Error = CF error;
