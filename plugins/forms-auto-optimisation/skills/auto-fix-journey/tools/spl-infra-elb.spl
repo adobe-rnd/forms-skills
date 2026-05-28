@@ -4,7 +4,9 @@
 -- __HOST__       : Splunk host filter for ELB nodes (e.g. ip-10-153-244-*.or2.adobe.net or *).
 --                  NOTE: ams_aws_elb_access is shared across AMS tenants. Always pair with
 --                  __CUSTOMER__ to narrow to the right ELB (matched against raw log ELB name).
--- __CUSTOMER__   : Customer keyword to filter ELB name in raw log (e.g. "hdfc"). Use "*" to skip.
+-- __CUSTOMER__   : Customer keyword to filter ELB name in raw log (e.g. hdfc — no quotes).
+--                  Must be a plain alphanumeric keyword; this file wraps it in quotes.
+--                  Use * to skip customer filtering (very slow — scans all AMS tenants).
 -- __URI_FILTER__ : API path or page URL. Use "*" for all.
 -- __EARLIEST__   : Unix epoch integer — substituted by splunk-runner-infra.py
 -- __LATEST__     : Unix epoch integer — substituted by splunk-runner-infra.py

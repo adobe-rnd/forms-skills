@@ -9,6 +9,7 @@
 -- Returns: 4xx/5xx counts grouped by HTTP status + cache status, with latency stats.
 -- Cache status: Hit = served from cache; Miss = fetched from origin; Error = CF error;
 --               Bypass = cache bypassed. "Error" with status 5xx means origin unreachable.
+-- NOTE: dx_ams_aws_cf is not a multi-tenant index — no __CUSTOMER__ filter needed.
 
 search index=dx_ams_aws_cf host="__HOST__" earliest=__EARLIEST__ latest=__LATEST__
 | search "__URI_FILTER__"

@@ -8,6 +8,7 @@
 --
 -- Returns: BLOCK/COUNT rule hits grouped by rule group + action, sorted by occurrence count.
 -- Use count probe (| stats count) before running this query to confirm data exists.
+-- NOTE: dx_ams_aws_waf is not a multi-tenant index — no __CUSTOMER__ filter needed.
 
 search index=dx_ams_aws_waf host="__HOST__" earliest=__EARLIEST__ latest=__LATEST__
 | search "__URI_FILTER__"

@@ -981,10 +981,11 @@ SPLUNK_PASS="<pass>" python3 /tmp/fji_infra_<layer>.py 2>/dev/null
 |---|---|---|
 | WAF | `spl-infra-waf.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__` |
 | CDN | `spl-infra-cdn.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__` |
-| ELB | `spl-infra-elb.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__` |
+| ELB | `spl-infra-elb.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__`, `__CUSTOMER__` |
 
 `__URI_FILTER__` → `API_PATH` if provided, else `"*"`.
-`__EARLIEST__` / `__LATEST__` → ISO timestamps computed by runner from `HOURS`.
+`__EARLIEST__` / `__LATEST__` → Unix epoch integers computed by runner from `HOURS`.
+`__CUSTOMER__` (ELB only) → customer keyword resolved in Step F1 (e.g. `hdfc`). Must be a plain alphanumeric keyword — the SPL wraps it in quotes. Use `*` to skip customer filtering (slow — scans all tenants).
 
 **Parallelism:** when `INFRA_LAYER=ALL`, run all three queries in parallel (single message, multiple `Agent` uses each running one query). Collect all results before Step F4.
 

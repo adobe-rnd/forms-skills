@@ -2,7 +2,7 @@
 #
 # Substitute before writing to /tmp/fji_infra_<layer>.py:
 #   __SPL__   — full SPL query body (read from spl-infra-*.spl; resolve its placeholders first)
-#   __HOURS__ — integer hours to look back; runner converts to absolute ISO timestamps
+#   __HOURS__ — integer hours to look back; runner converts to Unix epoch integers
 #               so that parallel queries for the same run share the same time window.
 #
 # Run as:
