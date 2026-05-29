@@ -74,6 +74,11 @@ forms-skills/
     └── forms-context-management/       ← context & session domain
 ```
 
+## Guides
+
+- [Onboarding Guide](skills/forms-orchestrator/ONBOARDING.md) — architecture, state machine, plan types, getting started
+- [Developer Guide](skills/forms-orchestrator/DEVELOPER.md) — setup, tests, evals, repo structure, adding skills
+
 ## Contributing
 
 See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines on adding or updating skills. Join [#agentskills](https://adobe.enterprise.slack.com/archives/C0APTKDNPEY) on Adobe Slack for questions and discussion.
