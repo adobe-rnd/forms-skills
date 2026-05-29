@@ -35,6 +35,7 @@ Parse requirements input into a structured journey spec at `journeys/<journey>/s
 4. **No PL.currentFormContext** — mark data sources as TBD instead
 5. **Custom components first** — identify custom `fd:viewType` components before describing screens
 6. **Complete field coverage** — every user-facing field must appear in the spec
+7. **Identify fragments** — before describing screens, flag panels that meet fragment thresholds (reused across 2+ forms, 10+ fields, regulatory, or frequently changing). Document in `## Fragments` section; note fragment reference in the affected screen(s).
 
 ## Input Handling
 
@@ -92,6 +93,38 @@ Identify from requirements + project `blocks/form/mappings.js` if accessible.
 ```
 
 If none: write `None` under the heading. Planner skips Custom Component plan if `None`.
+
+---
+
+### Section 2.5 — Fragments
+
+Identify panels that should be extracted as reusable fragments. Apply thresholds:
+
+| Threshold | Create fragment when... |
+|-----------|------------------------|
+| Reusability | Panel appears in 2+ forms |
+| Complexity | 10+ fields OR complex logic that clutters the main form |
+| Standardization | Regulatory/consent text that must be org-consistent |
+| Maintenance | Section changes frequently and propagation must be instant |
+
+```markdown
+## Fragments
+
+| Fragment | File | Used In | Reason |
+|----------|------|---------|--------|
+| personal-details | forms/personal-details.json | Screen 1, Screen 3 | Reused across 3 journeys |
+| consent-block | forms/consent-block.json | Screen 4 | Regulatory — must be org-consistent |
+```
+
+If none: write `None` under the heading. Planner skips Fragment plan if `None`.
+
+In the affected `## Screens` sub-section, note the fragment reference instead of listing fields inline:
+
+```markdown
+### Screen 1: Personal Details
+Purpose: Collect user identity information
+Fragment: `forms/personal-details.json`
+```
 
 ---
 

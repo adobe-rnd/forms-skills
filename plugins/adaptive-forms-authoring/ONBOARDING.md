@@ -69,6 +69,7 @@ The Planner generates plans from `journeys/<journey>/spec.md`. Each plan is one 
 | Plan Type | Purpose |
 |-----------|---------|
 | **Custom Component** | Scaffold custom `fd:viewType` block before Screen plans that use it |
+| **Fragment** (×N) | Create reusable panel as standalone JSON before Screen plans that reference it |
 | **Screen** (×N) | One wizard step — fields, layout, CSS. No rules or APIs |
 | **Interaction Flow** | Wizard navigation + conditional step progression |
 | **Functional Rules** | Show/hide, enable/disable, set-value rules |

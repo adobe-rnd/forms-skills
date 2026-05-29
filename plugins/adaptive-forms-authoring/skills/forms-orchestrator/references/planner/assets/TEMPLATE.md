@@ -108,6 +108,43 @@ Add '<fd:viewType>' to customComponents array in blocks/form/mappings.js
 
 ---
 
+### Fragment
+
+Creates a reusable form panel as a standalone JSON file. Must complete before any Screen plan that references it.
+
+**Specification Pattern:**
+
+```
+### Fragment: <fragment-name>
+
+- File: forms/<fragment-name>.json
+- Used in: Screen <N>, Screen <M>
+- Reason: <reusability | complexity | standardization | maintenance>
+
+### Fields
+
+| Field Name | Type / fd:viewType | Required | Notes |
+|---|---|---|---|
+| full_name | text-input | yes | — |
+| dob | date-input | yes | Must be 18+ |
+
+### Configuration
+
+- Lazy load: true | false
+- Global value fields: <field names that must remain available when fragment unloads, or "none">
+
+### Data Binding
+
+- Schema: <FDM path or JSON schema ref>
+```
+
+**Typical Steps:**
+1. Create fragment JSON in Universal Editor using `forms-author`
+2. Commit fragment file: `forms/<fragment-name>.json`
+3. Verify fragment loads standalone without errors
+
+---
+
 ### Screen
 
 Builds one wizard step — all fields, layout, CSS. No rules, no APIs, no navigation wiring.

@@ -28,6 +28,7 @@ Read the journey spec and determine which plan types apply:
 | Plan Type | Create when spec has... | Skills |
 |---|---|---|
 | **Custom Component** | `## Custom Components` section with entries | `forms-custom-components` |
+| **Fragment** (one per fragment) | `## Fragments` section with entries | `forms-author` |
 | **Screen** (one per wizard step) | Any screen under `## Screens` | `forms-author`, `forms-content-modeler` |
 | **Interaction Flow** | `Screen count: N` where N > 1 (multi-screen journey) | `forms-rule-author` |
 | **Functional Rules** | `## Functional Rules` section with entries | `forms-rule-author` |
@@ -40,6 +41,8 @@ Read the journey spec and determine which plan types apply:
 **Always create:** Screen × N, Submit, QA.
 **Conditionally create:** all others.
 
+> **Fragment before Screen:** Fragment plans must complete before any Screen plan that references them. Fragment JSON must exist in the repo before it can be referenced in a host form panel.
+
 ---
 
 ## Recommended Plan Order
@@ -50,6 +53,7 @@ digraph plan_order {
   node [shape=box];
 
   CC  [label="Custom\nComponent"];
+  FRAG [label="Fragment"];
   S1  [label="Screen 1"];
   SN  [label="Screen N"];
   IF  [label="Interaction\nFlow"];
@@ -60,7 +64,10 @@ digraph plan_order {
   SB  [label="Submit"];
   QA  [label="QA"];
 
-  CC -> S1 -> SN -> IF [style=dashed, label="if multi-screen"];
+  CC -> FRAG [style=dashed, label="if fragments"];
+  CC -> S1   [style=dashed, label="if no fragments"];
+  FRAG -> S1;
+  S1 -> SN -> IF [style=dashed, label="if multi-screen"];
   SN -> FR;
   FR -> CR [style=dashed, label="if complex rules"];
   SN -> VL;
@@ -75,7 +82,8 @@ digraph plan_order {
 | Order | Plan Type | Dependency |
 |---|---|---|
 | 0 | **Custom Component** | Nothing (must exist before screens that use it) |
-| 1–N | **Screen** (one per wizard step) | Custom Component (if any) |
+| 0.5 | **Fragment** (one per fragment) | Custom Component (if any); must exist before screens that reference it |
+| 1–N | **Screen** (one per wizard step) | Custom Component + Fragment (if any) |
 | N+1 | **Interaction Flow** | All Screen plans complete |
 | Next | **Functional Rules** | All Screen plans complete |
 | Next | **Complex Rules** | Functional Rules |
