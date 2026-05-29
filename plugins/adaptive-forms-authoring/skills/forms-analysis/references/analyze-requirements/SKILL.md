@@ -1,302 +1,264 @@
 ---
 name: analyze-requirements
 description: >
-  Use when analyzing a requirements document, Screen.md, journey.md, or design
-  mockup to produce a form specification. Outputs field inventory, panel
-  structure, rule requirements, and API dependencies.
+  Use when analyzing a requirements document, inline text, or journey.md to
+  produce a journey spec at journeys/<journey>/spec.md. Extracts API
+  definitions to refs/apis/ before writing the spec.
 license: Apache-2.0
 metadata:
   author: Adobe
-  version: "0.1"
+  version: "0.2"
   type: skill
   triggers:
     - analyze requirements
     - create spec
     - plan form
-    - Screen.md
+    - journey spec
+    - requirements doc
 ---
 
 # Analyze Requirements
 
-Parse requirements documents into structured form specifications ready for form creation.
+Parse requirements input into a structured journey spec at `journeys/<journey>/spec.md`.
 
 ## When to Use
 
-- User provides a requirements document, Screen.md, journey.md, or design mockup
-- A new form project needs to be planned before building
-- You need to extract field inventory, panel structure, rule requirements, and API dependencies
+- Input is a requirements document, inline user text, or journey.md
+- A new journey needs a spec before planning begins
+- Requirements contain API definitions that need extracting
 
 ## Critical Rules
 
-1. **Act autonomously** — read the document, produce the spec. Don't ask "should I analyze this?"
-2. **Mark unknowns as TBD** — if an API endpoint, data source, or behavior is unclear, mark it TBD rather than guessing
-3. **No PL.currentFormContext references** — mark data sources as TBD instead
-4. **Don't duplicate** — validation rules should NOT repeat constraints already captured in field properties
-5. **Skip container panels** — only include panels that have visibility rules or meaningful grouping
-6. **Complete field coverage** — every user-facing field must appear in the specification
+1. **Act autonomously** — read input, produce spec. Don't ask "should I analyze this?"
+2. **Extract APIs first** — write all API definitions to `refs/apis/` before writing spec.md. Spec references files, never inline schemas.
+3. **Mark unknowns TBD** — if an API endpoint, data source, or behavior is unclear, mark TBD
+4. **No PL.currentFormContext** — mark data sources as TBD instead
+5. **Custom components first** — identify custom `fd:viewType` components before describing screens
+6. **Complete field coverage** — every user-facing field must appear in the spec
 
-## Input Sources
+## Input Handling
 
-| Source Type | What to Look For |
-|-------------|------------------|
-| Requirements doc | Feature descriptions, field lists, business logic, API references |
-| Screen.md | Structured screen documentation with fields, validation, visibility rules |
-| Journey.md | Multi-step flow with screen transitions and navigation |
-| Design mockup | Visual layout implying fields, sections, and flow |
+| Input type | Action |
+|---|---|
+| Requirements doc at `inputs/<name>.md` | Read directly |
+| Inline text from user | Write to `inputs/<journey>-requirements.md` first, then read |
+| `.docx` file | Run `scripts/docx-to-text.py <path>` → read output, then proceed |
+| With screenshots | Pass visuals to `create-screen-doc` to fill screen structure gaps |
 
-## Output: Form Specification Template
+## Step 1 — Extract APIs to refs/apis/
 
-Produce a structured markdown document with ALL of the following sections, in this order:
+Before writing the spec, scan all input for API information:
 
-### 1. Title and Overview
+| API info type | Action |
+|---|---|
+| OpenAPI YAML | Copy to `refs/apis/<name>.yaml` as-is |
+| Custom YAML | Write to `refs/apis/<name>.yaml` |
+| JSON payload / schema | Write to `refs/apis/<name>.json` |
+| Inline description (URL, params, response) | Generate `refs/apis/<name>.md` with structured description |
+| cURL example | Write to `refs/apis/<name>.md` with endpoint, method, headers, body |
+| No APIs found | Skip — omit `## Integrations` section from spec |
 
-```
-# <Form Name> — Form Specification
+## Step 2 — Write journeys/<journey>/spec.md
 
-**Source:** <input document name>
-**Screens/Steps:** <count>
-**Estimated Fields:** <count>
-**Estimated Rules:** <count>
-```
-
-### 2. Panel Structure
-
-Map the form's top-level organization:
-
-```
-Form Root
-├── Panel: <panel-name> — "<Display Title>"
-│   ├── Field: <field-name>
-│   └── Fragment: <fragment-name> (if reusable)
-├── Panel: <panel-name>
-│   └── ...
-└── Submit Button
-```
-
-### 3. Field Inventory
-
-For each section/panel, produce a table:
-
-| Name | Title | Type | Required | Visible | Properties |
-|------|-------|------|----------|---------|------------|
-| `field_name` | Display Title | field-type | true/false | true/false | constraints, options, patterns |
-
-**Valid field types:** `text-input`, `number-input`, `date-input`, `drop-down`, `radio-group`, `checkbox-group`, `checkbox`, `email`, `file-input`, `plain-text`, `panel`, `button`
-
-**Properties column includes:**
-- Validation patterns (regex)
-- Min/max values
-- Character limits
-- Dropdown options (format: `Option1, Option2, Option3`)
-- Placeholder text
-
-### 4. Validation Rules
-
-Only rules NOT already captured in field Properties:
-
-| Field | Trigger | Rule | Error Message |
-|-------|---------|------|---------------|
-| `field_name` | On blur / On change | Description | "Error text" |
-
-**Do NOT duplicate:** patterns, min/max, character limits, or required already in the field inventory.
-
-### 5. Visibility Rules
-
-| Component | Initially Visible | Show/Hide Condition |
-|-----------|-------------------|---------------------|
-| `field_name` | Yes/No | Condition that triggers show/hide |
-
-### 6. Business Rules
-
-Describe logic that goes beyond simple validation/visibility:
-
-- **On form load:** Pre-fill logic, initialization
-- **Calculations:** Computed fields (e.g., total = subtotal + tax)
-- **Conditional required:** Fields that become required based on other values
-- **State transitions:** What happens when user completes a section
-
-Mark APIs and data sources as TBD:
-- [ ] Pre-fill `field_name` from <source TBD>
-- [ ] Call API for <purpose> — *API TBD*
-
-### 7. API Dependencies
-
-| Order | API | Purpose | Trigger |
-|-------|-----|---------|---------|
-| 1 | `api-name` (TBD) | Description | When triggered |
-
-### 8. Fragment Candidates
-
-Identify reusable sections that should be fragments:
-
-| Section | Reason | Reused In |
-|---------|--------|-----------|
-| Address fields | Common pattern | Multiple forms |
-
-### 9. Navigation Flow
-
-For multi-step forms:
-
-| Step | Panel | Next Condition | Back Condition |
-|------|-------|----------------|----------------|
-| 1 | Personal Details | On continue click | — |
-| 2 | Employment | On continue click | On back click |
-
-### 10. Summary & Complexity
-
-| Section          | Fields | Validation | Visibility | Business | APIs | Fragments |
-|------------------|--------|------------|------------|----------|------|-----------|
-| Section Name     | X      | X          | X          | X        | X    | X         |
-| **Screen Total** | **X**  | **X**      | **X**      | **X**    | **X** | **X**     |
-
-**Complexity Check (per screen):**
-
-| Metric             | Value | Threshold | Status |
-|--------------------|-------|-----------|--------|
-| Fields             | X     | ≤ 25      | 🟢/🟡/🔴 |
-| Validation rules   | X     | ≤ 15      | 🟢/🟡/🔴 |
-| Visibility rules   | X     | ≤ 10      | 🟢/🟡/🔴 |
-| Business rules     | X     | ≤ 6       | 🟢/🟡/🔴 |
-| API calls          | X     | ≤ 3       | 🟢/🟡/🔴 |
-| Fragments          | X     | ≤ 3       | 🟢/🟡/🔴 |
-| Logical sections   | X     | ≤ 4       | 🟢/🟡/🔴 |
-
-**Complexity Check (journey aggregate):**
-
-| Metric                     | Value | Threshold | Status |
-|----------------------------|-------|-----------|--------|
-| Total screens              | X     | ≤ 15      | 🟢/🟡/🔴 |
-| Total fields (all screens) | X     | ≤ 150     | 🟢/🟡/🔴 |
-| Total rules (all types)    | X     | ≤ 100     | 🟢/🟡/🔴 |
-| Total APIs (unique)        | X     | ≤ 12      | 🟢/🟡/🔴 |
-| Total fragments            | X     | ≤ 10      | 🟢/🟡/🔴 |
-
-**Severity thresholds:**
-- 🟢 Green: within threshold
-- 🟡 Amber: up to 50% over threshold — flag for human review
-- 🔴 Red: more than 50% over threshold — must split screen/journey or extract fragments
-
-> **Gate:** If any metric is 🔴, add a Complexity Warning to Open Items (section 11) with a recommended action.
-
-### 11. Open Items
-
-- [ ] Item needing clarification
-- [ ] API endpoint TBD
-- [ ] Data source TBD
-
-## Workflow
-
-1. **Read the input document** — understand the full scope
-2. **Identify panels/sections** — group fields logically by screen or functional area
-3. **Extract all fields** — list every data input with type, label, constraints
-4. **Separate validation rules** — only rules not captured in field properties
-5. **Map visibility logic** — initially hidden components and their show/hide conditions
-6. **Document business rules** — calculations, state transitions, conditional behavior
-7. **List API dependencies** — mark all as TBD for verification
-8. **Identify fragment candidates** — sections reusable across forms
-9. **Map navigation** — step flow for multi-step forms
-10. **Compile summary and evaluate complexity** — populate the Summary & Complexity tables, flag any 🟡/🔴 metrics
-11. **Generate execution plans** — decompose the specification into sequentially numbered plans at `plans/<journey>/` (see Plan Generation below)
-
-## What Happens Next
-
-After the specification is reviewed and approved:
-1. **Execution plans** are generated at `plans/<journey>/` — one plan per functional concern
-2. Plans execute sequentially — each plan invokes the appropriate skill(s)
-3. After each plan completes, `.agent/handover.md` is updated with the Plan Execution Status dashboard
-
-## Plan Generation
-
-After the form specification is reviewed, generate sequentially numbered plan files at `plans/<journey>/`.
-
-### Plan File Convention
-
-- **Path:** `plans/<journey>/NN-<short-title>.md`
-- **Numbering:** Zero-padded two digits: `01`, `02`, ..., `10`, `11`
-- **Naming:** Lowercase, hyphen-separated: `01-form-structure.md`, `07-api-prefill.md`
-- **Execution order:** Sequential — each plan declares its dependencies explicitly
-
-### Plan Template
-
-Each plan file must follow this structure:
-
-```
-# Plan NN: <Title>
-
-**Source:** `journeys/<journey>.md` section X.X / `Screen.md` references
-**Skills:** <primary skills invoked: forms-author, forms-content-modeler, forms-rule-author, manage-apis>
-**Depends on:** Plan NN (description) — or "None (first plan)"
+Produce a structured markdown file with ALL applicable sections in this order:
 
 ---
 
-## Objective
+### Section 1 — Overview
 
-<1-2 sentences: what this plan delivers and why>
+```markdown
+# Journey: <name>
 
-## Scope
-
-### In Scope
-
-- <specific deliverable 1>
-- <specific deliverable 2>
-
-### Out of Scope
-
-- <explicitly excluded item> (covered in Plan NN)
-
-## Specification
-
-<The detailed spec — varies by plan type:>
-<- For Build plans: panel structure tree, field specification tables>
-<- For Logic plans: rule tables, custom function signatures, event flows>
-<- For Integrate plans: API definitions, request/response, mapping tables>
-<- For Deploy plans: deployment targets, verification steps>
-
-## Steps to Execute
-
-1. <Step 1 with specific skill/tool invocation>
-2. <Step 2>
-3. ...
-N. **Validate and push**
-
-## Acceptance Criteria
-
-- [ ] <Testable criterion 1>
-- [ ] <Testable criterion 2>
-- [ ] <Form passes validation>
-- [ ] <Renders/deploys without errors>
+## Overview
+- Purpose: <one sentence — what the user accomplishes>
+- Form path: /content/forms/af/<name>
+- Screen count: N
 ```
 
-### Plan Decomposition Guidelines
+`Screen count` drives planner: 1 = single-screen (no wizard needed), N > 1 = wizard steps.
 
-When breaking a form specification into plans:
+---
 
-| Principle | Guideline |
-|-----------|-----------|
-| **One concern per plan** | Each plan addresses one functional area — don't mix form structure with API integration |
-| **Deployable increment** | After each plan, the form should be in a valid, deployable state (even if incomplete) |
-| **Explicit dependencies** | Every plan declares which prior plans it depends on — no implicit assumptions |
-| **First plan = skeleton** | Plan 01 always creates the full form structure (all panels, even empty placeholders for later plans) |
-| **APIs before rules** | Integration plans (API clients) come before logic plans that consume those APIs |
-| **Error handling last** | Cross-cutting concerns like error handling and session management come at the end |
-| **Max 15 plans per journey** | If you need more, the journey is likely too complex — check journey-level complexity thresholds |
+### Section 2 — Custom Components
 
-### Typical Plan Sequence
+Identify from requirements + project `blocks/form/mappings.js` if accessible.
 
-| Order | Focus | Primary Skills | Example |
-|-------|-------|---------------|---------|
-| 01 | Form structure + primary fields | `forms-author` | Panels, field types, basic validation |
-| 02–05 | Screen-by-screen logic | `forms-author`, `forms-rule-author` | Visibility rules, business rules per screen |
-| 06–08 | API integration | `manage-apis`, `forms-rule-author` | API clients, prefill, save/submit |
-| 09 | Complex workflows | `forms-rule-author` | Multi-step flows (e.g., OTP, verification) |
-| 10 | Error handling & edge cases | `forms-rule-author` | Session management, error modals, fallbacks |
+```markdown
+## Custom Components
 
-## Exclusions
+| fd:viewType | Base Type | Purpose |
+|---|---|---|
+| card-choice | radio-group | Radio options as clickable image cards |
+```
 
-Do NOT include in the specification:
-1. Container panels that are just wrappers with no visibility rules
-2. Duplicate validation (already in field Properties)
-3. Screenshots or visual mockups
-4. Source code references
-5. CSS/styling details
-6. Detailed API request/response payloads (document separately)
+If none: write `None` under the heading. Planner skips Custom Component plan if `None`.
+
+---
+
+### Section 3 — Screens
+
+One sub-section per wizard step. Single-screen journeys have one sub-section.
+
+```markdown
+## Screens
+
+### Screen 1: <name>
+Purpose: <what the user does on this step>
+
+| Field Name | Type / fd:viewType | Required | Placeholder | Notes |
+|---|---|---|---|---|
+| full_name | text-input | yes | Full name | — |
+| plan_type | card-choice | yes | — | Uses card-choice custom component |
+| dob | date-input | yes | — | Must be 18+ |
+
+### Screen 2: <name>
+...
+```
+
+---
+
+### Section 4 — Navigation
+
+Only if Screen count > 1.
+
+```markdown
+## Navigation
+
+| From | To | Condition |
+|---|---|---|
+| Screen 1 | Screen 2 | always |
+| Screen 2 | Screen 3 | field_x = "yes" |
+| Screen 2 | Screen 4 | field_x != "yes" |
+```
+
+---
+
+### Section 5 — Functional Rules
+
+Show/hide, enable/disable, set-value rules.
+
+```markdown
+## Functional Rules
+
+| Trigger Field | Condition | Action | Target |
+|---|---|---|---|
+| has_spouse | value = "yes" | show | spouse_name |
+| country | value != "US" | hide | state_field |
+```
+
+Omit section if no functional rules.
+
+---
+
+### Section 6 — Complex Rules
+
+Calculations and derived values.
+
+```markdown
+## Complex Rules
+
+| Output Field | Formula | Input Fields |
+|---|---|---|
+| total_premium | base_rate × coverage_amount | base_rate, coverage_amount |
+```
+
+Omit section if no complex rules.
+
+---
+
+### Section 7 — Validations
+
+Field constraints and cross-field validations.
+
+```markdown
+## Validations
+
+| Field | Rule | Error Message |
+|---|---|---|
+| email | email format | Enter a valid email |
+| confirm_email | equals email | Emails must match |
+| dob | date in past | Date of birth must be in the past |
+```
+
+---
+
+### Section 8 — Integrations
+
+Reference API files extracted to `refs/apis/` in Step 1.
+
+```markdown
+## Integrations
+
+> **AEM FDM guard:** APIs with source `aem-fdm` require AEM_HOST and AEM_TOKEN
+> in `.skills-workspace/.env`. Mark `sync-blocked: true` if credentials unknown.
+
+### <api-name>
+- API ref: refs/apis/<name>.<ext>
+- Source: `aem-fdm` | `new`
+- Sync blocked: true | false   ← aem-fdm only
+- Trigger: `form-load` | `field-change: <field_name>` | `button-click: <field_name>`
+- Purpose: <one line>
+- Response → form mapping:
+  - response.<field> → form.<field_name>
+- On error: `<message>` | `silent`
+```
+
+Omit section if no integrations.
+
+---
+
+### Section 9 — Submit
+
+```markdown
+## Submit
+- Endpoint: POST /api/submit (or TBD)
+- Success: <message text> | redirect to <url>
+- Error: <message text>
+```
+
+---
+
+### Section 10 — Acceptance Criteria
+
+Journey-level criteria (not plan-level).
+
+```markdown
+## Acceptance Criteria
+- [ ] Form renders all N fields across M screens
+- [ ] Submits to <endpoint> on confirmation
+- [ ] Shows <success state> on completion
+- [ ] <Key conditional behavior>
+```
+
+---
+
+### Section 11 — Open Items
+
+```markdown
+## Open Items
+- [ ] <API endpoint TBD>
+- [ ] <Unclear business rule>
+- [ ] <Data source TBD>
+```
+
+Omit if no open items.
+
+---
+
+## Complexity Check
+
+After writing the spec, evaluate:
+
+| Metric | Value | Threshold | Status |
+|---|---|---|---|
+| Screen count | X | ≤ 15 | 🟢/🟡/🔴 |
+| Fields (total) | X | ≤ 150 | 🟢/🟡/🔴 |
+| Functional rules | X | ≤ 50 | 🟢/🟡/🔴 |
+| APIs (unique) | X | ≤ 12 | 🟢/🟡/🔴 |
+
+🔴 on any metric → add a Complexity Warning to Open Items with recommended action (split journey, reduce scope).
+
+## Output
+
+- `journeys/<journey>/spec.md` — journey specification
+- `refs/apis/<name>.<ext>` — one file per API found (written in Step 1)

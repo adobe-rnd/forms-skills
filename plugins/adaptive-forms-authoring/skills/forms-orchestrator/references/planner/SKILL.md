@@ -1,13 +1,13 @@
 ---
 name: planner
 description: >
-  Use when a form journey has requirements but no execution plans yet, or when
-  generating a new plan from a spec. Produces ordered plan files at
-  plans/<journey>/.
+  Use when a journey spec exists but no execution plans have been generated yet.
+  Reads journeys/<journey>/spec.md and produces ordered plan files at
+  journeys/<journey>/plans/.
 license: Apache-2.0
 metadata:
   author: Adobe
-  version: "0.1"
+  version: "0.2"
   type: skill
   triggers:
     - plan
@@ -21,84 +21,89 @@ metadata:
 
 # Planner
 
-Generates ordered, executable plans from user requirements. The orchestrator routes here when a journey has requirements but no plans yet.
+Generates ordered, executable plans from a journey spec. The orchestrator routes here when `journeys/<journey>/spec.md` exists but no plans have been generated.
 
 ---
 
 ## What the Planner Does
 
 ```
-Requirements (journey docs, Screen.md, screenshots, v1 JSON)
-     │
-     ▼
-┌────────────────────────────────┐
-│  Resolve strategy              │
-│  (custom or default)           │
-└─────────────┬──────────────────┘
-              │
-              ▼
-┌────────────────────────────────┐
-│  Analyze requirements          │
-│  using analysis domain skills  │
-└─────────────┬──────────────────┘
-              │
-              ▼
-┌────────────────────────────────┐
-│  Decompose into ordered plans  │
-│  Write to plans/<journey>/     │
-└────────────────────────────────┘
+journeys/<journey>/spec.md
+  + refs/apis/<name>.<ext> (if integrations)
+          │
+          ▼
+  ┌───────────────────────┐
+  │  Select plan types    │
+  │  from spec sections   │
+  └──────────┬────────────┘
+             │
+             ▼
+  ┌───────────────────────┐
+  │  Order by dependency  │
+  │  (see GUARDRAILS.md)  │
+  └──────────┬────────────┘
+             │
+             ▼
+  ┌───────────────────────┐
+  │  Write numbered plan  │
+  │  files to plans/      │
+  └───────────────────────┘
 ```
 
-The planner takes requirements as input and produces a set of plan files ready for sequential execution by the orchestrator.
+Input: `journeys/<journey>/spec.md`
+Output: `journeys/<journey>/plans/NN-<title>.md`
 
 ---
 
 ## Guardrails
 
-Decomposition rules and process: **[`assets/GUARDRAILS.md`](assets/GUARDRAILS.md)**
+Plan type selection, ordering, scope rules, acceptance criteria requirement: **[`assets/GUARDRAILS.md`](assets/GUARDRAILS.md)**
 
-**Resolution rule:** If `plans/custom-strategy.md` exists in the workspace, use it instead of `GUARDRAILS.md`. A custom strategy can define any decomposition approach — by screen, by feature, by priority, or any other scheme.
-
----
-
-## Output
-
-The planner produces plan files at `plans/<journey>/NN-<title>.md`, numbered sequentially, ready for execution by the orchestrator.
+**Strategy override:** If `plans/custom-strategy.md` exists in the workspace, use it instead of `GUARDRAILS.md`.
 
 ---
 
 ## Plan Types
 
-A plan's type is not declared explicitly — it emerges from which specification sections and skills the plan uses. Consult the plan type samples in **[`assets/TEMPLATE.md`](assets/TEMPLATE.md)** when generating each plan.
+| Type | Primary Skills | When to Create |
+|---|---|---|
+| **Custom Component** | `forms-custom-components` | spec has custom component entries |
+| **Screen** (one per wizard step) | `forms-author`, `forms-content-modeler` | always — one per screen in spec |
+| **Interaction Flow** | `forms-rule-author` | multi-screen journey (screen count > 1) |
+| **Functional Rules** | `forms-rule-author` | spec has functional rules |
+| **Complex Rules** | `forms-rule-author` | spec has complex rules / calculations |
+| **Validation** | `forms-rule-author` | spec has validations |
+| **Integration** | `forms-integration`, `forms-rule-author` | spec has API integrations |
+| **Submit** | `forms-author`, `forms-integration` | always |
+| **QA** | — | always — last plan |
 
-| Type | Primary Skills | When to Use |
-|------|---------------|-------------|
-| **Structure** | `forms-author` | Form skeleton — panels, fields, basic validations |
-| **Workflow** | `forms-author`, `forms-rule-author` | Specific user flow or conditional branch |
-| **Logic** | `forms-rule-author` | Cross-cutting validations and business rules |
-| **Integration** | `manage-apis`, `forms-rule-author` | API wiring — data loading, save/submit, external services |
-| **Infrastructure** | `forms-rule-author` | Cross-cutting concerns — error handling, session management, toasts |
+---
+
+## Output
+
+Plan files at `journeys/<journey>/plans/NN-<title>.md`, numbered sequentially, ready for execution.
+
+Each plan follows **[`assets/TEMPLATE.md`](assets/TEMPLATE.md)** and must include a `## Acceptance Criteria` section.
 
 ---
 
 ## Plan Conventions
 
-Generated plans follow a standard structure. Full template and field definitions: **[`assets/TEMPLATE.md`](assets/TEMPLATE.md)**
-
 | Property | Convention |
-|----------|-----------|
-| **Path** | `plans/<journey>/NN-<short-title>.md` |
+|---|---|
+| **Path** | `journeys/<journey>/plans/NN-<short-title>.md` |
 | **Numbering** | Zero-padded two digits: `01`, `02`, ..., `10`, `11` |
-| **Max per journey** | 15 plans — if more are needed, the journey is too complex; split it |
+| **Max per journey** | 15 — if more needed, journey is too complex; flag to user |
 | **Template** | `assets/TEMPLATE.md` |
+| **Guardrails** | `assets/GUARDRAILS.md` |
 
 ---
 
 ## Quick Reference
 
 | What | Where |
-|------|-------|
-| Decomposition guardrails | `assets/GUARDRAILS.md` |
-| User strategy override | `plans/custom-strategy.md` (in workspace) |
-| Plan template + type samples | `assets/TEMPLATE.md` |
+|---|---|
+| Plan type selection + ordering | `assets/GUARDRAILS.md` |
+| Plan template + type patterns | `assets/TEMPLATE.md` |
 | Domain registry (skill resolution) | `../domain-registry/SKILL.md` |
+| User strategy override | `plans/custom-strategy.md` (workspace root) |

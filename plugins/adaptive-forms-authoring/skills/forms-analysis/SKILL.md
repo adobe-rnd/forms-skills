@@ -1,9 +1,9 @@
 ---
 name: forms-analysis
 description: >
-  Use when the task is analysis or documentation — analyzing requirements,
-  creating Screen.md files, reviewing existing screen docs, or migrating from
-  v1 AEM forms.
+  Use when analyzing requirements to produce a journey spec — from requirements
+  docs, screenshots, Figma, JUD, or v1 AEM form JSON. Output is
+  journeys/<journey>/spec.md ready for the planner.
 license: Apache-2.0
 metadata:
   triggers:
@@ -11,109 +11,97 @@ metadata:
     - requirements
     - create spec
     - plan form
-    - screen doc
-    - review screen
+    - journey spec
     - v1 form
     - legacy form
     - migrate
     - mockup
     - figma
-    - jud
-    - docx screen
-    - jud to screen
+    - screenshots
+    - docx
   type: router
   author: Adobe
-  version: "0.1"
+  version: "0.2"
 ---
 
 # Analysis — Domain Router
 
-Routes analysis and documentation intents to the correct skill based on input source. This router does not implement — it delegates.
+Sequential pipeline that transforms raw inputs into a journey spec (`journeys/<journey>/spec.md`). This router does not implement — it delegates to sub-skills in order.
 
 ---
 
-## Routing Table
+## Pipeline State Machine
 
-First match wins.
+```dot
+digraph analysis_pipeline {
+  rankdir=LR;
+  node [shape=box];
 
-| Intent | Skill |
-|--------|-------|
-| Parse requirements docs, mockups, or journey specs into a structured form specification | `analyze-requirements` |
-| Read legacy v1 adaptive-form JSON and produce Screen.md docs for migration | `analyze-v1-form` |
-| Create a standardized Screen.md for a form screen (11-section format) from screenshots or Figma | `create-screen-doc` |
-| Create Screen.md from a JUD (.docx) and design screenshots, with global variable tracking | `jud-to-screen` |
-| Validate a Screen.md against actual form JSON — quality gate | `review-screen-doc` |
+  INTAKE    [shape=doublecircle, label="INTAKE"];
+  EXTRACTING [label="EXTRACTING\nAPIs"];
+  GENERATING [label="GENERATING\nSPEC"];
+  DONE      [shape=doublecircle, label="DONE"];
+  BLOCKED   [label="BLOCKED\n(input missing)"];
 
+  INTAKE    -> BLOCKED    [label="input not found"];
+  INTAKE    -> EXTRACTING [label="input confirmed"];
+  BLOCKED   -> INTAKE     [label="user provides input"];
+  EXTRACTING -> GENERATING [label="APIs written\nto refs/apis/"];
+  GENERATING -> DONE      [label="spec.md written"];
+}
 ```
-                         ┌─ requirements doc ──→ analyze-requirements ─┐
-                         ├─ journey.md ────────→ analyze-requirements ─┤
-  Input Source ──────────┤                                             ├──→ Screen.md
-                         ├─ screenshots/figma ─→ create-screen-doc ───┤
-                         ├─ JUD + screenshots ─→ jud-to-screen ───────┤
-                         └─ v1 adaptive form ──→ analyze-v1-form ─────┘
-                                                        │
-                                              review-screen-doc (quality gate)
-```
+
+| State | Action | Exit → Next |
+|---|---|---|
+| **INTAKE** | Confirm input exists on disk. Write inline input to `inputs/` if needed. For `.docx` → run `scripts/docx-to-text.py` first. | Input confirmed → EXTRACTING |
+| **BLOCKED** | Input file not found or insufficient. Prompt user. | User provides → INTAKE |
+| **EXTRACTING** | Scan input for API definitions (inline, attached files, cURL examples). Write each to `refs/apis/<name>.<ext>`. | APIs extracted → GENERATING |
+| **GENERATING** | Invoke the appropriate sub-skill to produce `journeys/<journey>/spec.md`. | spec.md written → DONE |
+| **DONE** | Return spec path to orchestrator. Orchestrator routes to planner. | — |
 
 ---
 
-## Skills
+## Sub-Skill Routing (GENERATING state)
 
-| # | Skill | Path | Purpose | Triggers |
-|---|-------|------|---------|----------|
-| 1 | `analyze-requirements` | `references/analyze-requirements/SKILL.md` | Parse requirements docs / mockups into structured form specification | analyze, requirements, create spec, plan form, journey |
-| 2 | `analyze-v1-form` | `references/analyze-v1-form/SKILL.md` | Read legacy v1 AEM form JSON and produce Screen.md docs for migration | v1 form, legacy form, migrate, adaptive form |
-| 3 | `create-screen-doc` | `references/create-screen-doc/SKILL.md` | Create standardized Screen.md per form screen (11-section format) | screen doc, create screen, screenshots, figma, mockup |
-| 4 | `jud-to-screen` | `references/jud-to-screen/SKILL.md` | Create Screen.md from JUD (.docx) and design screenshots with global variable tracking | jud, docx screen, jud to screen, document screen from jud |
-| 5 | `review-screen-doc` | `references/review-screen-doc/SKILL.md` | Validate Screen.md against actual form JSON — quality gate | review screen, validate screen, quality gate |
+| Input type | Sub-skill |
+|---|---|
+| Requirements doc, inline text, journey.md | `analyze-requirements` |
+| Screenshots, Figma frames, design mockups | `create-screen-doc` (visual analysis mode) |
+| v1 AEM Adaptive Form JSON | `analyze-v1-form` |
+
+First match wins. If multiple input types present, start with requirements doc — use visual analysis to fill gaps in screen structure.
+
+---
+
+## Sub-Skills
+
+| # | Skill | Path | Purpose |
+|---|---|---|---|
+| 1 | `analyze-requirements` | `references/analyze-requirements/SKILL.md` | Parse requirements docs → journey spec |
+| 2 | `create-screen-doc` | `references/create-screen-doc/SKILL.md` | Analyze visuals (screenshots, Figma) → journey spec sections |
+| 3 | `analyze-v1-form` | `references/analyze-v1-form/SKILL.md` | Read v1 AEM form JSON → journey spec |
+
+---
 
 ## Guard Policies
 
 | Policy | Rule |
-|--------|------|
-| `screen-md-convergence` | All paths in this domain converge to produce Screen.md files. Every skill's output is either a Screen.md or feeds into one. |
-| `quality-gate` | All Screen.md files MUST pass through `review-screen-doc` as a quality gate before leaving this domain. No Screen.md is considered complete until reviewed. |
-| `no-guessing-endpoints` | Never guess API endpoints or service URLs. Mark any unknowns as `TBD` and flag them for the user. |
-| `no-currentFormContext` | Never emit `PL.currentFormContext` references in any generated output. Use the documented data-binding patterns instead. |
-| `intake-gate` | Before routing, confirm that input files (requirements, screenshots, v1 JSON, etc.) are present on disk. Do NOT proceed until files are confirmed. |
+|---|---|
+| `intake-gate` | Confirm input files exist on disk before routing. Never proceed with missing inputs. |
+| `no-guessing-endpoints` | Never guess API endpoints. Mark unknowns as `TBD` in spec and `refs/apis/`. |
+| `no-currentFormContext` | Never emit `PL.currentFormContext` references. Mark data sources as TBD instead. |
+| `spec-convergence` | All paths converge to produce `journeys/<journey>/spec.md`. No sub-skill is done until spec.md is written. |
+| `api-extraction-first` | Always extract and write API refs to `refs/apis/` before writing spec.md. Spec references files, not inline schemas. |
+
+---
 
 ## File Locations
 
 | Asset | Path |
-|-------|------|
-| Screen docs | `refs/screens/<journey>/<screen-name>.md` |
-| Plans | `plans/<journey>/NN-<title>.md` |
-| Journey specs | `journeys/<journey-name>.md` |
-| Screenshots | `journeys/<journey>/screens/<screen>/*.png`, `*.jpg`, `*.pdf` |
-| V1 form JSON | `refs/<form-name>.v1.json` |
-
-### Intake Conventions
-
-| Source | Place In | Convention |
-|--------|----------|------------|
-| Screen.md | `journeys/<journey>/screens/<screen>/` | `Screen.md` |
-| Journey.md | `journeys/` | `<journey-name>.md` |
-| Screenshots | `journeys/<journey>/screens/<screen>/` | `*.png`, `*.jpg`, `*.pdf` |
-| V1 Form JSON | `refs/` | `<form-name>.v1.json` |
-
-## Dependencies
-
-| Dependency | Domain | Purpose |
-|------------|--------|---------|
-| `review-screen-doc` → form JSON | `content-author` | Review skill needs the form JSON (fetched via MCP) to validate Screen.md against |
-
-## Plan Integration
-
-How this domain participates in plan-driven execution.
-
-| When | Skill(s) Invoked | Role |
-|------|-------------------|------|
-| Plan generation — understanding requirements and producing specs | `analyze-requirements` | Parses requirements and produces initial Screen.md drafts |
-| Plan execution — screen doc creation and review | `create-screen-doc`, `review-screen-doc` | Creates Screen.md files and validates them against form JSON before build proceeds |
-
-## Extending This Domain
-
-- Create `references/<skill-name>/SKILL.md` following the skill template; add the intent → skill mapping to the **Routing Table** above.
-- Add the skill to the **Skills** table (path and triggers included).
-- Ensure output either produces a Screen.md or feeds into one (per the `screen-md-convergence` policy).
-- If the skill is a quality gate, add it to **Guard Policies**.
+|---|---|
+| Raw input documents | `inputs/` |
+| Journey spec | `journeys/<journey>/spec.md` |
+| API reference docs | `refs/apis/<name>.<ext>` |
+| v1 form JSON | `refs/<form-name>.v1.json` |
+| Screenshots / design files | `inputs/<journey>/` or `journeys/<journey>/` |
+| `.docx` extraction script | `references/analyze-requirements/scripts/docx-to-text.py` |

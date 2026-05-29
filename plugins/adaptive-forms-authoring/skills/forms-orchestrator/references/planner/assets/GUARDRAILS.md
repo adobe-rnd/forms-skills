@@ -1,96 +1,136 @@
 ---
 name: planner-guardrails
 description: >
-  Use when generating plans from requirements for a journey. Covers
-  what inputs to accept, how to decompose requirements into ordered
-  plans, and the principles governing plan order and scope.
+  Use when generating plans from a journey spec. Covers plan type selection,
+  ordering, scope rules, and the acceptance criteria requirement.
 ---
 
 # Planner Guardrails
 
-How to decompose requirements into ordered plans. Use this when generating plans for a journey.
+How to decompose a journey spec into ordered plans. Use when generating plans from `journeys/<journey>/spec.md`.
 
 ---
 
 ## Inputs
 
-Accept any combination of:
-
-| Input | Description |
-|-------|-------------|
-| Requirements docs | Free-form requirements, user stories, acceptance criteria |
-| Journey specs | `journeys/<journey>/journey.md` — structured journey specification |
-| Screen.md | `journeys/<journey>/screens/<screen>/Screen.md` — detailed screen documentation |
-| Screenshots | UI mockups or screenshots of existing forms |
-| v1 form JSON | Existing `form.json` from a v1 form being migrated or extended |
-
-At minimum one input source must be available. Richer inputs produce better decomposition.
+| Input | Path | Required |
+|---|---|---|
+| Journey spec | `journeys/<journey>/spec.md` | Yes |
+| API reference docs | `refs/apis/<name>.<ext>` | If integrations exist |
+| Custom strategy override | `plans/custom-strategy.md` (workspace root) | No — overrides this file if present |
 
 ---
 
-## Process
+## Plan Type Selection
 
-### Step 1 — Analyze Requirements
+Read the journey spec and determine which plan types apply:
 
-Use `analysis` domain skills to understand the form:
+| Plan Type | Create when spec has... | Skills |
+|---|---|---|
+| **Custom Component** | `## Custom Components` section with entries | `forms-custom-components` |
+| **Screen** (one per wizard step) | Any screen under `## Screens` | `forms-author`, `forms-content-modeler` |
+| **Interaction Flow** | `Screen count: N` where N > 1 (multi-screen journey) | `forms-rule-author` |
+| **Functional Rules** | `## Functional Rules` section with entries | `forms-rule-author` |
+| **Complex Rules** | `## Complex Rules` section with entries | `forms-rule-author` |
+| **Validation** | `## Validations` section with entries | `forms-rule-author` |
+| **Integration** | `## Integrations` section with entries | `forms-integration`, `forms-rule-author` |
+| **Submit** | `## Submit` section (always present) | `forms-author`, `forms-integration` |
+| **QA** | Always — every journey ends with QA | lint + smoke test |
 
-- **`analyze-requirements`** — parse requirements docs, extract form specification, identify complexity
-- **`create-screen-doc`** — generate Screen.md from screenshots or requirements (if not already available)
-- **`analyze-v1-form`** — extract structure and logic from existing v1 form JSON (migration scenarios)
-
-Goal: clear picture of panels, fields, validation rules, conditional logic, API integrations, and workflows.
-
-### Step 2 — Identify Structure
-
-From the analysis output, identify:
-
-- **Panels and sections** — form's top-level structure
-- **Fields and field groups** — what data is collected
-- **Workflows and branches** — conditional paths (e.g., user category → different field sets)
-- **API integrations** — data loading, save/submit, external validations
-- **Cross-cutting concerns** — error handling, session management, complex async flows
-
-### Step 3 — Decompose into Plans
-
-Create ordered plan files following the **recommended decomposition order** below. This is a guideline, not a mandate — adapt to the form's needs.
-
-#### Recommended Plan Order
-
-| Order | Focus | Example Title | What It Covers |
-|-------|-------|---------------|----------------|
-| 1 | **Form structure & skeleton** | `01-form-structure.md` | All panels, initial fields, basic layout |
-| 2–N | **Major workflows** (one per plan) | `02-workflow-branch-a.md` | One plan per major conditional branch or workflow |
-| Next | **Cross-cutting validations** | `04-field-validations.md` | Validation rules spanning multiple panels or workflows |
-| Next | **API integrations** | `05-api-prefill.md` | Data loading, save/submit handlers, API clients |
-| Next | **Complex async flows** | `07-async-verification.md` | OTP, external checks, real-time validations, polling |
-| Last | **Infrastructure / cross-cutting** | `08-error-handling.md` | Error handling, session management, analytics |
-
-> **Adapt, don't force.** Simple forms need only 3 plans. Forms with no APIs skip integration plans. Heavy async flows may front-load those. The order above is a starting point.
-
-#### Decomposition Principles
-
-1. **One workflow per plan** — each plan targets a single user-facing workflow or concern. If a plan touches unrelated features, split it.
-2. **Vertical slices** — a plan can invoke build + logic + integration skills. Plans are scoped by *feature*, not by *skill domain*.
-3. **Incremental testability** — after each plan completes, the form should be in a testable state.
-4. **Dependency clarity** — each plan explicitly declares which prior plans must be complete.
-5. **Manageable scope** — if a plan has more than 8–10 steps, it's too large. Split along a natural boundary.
-
-### Step 4 — Write Plan Files
-
-Write each plan to `plans/<journey>/NN-<title>.md` following `assets/TEMPLATE.md`.
+**Always create:** Screen × N, Submit, QA.
+**Conditionally create:** all others.
 
 ---
 
-## Example Decomposition
+## Recommended Plan Order
 
-| Plan | Focus | Skills Used |
-|------|-------|-------------|
-| 01 | Form structure & initial fields | `forms-author` |
-| 02 | Workflow branch A (conditional section) | `forms-author`, `forms-rule-author` |
-| 03 | Workflow branch B (alternative path) | `forms-author`, `forms-rule-author` |
-| 04 | Shared fields & common sections | `forms-author`, `forms-rule-author` |
-| 05 | Cross-field business rule validations | `forms-rule-author` |
-| 06 | API integration — data loading & prefill | `manage-apis`, `forms-rule-author` |
-| 07 | API integration — save & submit | `manage-apis`, `forms-rule-author` |
-| 08 | Error handling & session management | `forms-rule-author` |
+```dot
+digraph plan_order {
+  rankdir=LR;
+  node [shape=box];
 
+  CC  [label="Custom\nComponent"];
+  S1  [label="Screen 1"];
+  SN  [label="Screen N"];
+  IF  [label="Interaction\nFlow"];
+  FR  [label="Functional\nRules"];
+  CR  [label="Complex\nRules"];
+  VL  [label="Validation"];
+  IN  [label="Integration"];
+  SB  [label="Submit"];
+  QA  [label="QA"];
+
+  CC -> S1 -> SN -> IF [style=dashed, label="if multi-screen"];
+  SN -> FR;
+  FR -> CR [style=dashed, label="if complex rules"];
+  SN -> VL;
+  SN -> IN [style=dashed, label="if APIs"];
+  IN -> SB;
+  VL -> SB;
+  FR -> SB;
+  SB -> QA;
+}
+```
+
+| Order | Plan Type | Dependency |
+|---|---|---|
+| 0 | **Custom Component** | Nothing (must exist before screens that use it) |
+| 1–N | **Screen** (one per wizard step) | Custom Component (if any) |
+| N+1 | **Interaction Flow** | All Screen plans complete |
+| Next | **Functional Rules** | All Screen plans complete |
+| Next | **Complex Rules** | Functional Rules |
+| Next | **Validation** | All Screen plans complete |
+| Next | **Integration** | All Screen plans complete |
+| Last-1 | **Submit** | Integration (if any), Validation |
+| Last | **QA** | All preceding plans |
+
+> **Adapt, don't force.** Simple single-screen form with no APIs: Screen + Validation + Submit + QA = 4 plans. Only add plan types that the spec requires.
+
+---
+
+## Decomposition Principles
+
+1. **One concern per plan** — each plan targets one functional area. If a plan touches unrelated concerns, split it.
+2. **Screen plans are structure only** — fields + layout + CSS. No rules, no APIs, no navigation wiring.
+3. **Incremental testability** — after each plan, the form must be in a testable, non-broken state.
+4. **Explicit dependencies** — every plan declares which prior plans must be complete.
+5. **Max 15 plans per journey** — if more needed, journey is too complex; split it or flag to user.
+6. **Read API refs** — for Integration plans, read `refs/apis/<name>.<ext>` for endpoint and schema details. Do not duplicate API schema in the plan — reference the file.
+
+---
+
+## Acceptance Criteria — Required in Every Plan
+
+Every plan **must** end with a `## Acceptance Criteria` section. No exceptions.
+
+```markdown
+## Acceptance Criteria
+
+- [ ] <Specific observable behavior — not vague>
+- [ ] Form loads without console errors
+- [ ] No regressions in previously implemented plans
+```
+
+**QA plan criteria (thin — covers the full journey):**
+
+```markdown
+## Acceptance Criteria
+
+- [ ] `npm run lint` in `$FORMS_EDS_ROOT` exits 0
+- [ ] Full journey walkthrough: all screens, happy path, submit succeeds
+- [ ] All acceptance criteria from all preceding plans still pass
+```
+
+Criteria must be independently testable. "Works correctly" is not a criterion.
+
+---
+
+## Plan File Convention
+
+| Property | Convention |
+|---|---|
+| **Path** | `journeys/<journey>/plans/NN-<short-title>.md` |
+| **Numbering** | Zero-padded two digits: `01`, `02`, ..., `10`, `11` |
+| **Naming** | Lowercase, hyphen-separated: `01-custom-component.md`, `03-screen-01-personal-info.md` |
+| **Template** | `assets/TEMPLATE.md` |
+| **Max per journey** | 15 |

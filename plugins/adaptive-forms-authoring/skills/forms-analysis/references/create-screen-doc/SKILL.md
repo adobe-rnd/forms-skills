@@ -1,359 +1,168 @@
 ---
 name: create-screen-doc
 description: >
-  Use when producing a new Screen.md for a screen that has no documentation yet.
-  Input is form JSON and reference docs; output is a standardized 11-section
-  screen specification. NOT for reviewing existing docs — use review-screen-doc.
+  Use when extracting form structure from visual inputs — screenshots, Figma
+  frames, or design mockups — to populate the Screens, Navigation, and Custom
+  Components sections of a journey spec. NOT for requirements docs — use
+  analyze-requirements instead.
 license: Apache-2.0
 metadata:
   author: Adobe
-  version: "0.1"
+  version: "0.2"
   type: skill
   triggers:
-    - create screen doc
-    - document screen
-    - write Screen.md
+    - screenshots
+    - figma
+    - mockup
+    - design file
+    - visual analysis
+    - extract from design
+    - screen from image
 ---
 
-# Screen Documentation Creator
+# Visual Analysis — Screens to Spec
 
-Creates `Screen.md` documentation files for form screens based on reference documentation and the actual form JSON definition.
+Analyzes visual inputs (screenshots, Figma, mockups) and produces the `## Screens`, `## Navigation`, and `## Custom Components` sections of `journeys/<journey>/spec.md`.
 
 ---
 
 ## When to Use
 
-- Creating a new `Screen.md` from scratch for a screen that has no documentation yet
-- Documenting a screen after identifying it in a journey analysis
-- Generating initial screen documentation from a form JSON definition
-- Building out the `journey/<journey-name>/screens/<screen-name>/Screen.md` file for a specific screen
+- Requirements are visual-only (screenshots, Figma frames, exported design specs)
+- Requirements doc exists but is missing screen structure detail — use this to fill gaps
+- User provides design mockups alongside a requirements doc
+
+**Do NOT use for:** requirements documents, inline text, JUD files, or v1 form JSON — use `analyze-requirements` for those.
 
 ---
 
-## Critical Rules
+## Inputs
 
-1. **Always derive from the actual JSON** — every field name, type, dataRef, required flag, visible flag, and constraint must come from the form JSON, not from assumptions
-2. **No duplicate information** — if a constraint (pattern, min/max, character limit) appears in the Content Properties column, do NOT repeat it in Validation Rules
-3. **No container panels** — omit panels that are purely structural wrappers with no visibility rules
-4. **No code references** — never include `PL.currentFormContext` setter/getter references; mark data sources as TBD instead
-5. **No UI/UX details** — skip CSS classes, styling notes, layout specifics, and screenshot references
-6. **Mark unknowns as TBD** — anything that cannot be resolved from the JSON (API endpoints, pre-fill sources, ambiguous business logic) goes into Open Items with a clear TBD marker
-7. **Follow the 11-section structure exactly** — all sections must appear in order even if some are empty
+| Input | How to identify |
+|---|---|
+| Screenshots | `.png`, `.jpg`, `.pdf` image files |
+| Figma frames | Figma export or shared frame URL |
+| Design specs | Exported design documents with annotated fields |
+
+Collect all available materials — desktop AND mobile viewports if available.
 
 ---
 
 ## Workflow
 
-1. **Read reference documentation** — locate the reference doc (e.g., `refs/afv1/README.md`) for the specific screen and journey flow
-2. **Read the form JSON** — load the form definition (e.g., `refs/afv1/<form>.json`) and find all fields belonging to the target screen
-3. **Identify screen sections** — group fields logically (Personal Details, Address, Employment, Bank Use, etc.)
-4. **Extract fields** — list all fields with their properties from JSON; skip container panels
-5. **Document validation** — only rules NOT already captured in Content Properties
-6. **Document visibility** — hidden components and dynamic show/hide rules
-7. **Document business logic** — mark APIs and data sources as TBD
-8. **Write the Screen.md** — output to `journey/<journey-name>/screens/<screen-name>/Screen.md`
-9. **Add Open Items** — list everything that needs verification
+### Step 1 — Map Visual Structure to Form Structure
 
----
+| Visual element | Maps to |
+|---|---|
+| Distinct section with heading | Wizard step (Screen) |
+| Tabbed interface | `tabsontop` panel (single screen, multiple tabs) |
+| Progress bar with labeled steps | Wizard wrapper + N screens |
+| Collapsible section | Accordion panel (within a screen) |
+| Group of related fields | Panel container (within a screen) |
+| "Add another" button + repeating row | Repeatable panel |
 
-## Document Structure (11 Sections, In Order)
+> **Wizard steps vs panels:** A Screen boundary = a new wizard step the user navigates to (Next/Back). Panels within a step are NOT separate screens.
 
-### 1. Title and Progress
+### Step 2 — Identify Custom Components
 
-```
-# <Screen Name>
+For each field, ask: does this look like an OOTB field or a custom renderer?
 
-**Progress:** Step XX - "<Step description>" (XX% complete)
+| Visual pattern | Likely custom component |
+|---|---|
+| Radio options displayed as image cards | `card-choice` (base: radio-group) |
+| Numeric range slider | `range` (base: number-input) |
+| Countdown display | `countdown-timer` (base: number-input) |
+| Modal/overlay panel | `confirm-modal` (base: panel) |
 
----
-```
+If project `blocks/form/mappings.js` is accessible, cross-reference `customComponents` array.
 
-### 2. Navigation
+### Step 3 — Catalog Fields Per Screen
 
-```
+For each screen, document every visible field:
+
+| Field Name | Type / fd:viewType | Required | Placeholder | Notes |
+|---|---|---|---|---|
+| full_name | text-input | yes | Full name | — |
+| plan_type | card-choice | yes | — | Image card selection |
+
+**Field name:** derive from label using snake_case.
+**Required:** infer from asterisk (*), "required" label, or design annotation.
+**Placeholder:** capture if visible in design.
+
+### Step 4 — Map Navigation
+
+For multi-screen designs:
+
+| From | To | Condition |
+|---|---|---|
+| Screen 1 | Screen 2 | always (Next button) |
+| Screen 2 | Screen 3 | field_x = "yes" |
+
+Identify: Back/Next buttons, conditional skip (e.g., "If No, skip to step 4"), progress indicators.
+
+### Step 5 — Identify Conditional Logic Hints
+
+Note visible show/hide patterns for `analyze-requirements` to formalize:
+- "If Yes, additional fields appear" → functional rule candidate
+- "Show more" toggles → show/hide rule candidate
+
+Document as: `When <field> = <value>: show/hide <target>` — these become entries in `## Functional Rules`.
+
+### Step 6 — Write Spec Sections
+
+Output the following sections in journey spec format:
+
+```markdown
+## Custom Components
+
+| fd:viewType | Base Type | Purpose |
+|---|---|---|
+| card-choice | radio-group | Radio options as image cards |
+
+## Screens
+
+### Screen 1: <name>
+Purpose: <what user does here>
+
+| Field Name | Type / fd:viewType | Required | Placeholder | Notes |
+|---|---|---|---|---|
+| ... | ... | ... | ... | ... |
+
+### Screen 2: <name>
+...
+
 ## Navigation
 
-| Action | Destination |
-|--------|-------------|
-| **Back Button** | <destination> |
-| **Continue Button** | <what it triggers, then destination> |
-
----
-```
-
-### 3. Content Screen
-
-Organise fields by logical sections (Personal Details, Address, Employment, etc.).
-
-```
-## Content Screen
-
-### <Section Name>
-
-| Name | Title | Type | dataRef | Required | Visible | Properties |
-|------|-------|------|---------|----------|---------|------------|
-| `fieldName` | Display Title | field-type | `$.path` | true/false | true/false | constraints, options |
-```
-
-**Field Types:** text-input, number-input, date-input, drop-down, radio-group, checkbox, toggle, hidden, text-display, panel
-
-**Properties column includes:**
-- Validation patterns
-- Min/max values
-- Character limits (maxChars / minLength)
-- Dropdown options (format: Option1, Option2, Option3)
-- Special behaviours
-
-### 4. Validation Rules
-
-Only include rules NOT already in Content Properties column.
-
-```
-## Validation Rules
-
-### <Field Name>
-
-| Trigger | Rule | Error Message |
-|---------|------|---------------|
-| On blur | Required field | "Error message" |
-| On input | <behaviour not in Content> | "Error message" |
-```
-
-**DO NOT duplicate:**
-- Patterns already in Content Properties
-- Min/max values already in Content Properties
-- Character limits already in Content Properties
-- Dropdown options already in Content Properties
-
-### 5. Visibility Rules
-
-```
-## Visibility Rules
-
-### Initially Hidden Components
-
-| Component | Reason | Shown When |
-|-----------|--------|------------|
-| `fieldName` | Why hidden | Condition to show |
-
-### Dynamic Visibility Rules
-
-| Trigger | Action |
-|---------|--------|
-| `field` = value | Show/hide fields, change required |
-
-### Read-Only Conditions
-
-| Field | Becomes Read-Only When |
-|-------|------------------------|
-| `fieldName` | Condition |
-```
-
-### 6. Business Rules
-
-```
-## Business Rules
-
-### On Screen Load
-
-- [ ] Pre-fill `fieldName` (transformation) - *source TBD*
-- [ ] Other initialisation logic
-
-### <Flow Name> (e.g., PAN Verification Flow)
-
-- [ ] Trigger condition - *API TBD*
-- [ ] On success: actions
-- [ ] On failure: actions
-```
-
-Mark all APIs as TBD. Do not use `PL.currentFormContext` references.
-
-### 7. API Calls
-
-```
-## API Calls
-
-### <Trigger Event>
-
-| Order | API | Purpose |
-|-------|-----|---------|
-| 1 | `api-name.json` | Description |
-```
-
-### 8. Error Popups
-
-```
-## Error Popups
-
-| Trigger | Popup Title | Message | Actions |
-|---------|-------------|---------|---------|
-| Condition | Title | "Message" | Button actions |
-```
-
-### 9. Form Context Variables
-
-```
-## Form Context Variables
-
-| Variable | Purpose | Source |
-|----------|---------|--------|
-| `variableName` | What it stores | Where it comes from |
-```
-
-### 10. Summary & Complexity
-
-```
-## Summary
-
-| Section          | Fields | Validation | Visibility | Business | APIs | Fragments |
-|------------------|--------|------------|------------|----------|------|-----------|
-| Section Name     | X      | X          | X          | X        | X    | X         |
-| **Screen Total** | **X**  | **X**      | **X**      | **X**    | **X** | **X**     |
-```
-
-After the totals table, add a **Complexity Check** sub-section:
-
-```
-### Complexity Check
-
-| Metric             | Value | Threshold | Status |
-|--------------------|-------|-----------|--------|
-| Fields             | X     | ≤ 25      | 🟢/🟡/🔴 |
-| Validation rules   | X     | ≤ 15      | 🟢/🟡/🔴 |
-| Visibility rules   | X     | ≤ 10      | 🟢/🟡/🔴 |
-| Business rules     | X     | ≤ 6       | 🟢/🟡/🔴 |
-| API calls          | X     | ≤ 3       | 🟢/🟡/🔴 |
-| Fragments          | X     | ≤ 3       | 🟢/🟡/🔴 |
-| Logical sections   | X     | ≤ 4       | 🟢/🟡/🔴 |
-```
-
-**Severity thresholds:**
-- 🟢 Green: within threshold
-- 🟡 Amber: up to 50% over threshold — flag for human review
-- 🔴 Red: more than 50% over threshold — must split screen or extract fragments before proceeding to build
-
-> **Gate:** If any metric is 🔴, add a Complexity Warning to Open Items with a recommended action (split screen, extract fragment, or consolidate rules into custom functions).
-
-### 11. Open Items
-
-```
-## Open Items / To Be Clarified
-
-### Missing Sections
-
-- [ ] Pre-fill data source - What is the source for on-screen-load pre-population?
-
-### API Endpoints TBD
-
-| API | Purpose | Reference API (to verify) | Needs |
-|-----|---------|---------------------------|-------|
-| API name | Purpose | `reference-api.json` | Verify endpoint, success/error response |
-
-### Other Missing Items
-
-- [ ] Item description
+| From | To | Condition |
+|---|---|---|
+| Screen 1 | Screen 2 | always |
 ```
 
 ---
 
-## JSON Resolution Patterns
+## Output
 
-When resolving values from the form JSON:
+The three spec sections above, ready to paste into (or merge with) `journeys/<journey>/spec.md`.
 
-| Pattern | Where to Look | How to Document |
-|---------|---------------|-----------------|
-| **Dropdowns** | `enum` and `enumNames` arrays on the field object | Properties: `Options: Display1, Display2, ...` |
-| **Patterns** | `pattern` property on the field | Properties column; do NOT duplicate in Validation |
-| **Character limits** | `maxLength` / `minLength` properties | Properties: `maxChars: N` / `minLength: N` |
-| **Number ranges** | `minimum` / `maximum` properties | Properties: `min: N, max: N` |
-| **Required** | `required: true` on the field | Required column = `true` |
-| **Hidden fields** | `visible: false` on the field | Visible column = `false`; add "Initially Hidden" in Visibility Rules |
+If a spec file already exists, merge these sections into it — do not overwrite sections populated by `analyze-requirements`.
 
 ---
 
-## What NOT to Include
+## Common Patterns
 
-1. **Container panels** — panels that are just wrappers with no visibility rules
-2. **Duplicate validation** — patterns/constraints already in Content Properties
-3. **Screenshots** — skip for now
-4. **Source traceability** — no JSON line references or JS file references
-5. **API request/response payloads** — document separately if needed
-6. **`PL.currentFormContext` references** — mark data sources as TBD instead
-7. **UI/UX details** — CSS classes, styling notes, layout specifics
-8. **Journey state logging** — internal logging implementation details
+**Wizard (multi-step):**
+- Progress bar with N labeled steps → N screens
+- Each step = one Screen sub-section
+- Back/Next buttons → Navigation table with `always` conditions
 
----
+**Single screen with accordion:**
+- Collapsible sections = accordion panels within ONE screen
+- Not separate screens — no Navigation table needed
 
-## What TO Include
+**Two-column field layout:**
+- Side-by-side fields on desktop = CSS only (same Screen)
+- NOT separate screens or panels
 
-1. **Only meaningful panels** — panels with visibility rules (initially hidden, conditional show)
-2. **All user-facing fields** — input fields, dropdowns, radio groups, checkboxes
-3. **Hidden fields** — that store computed or formatted values
-4. **Error messages** — exact text for validation failures
-5. **API references** — from reference doc, marked as TBD for verification
-6. **Dropdown options** — complete list if known from JSON, or mark as TBD
-7. **Pre-fill data sources** — as TBD checkboxes if not documented
-8. **Validation error messages** — for any rule that has user-facing text
-
----
-
-## Example Output
-
-Output location:
-
-```
-journey/etbwo/screens/personal-details/Screen.md
-```
-
-Example structure:
-
-```
-# Personal Details Screen
-
-**Progress:** Step 01 - "Please verify your details" (10% complete)
-
----
-
-## Navigation
-...
-
-## Content Screen
-...
-
-## Validation Rules
-...
-
-## Visibility Rules
-...
-
-## Business Rules
-...
-
-## API Calls
-...
-
-## Error Popups
-...
-
-## Form Context Variables
-...
-
-## Summary
-...
-
-## Open Items / To Be Clarified
-...
-```
-
----
-
-## Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| Cannot find the screen in the form JSON | Search for a unique field name you know belongs to the screen; screens are usually nested inside a wizard panel |
-| Dropdown options show as TBD | Look for `enum` / `enumNames` arrays on the field object in the JSON; if absent, keep as TBD in Open Items |
-| Unsure which fields belong to this screen | Trace the panel hierarchy in the JSON — each wizard step typically maps to a top-level panel under the wizard |
-| Field type unclear | Map JSON `fieldType` values: `text-input`, `number-input`, `date-input`, `drop-down`, `radio-group`, `checkbox`, `plain-text` → `text-display` |
-| Business rule references code | Strip the code reference; describe the behaviour in plain language and mark the data source as TBD |
-| Reference doc is missing sections | Document what you can from JSON; add all gaps to Open Items with TBD markers |
+**Repeatable section:**
+- "Add another" button + repeating row = repeatable panel within a screen
+- Note max rows if visible in design

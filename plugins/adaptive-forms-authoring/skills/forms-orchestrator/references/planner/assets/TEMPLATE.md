@@ -1,9 +1,8 @@
 ---
 name: plan-template
 description: >
-  Use when writing a new plan file for a journey. Provides the plan schema to
-  copy, conventions governing all plans, and specification patterns with
-  typical steps for each plan type.
+  Use when writing a new plan file for a journey. Provides the plan schema,
+  conventions, and specification patterns for each plan type.
 type: template
 ---
 
@@ -11,7 +10,7 @@ type: template
 
 Standard structure for plan files. Copy the template below when creating a new plan.
 
-> **File path convention:** `plans/<journey>/NN-<short-title>.md`
+> **File path convention:** `journeys/<journey>/plans/NN-<short-title>.md`
 
 ---
 
@@ -20,328 +19,305 @@ Standard structure for plan files. Copy the template below when creating a new p
 ````
 # Plan NN: <Plan Title>
 
-**Source:** `journeys/<journey>.md` sections <X.Y>, <X.Z>
-<!-- Which sections of the journey/requirements doc does this plan implement? -->
-
-**Sub-task:** <TICKET-ID> (<N> SP)
-<!-- Optional: Jira/ticket ID and story points -->
-
-**Skills:** `<skill-1>`, `<skill-2>`, `<skill-3>`
-<!-- Which skills does this plan invoke? e.g. forms-author, forms-rule-author, manage-apis -->
-
-**Depends on:** Plan <NN> (<what it provides>), Plan <NN> (<what it provides>)
-<!-- Explicit dependency chain. Use "Nothing (first plan)" for the first plan. -->
+**Type:** <Custom Component | Screen | Interaction Flow | Functional Rules | Complex Rules | Validation | Integration | Submit | QA>
+**Source:** `journeys/<journey>/spec.md` sections <X>, <Y>
+**Skills:** `<skill-1>`, `<skill-2>`
+**Depends on:** Plan <NN> (<what it provides>) — or "Nothing (first plan)"
 
 ---
 
 ## Objective
 
-<!-- One paragraph: what does this plan achieve and why? Keep it concise. -->
+<One paragraph: what this plan delivers and why.>
 
 ## Specification
 
-<!-- The detailed design. Content varies by plan type — see Plan Types below. -->
+<Detailed design — see plan type patterns below.>
 
 ## Steps to Execute
 
-<!-- Numbered, actionable steps. Each step indicates which skill to invoke. -->
-
 1. **<Action verb> <artifact>** using `<skill-name>`:
-   <!-- Describe what to create/modify and how -->
+   <What to create/modify and how>
 
-2. **Validate:**
-   ```
-   node tools/eds-form-validator/validate.js <path-to-form.json>
-   ```
-
-3. **Push to AEM:**
-   Use `forms-author` — `patch-aem-page-content` writes changes directly to AEM.
-   Confirm the patch response shows success before proceeding.
+2. **Verify acceptance criteria** — run checks at end of plan, not after each step.
 
 ## Acceptance Criteria
 
-<!-- Checklist of testable conditions. Each item must be independently verifiable. -->
-
-- [ ] <Condition 1 — what should be true when this plan is done>
-- [ ] <Condition 2 — specific field/panel/rule behavior>
-- [ ] <Condition 3 — error case handled correctly>
-- [ ] Form passes validation without errors
-- [ ] Form renders on AEM without errors
+- [ ] <Specific observable behavior>
+- [ ] Form loads without console errors
+- [ ] No regressions in previously implemented plans
 
 ## Notes
 
-<!-- Optional: Known issues, deferred items, edge cases, dependency notes. -->
-<!-- Remove this section if not needed. -->
+<Optional: known issues, deferred items, edge cases. Remove if not needed.>
 ````
 
 ---
 
 ## Conventions
 
-These rules govern all plans regardless of type.
-
 | Rule | Description |
-|------|-------------|
-| **Scope** | Each plan targets a single workflow, feature, or use-case. If a plan touches unrelated concerns, split it. |
-| **Cross-skill** | A plan can freely invoke multiple skills (build + logic + integration). Plans are scoped by *feature*, not by *skill*. |
+|---|---|
+| **Scope** | One plan = one functional concern. Mixed concerns → split. |
+| **Screen plans = structure only** | Fields + layout + CSS. No rules, no APIs, no navigation wiring in Screen plans. |
+| **Cross-skill** | A plan may invoke multiple skills. Plans are scoped by *feature*, not by *skill*. |
 | **Numbering** | Zero-padded two digits: `01`, `02`, ..., `10`, `11`. |
-| **Execution** | Plans execute sequentially. Each plan declares its dependencies via `Depends on`. |
-| **Max per journey** | 15 plans. If more are needed, the journey is too complex — decompose it. |
-| **File path** | `plans/<journey>/NN-<short-title>.md` |
-| **Validate + Deploy** | Every plan ends with: (1) `node tools/eds-form-validator/validate.js <path-to-form.json>`, then (2) push via `forms-author` (`patch-aem-page-content`). Always ask the user before pushing — never push silently. |
-| **Dependency declaration** | Always state what each dependency provides, not just its number. e.g., `Plan 01 (panel skeleton)` not just `Plan 01`. |
-| **Acceptance criteria** | Every criterion must be independently testable. Prefer specific observable behaviors over vague statements. |
-| **Specification tables** | Use tables for structured data. Use trees for hierarchical structures (panel layout). Use pseudocode for algorithms. |
+| **Execution** | Sequential — each plan declares its dependencies via `Depends on`. |
+| **Max per journey** | 15 plans. If more needed, journey is too complex — decompose it. |
+| **File path** | `journeys/<journey>/plans/NN-<short-title>.md` |
+| **Acceptance criteria** | Required in every plan. Every criterion must be independently testable. |
+| **API reference** | Integration plans read `refs/apis/<name>.<ext>` — do not duplicate API schema inline. |
 
 ---
 
 ## Plan Types
 
-A plan's type is not declared explicitly — it emerges from which specification sections and skills the plan uses. Consult the relevant sample below when writing each plan's **Specification** section.
+### Custom Component
 
-| Type | Primary Skills | When to Use |
-|------|---------------|-------------|
-| **Structure** | `forms-author` | Form skeleton — panels, fields, basic validations. Usually Plan 01. |
-| **Workflow** | `forms-author`, `forms-rule-author` | Specific user flow or conditional branch within the form. |
-| **Logic** | `forms-rule-author` | Cross-cutting validations and business rules spanning multiple fields. |
-| **Integration** | `manage-apis`, `forms-rule-author` | API wiring — data loading, save/submit, external services. |
-| **Infrastructure** | `forms-rule-author` | Cross-cutting concerns — error handling, session management, toasts. |
+Builds a new `fd:viewType` block renderer before Screen plans that use it.
+
+**Specification Pattern:**
+
+```
+### Component: <fd:viewType>
+
+- Base type: <fieldType> (e.g., radio-group, number-input, panel)
+- Files: blocks/form/components/<fd:viewType>/
+
+### Scaffold
+
+npm run create:custom-component -- --name <fd:viewType> --base <base-type>
+
+### Registration
+
+Add '<fd:viewType>' to customComponents array in blocks/form/mappings.js
+
+### Implementation Notes
+
+- <Key decorate() behavior>
+- <subscribe pattern: listenChanges: true>
+- <State classes or CSS variables used>
+```
+
+**Typical Steps:**
+1. Scaffold component using `forms-custom-components`
+2. Register in `mappings.js`
+3. Implement `decorate()` with subscribe wiring
+4. Write `<fd:viewType>.css` scoped to `.<fd:viewType>-wrapper`
+5. Verify: set `fd:viewType` on a test field → component renders
 
 ---
 
-### Structure Plan
+### Screen
 
-Builds the form skeleton: panels, fields, and basic per-field validations.
-
-**Characteristics:**
-- Usually Plan 01 — establishes the skeleton all other plans build on
-- Creates placeholder panels for features built in later plans
-- Hidden panels default to `visible: false`
-- Field specs include `constraintMessages` for validation errors
+Builds one wizard step — all fields, layout, CSS. No rules, no APIs, no navigation wiring.
 
 **Specification Pattern:**
 
 ```
 ### Panel Structure
 
-rootPanel
-├── <panelName1>
-│   ├── <fieldName1>        (text-input)
-│   └── <fieldName2>        (drop-down)
-└── <panelName2>            (initially hidden)
-    └── <fieldName3>        (number-input)
+wizardPanel
+└── screen-01-<name> (panelcontainer)
+    ├── field_a  (text-input)
+    ├── field_b  (drop-down)
+    └── field_c  (card-choice — fd:viewType)
 
 ### Field Specifications
 
-| Field          | Type       | Required | Min     | Max     | Pattern     | Notes   |
-|----------------|------------|----------|---------|---------|-------------|---------|
-| <fieldName1>   | text-input | Yes      | <min>   | <max>   | <pattern>   | <notes> |
-| <fieldName2>   | drop-down  | Yes      | —       | —       | —           | <notes> |
+| Field | Type / fd:viewType | Required | Placeholder | Notes |
+|---|---|---|---|---|
+| field_a | text-input | yes | Full name | — |
+| field_b | drop-down | yes | — | Options: A, B, C |
+| field_c | card-choice | yes | — | Custom component |
+
+### Layout / CSS Notes
+
+<Any CSS class or layout specifics — column count, spacing>
 ```
 
 **Typical Steps:**
-1. Create form on AEM using `forms-author` (`create-form` intent)
-2. Build form content — add panels, fields, types, required flags, min/max, patterns, `constraintMessages`
-3. Validate → push (see Conventions)
+1. Add wizard panel step using `forms-author`
+2. Add fields using `forms-author` + `forms-content-modeler`
+3. Verify: screen renders all fields, no console errors
 
 ---
 
-### Workflow Plan
+### Interaction Flow
 
-Builds a specific user flow or conditional branch within the form.
-
-**Characteristics:**
-- Depends on the structure plan (panel skeleton must exist)
-- Heavy use of visibility rules and conditional required flags
-- May introduce custom functions for dynamic behavior
-- One plan per major branch/flow — keeps scope manageable
+Wires wizard navigation and conditional step progression. Depends on all Screen plans.
 
 **Specification Pattern:**
 
 ```
-### Branching Logic
+### Wizard Navigation
 
-| Component      | Trigger    | Condition                  | Actions                                                       |
-|----------------|------------|----------------------------|---------------------------------------------------------------|
-| `<fieldName>`  | is changed | value EQUALS `"<value>"`   | Show `<panel>`, Hide `<panel>`, Set `<field>` required = true |
-| `<fieldName>`  | is changed | value EQUALS `"<value>"`   | Hide `<panel>`, Show `<panel>`, Clear `<field>`               |
+| From Screen | To Screen | Condition |
+|---|---|---|
+| screen-01 | screen-02 | always (Next button click) |
+| screen-02 | screen-03 | field_x = "yes" |
+| screen-02 | screen-04 | field_x != "yes" (skip screen-03) |
 
-### New Fields (if adding fields to existing panels)
+### Back Navigation
 
-| Field          | Panel          | Type       | Required | Visible | Notes   |
-|----------------|----------------|------------|----------|---------|---------|
-| `<fieldName>`  | `<panelName>`  | text-input | Yes      | true    | <notes> |
-
-### Conditional Requirements
-
-| Field          | Required When                        | Not Required When |
-|----------------|--------------------------------------|-------------------|
-| `<fieldName>`  | `<triggerField>` equals `"<value>"`  | All other cases   |
+All screens: Back button returns to previous screen unconditionally.
 ```
 
 **Typical Steps:**
-1. Add workflow-specific fields to existing panels using `forms-author`
-2. Implement visibility rules using `forms-rule-author`
-3. Implement value/property rules (conditional required, clear on branch change)
-4. Create custom functions if needed
-5. Validate → push (see Conventions)
+1. Wire Next/Back rules using `forms-rule-author`
+2. Implement conditional skip logic
+3. Verify: navigate through all screens in happy path and skip path
 
 ---
 
-### Logic Plan
+### Functional Rules
 
-Adds cross-cutting validations and business rules spanning multiple fields or panels.
-
-**Characteristics:**
-- Depends on multiple earlier plans (fields must exist before rules reference them)
-- Creates reusable custom functions (e.g., range checks, cross-field comparisons)
-- Documents edge cases and boundary conditions explicitly
-- Often includes a unit test step for custom functions
+Show/hide, enable/disable, set-value rules. Depends on all Screen plans.
 
 **Specification Pattern:**
 
 ```
-### Validation Rules
+### Rules
 
-| Trigger Fields           | Condition                | Error Message        | Display As |
-|--------------------------|--------------------------|----------------------|------------|
-| <fieldX> OR <fieldY>     | <fieldX> > <fieldY>      | "<error message>"    | Toast      |
-| <fieldZ>                 | value outside <range>    | "<error message>"    | Inline     |
-
-### Custom Functions
-
-| Function Name            | Purpose                             | Parameters              | Returns                    |
-|--------------------------|-------------------------------------|-------------------------|----------------------------|
-| <validateFunctionName>   | <what it validates>                 | `<param1>`, `<param2>`  | void (shows toast on fail) |
-| <validateFunctionName2>  | <what it validates>                 | `<param1>`, `<param2>`  | void (shows toast on fail) |
-
-### Algorithm (for non-trivial logic)
-
-Input:  <param1>, <param2>
-Output: validation result
-
-if <condition>:
-  showErrorToast("<error message>")
-  return false
-return true
+| Trigger Field | Condition | Action | Target |
+|---|---|---|---|
+| has_spouse | value = "yes" | show | spouse_name |
+| country | value != "US" | hide | state_field |
+| plan_type | changes | set value "" | coverage_amount |
 ```
 
 **Typical Steps:**
-1. Create custom functions using `forms-rule-author` (sync wrapper + async helper pattern)
-2. Wire validation rules to trigger fields
-3. Test edge cases (null/empty values, boundary conditions, multiple triggers)
-4. Validate → push (see Conventions)
+1. Implement rules using `forms-rule-author`
+2. Verify each rule: trigger → expected outcome
 
 ---
 
-### Integration Plan
+### Complex Rules
 
-Wires APIs and data flows — loading data into the form, submitting data out, or calling external services.
-
-**Characteristics:**
-- Depends on structure + workflow plans (fields and panels must exist for prefill mapping)
-- Documents every API field → form field mapping explicitly
-- Handles multiple response scenarios (success, timeout, business exception)
+Calculations and derived values. Depends on Functional Rules (if any).
 
 **Specification Pattern:**
 
 ```
-### API Definition
+### Calculations
 
-| Property     | Value                        |
-|--------------|------------------------------|
-| Endpoint     | `<api-endpoint-path>`        |
-| Method       | POST                         |
-| Content-Type | application/json             |
-| Trigger      | On form load / button click  |
-
-### Request Body
-
-{
-  "<paramName>": "<value source>"
-}
-
-### Response Handling
-
-| Response           | Status | Action                                 |
-|--------------------|--------|----------------------------------------|
-| Success            | 200    | Extract data → prefill form            |
-| Timeout            | 401    | Clear session → show relogin           |
-| Business exception | 400    | Show error toast with message from API |
-
-### Prefill Mapping
-
-| API Field               | Form Field      | Transform         |
-|-------------------------|-----------------|-------------------|
-| `response.<apiField1>`  | `<formField1>`  | Direct            |
-| `response.<apiField2>`  | `<formField2>`  | `<transformFn>`   |
-
-### Custom Functions
-
-| Function Name       | Purpose                            | Parameters              | Returns |
-|---------------------|------------------------------------|-------------------------|---------|
-| `<orchestratorFn>`  | Orchestrates API calls and prefill | `globals`               | void    |
-| `<mappingFn>`       | Maps API response to form fields   | `data`, `globals`       | void    |
+| Output Field | Formula | Input Fields |
+|---|---|---|
+| total_premium | base_rate × coverage_amount | base_rate, coverage_amount |
+| discount | IF age > 60 THEN 0.1 ELSE 0 | age |
 ```
 
 **Typical Steps:**
-1. Register API definitions using `manage-apis` → generate JS client
-2. Create orchestrator function using `forms-rule-author`
-3. Create mapping functions (prefill, request assembly, data transforms)
-4. Wire form triggers (`fd:init` → data loading, button click → save/submit)
-5. Validate → push (see Conventions)
+1. Implement calculate expressions using `forms-rule-author`
+2. Verify: change inputs → output updates correctly
 
 ---
 
-### Infrastructure Plan
+### Validation
 
-Cross-cutting concerns: error handling, session management, toast notifications, data sanitization.
-
-**Characteristics:**
-- Provides shared infrastructure consumed by other plans
-- Build order may differ from plan number (may execute earlier than its number suggests)
-- Documents all error messages in a centralized catalog
-- Manages storage keys with clear ownership
+Field constraints and cross-field validation. Depends on Screen plans.
 
 **Specification Pattern:**
 
 ```
-### Error Message Catalog
+### Field Validations
 
-| Code           | Type    | Message             | Display As |
-|----------------|---------|---------------------|------------|
-| `<ERR_CODE_1>` | error   | "<error message>"   | Modal      |
-| `<ERR_CODE_2>` | error   | "<error message>"   | Toast      |
-| `<SUC_CODE_1>` | success | "<success message>" | Toast      |
+| Field | Rule | Error Message |
+|---|---|---|
+| email | email format | Enter a valid email address |
+| dob | date in past | Date of birth must be in the past |
 
-### Session Management
+### Cross-Field Validations
 
-| Scenario              | Detection               | Action                         |
-|-----------------------|-------------------------|--------------------------------|
-| Session timeout       | API returns 401         | Show relogin modal, clear data |
-| Tab close             | `beforeunload` event    | Clear session storage          |
-| Successful completion | Form submitted          | Clear all storage keys         |
-
-### Storage Key Inventory
-
-| Key            | Storage        | Read By          | Written By       | Purpose   |
-|----------------|----------------|------------------|------------------|-----------|
-| `<keyName1>`   | sessionStorage | <consuming plan> | <writing plan>   | <purpose> |
-| `<keyName2>`   | localStorage   | <consuming plan> | External         | <purpose> |
-
-### Utility Functions
-
-| Function Name         | Purpose               | Parameters              | Returns |
-|-----------------------|-----------------------|-------------------------|---------|
-| `<errorHandlerFn>`    | Central error router  | `response`, `globals`   | void    |
-| `<sessionHandlerFn>`  | Relogin flow          | `globals`               | void    |
-| `<cleanupFn>`         | Storage cleanup       | —                       | void    |
+| Condition | Error Message | Display |
+|---|---|---|
+| confirm_email ≠ email | Emails must match | Inline on confirm_email |
+| end_date < start_date | End date must be after start date | Toast |
 ```
 
 **Typical Steps:**
-1. Create utility functions using `forms-rule-author` (toast, error handler, sanitizers, storage cleanup)
-2. Add UI elements using `forms-author` if needed (relogin modal, shared error display)
-3. Wire rules to fields (sanitization on `fd:change`, relogin button click)
-4. Validate → push (see Conventions)
+1. Add validate expressions using `forms-rule-author`
+2. Add cross-field validation functions
+3. Verify: invalid input → correct error shown; valid input → no error
 
-> **Dependency note:** If integration/logic plans depend on shared infrastructure functions, execute the infrastructure plan before those plans regardless of its number.
+---
+
+### Integration
+
+API wiring — prefill on load, mid-flow service calls. Read `refs/apis/<name>.<ext>` for schema details.
+
+**Specification Pattern:**
+
+```
+### APIs
+
+| API | Ref | Trigger | Response → Form Mapping | On Error |
+|---|---|---|---|---|
+| address-lookup | refs/apis/address-lookup.yaml | postcode field change | response.street → form.street | show "Address not found" |
+| user-prefill | refs/apis/user-prefill.json | form load | response.firstName → form.first_name | silent |
+
+### Custom Function Signatures
+
+| Function | Purpose | Params |
+|---|---|---|
+| fetchAddressLookup | Call address API on postcode change | postcode, globals |
+| prefillUserDetails | Call prefill API on form load | globals |
+```
+
+**Typical Steps:**
+1. Register/sync API using `forms-integration` → `manage-apis`
+2. Generate JS client (`api-manager build`)
+3. Create custom function wrappers using `forms-rule-author`
+4. Wire triggers: field change / form load → custom function call
+5. Verify: trigger fires → response prefills correct fields; error → correct message shown
+
+---
+
+### Submit
+
+Submit action configuration and success/error handling.
+
+**Specification Pattern:**
+
+```
+### Submit Action
+
+- Endpoint: POST /api/submit
+- Trigger: Submit button click
+- Payload: { field_a: form.field_a, field_b: form.field_b, ... }
+
+### Success State
+
+<Show "Thank you" message text> | <Redirect to /thank-you>
+
+### Error State
+
+Show "<error message>" — do not clear form
+```
+
+**Typical Steps:**
+1. Configure submit action using `forms-author`
+2. Implement success handler (message or redirect)
+3. Implement error handler (user message, form preserved)
+4. Verify: submit → success state shown; API error → error message shown
+
+---
+
+### QA
+
+Thin final plan — lint + full journey smoke test + cross-plan regression. No new implementation.
+
+**Specification Pattern:**
+
+```
+### Checks
+
+1. npm run lint in $FORMS_EDS_ROOT — zero errors
+2. Full journey walkthrough: all screens, happy path, submit
+3. All acceptance criteria from all preceding plans
+```
+
+**Typical Steps:**
+1. Run `npm run lint` — fix any violations before marking done
+2. Walk through full journey: all screens → submit → verify success state
+3. Spot-check acceptance criteria from each preceding plan

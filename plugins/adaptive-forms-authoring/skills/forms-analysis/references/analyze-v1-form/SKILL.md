@@ -1,9 +1,9 @@
 ---
 name: analyze-v1-form
 description: >
-  Use when analyzing a v1 AEM form JSON export to identify screens, extract
-  fields and rules, or compare journeys. NOT for requirements docs — use
-  analyze-requirements instead.
+  Use when analyzing a v1 AEM form JSON export to produce a journey spec at
+  journeys/<journey>/spec.md. Identifies screens, extracts fields, rules, and
+  APIs. NOT for requirements docs — use analyze-requirements instead.
 license: Apache-2.0
 metadata:
   author: Adobe
@@ -23,8 +23,8 @@ metadata:
 # Analyze v1 Form
 
 Analyze legacy AEM v1 Adaptive Form JSON files through **direct reading and human reasoning** to
-identify screens, extract fields and business rules, and produce structured Screen.md
-documentation for migration to Edge Delivery forms.
+identify screens, extract fields and business rules, and produce a journey spec at
+`journeys/<journey>/spec.md` for migration to Edge Delivery forms.
 
 ## When to Use
 
@@ -38,7 +38,7 @@ documentation for migration to Edge Delivery forms.
 
 1. **Read JSON directly** — open the file, read it section by section like a human analyst. NEVER write scripts, parsers, or automated heuristics to process the JSON
 2. **Distinguish screens from non-screens** — popups, helpers, loaders, and nested sub-panels are NOT screens (see Screen Definition below)
-3. **Document everything in Screen.md format** — every screen gets a structured markdown file following the Output Template
+3. **Document in journey spec format** — output to `journeys/<journey>/spec.md` following the Output section below
 4. **Use `name` not panel keys** — panel keys like `panel_1239854573` are auto-generated; always use the `name` property to identify panels
 5. **Mark unknowns as TBD** — if an API endpoint, field purpose, or rule behavior is unclear, mark it TBD rather than guessing
 6. **Complete field coverage** — every user-facing field in each screen must appear in the documentation
@@ -135,7 +135,7 @@ For each confirmed screen, read its full nested content and extract:
 
 ### Step 5: Document Each Screen
 
-Write a Screen.md file for each screen following the Output Template below.
+Translate each screen into a `### Screen N: <name>` sub-section in the journey spec format (see Output section below).
 
 ### Step 6: Cross-Journey Comparison (if applicable)
 
@@ -190,139 +190,32 @@ When comparing two or more journeys:
 3. **Compare rules** — the same field may have different rules per journey (e.g., PAN validation differs between NTB and ETBWO)
 4. **Note structural differences** — different navigation types, screen counts, and flow variations
 
-## Output Template
+## Output
 
-Each screen produces a Screen.md with this structure:
+Write `journeys/<journey>/spec.md` using the journey spec format defined in `analyze-requirements/SKILL.md`.
 
-```
-# Screen XX: [Screen Name]
+Map v1 JSON concepts to spec sections:
 
-**Progress:** Step XX — "[Title]" (XX% complete)
-**Journey:** [Journey Name]
-**Form Path:** [Form path from JSON]
+| v1 JSON concept | Journey spec section |
+|---|---|
+| Screen count (direct children of NavigationPanel) | `## Overview` → `Screen count: N` |
+| Custom component registrations | `## Custom Components` |
+| Fields per screen | `## Screens` → per-screen field table |
+| Back/Continue button targets | `## Navigation` |
+| `visibleExp` / `visible: false` rules | `## Functional Rules` |
+| Calculations in `valueCommitScript` | `## Complex Rules` |
+| `validateExp` / `validatePictureClause` | `## Validations` |
+| API calls in `initScript` / `clickExp` | `## Integrations` (write API details to `refs/apis/<name>.md`) |
+| Submit button / form submit | `## Submit` |
 
----
+Also write API reference files to `refs/apis/<name>.md` for each API found in scripts — spec references these files, does not embed API schemas inline.
 
-## Panel Structure
+### Open Items
 
-### Main Panel: [Panel Name] (Key: [panel_key])
-
-| Property | Value |
-|----------|-------|
-| **Panel Name** | `panelName` |
-| **Title** | "Panel Title" |
-| **Visible** | false |
-| **Layout** | gridFluidLayout2 |
-
----
-
-## Navigation
-
-| Action | Destination |
-|--------|-------------|
-| **Back Button** | Previous screen name |
-| **Continue Button** | Next screen name |
-
----
-
-## Content
-
-### [Section Name]
-
-| Name | Title | Type | dataRef | Required | Visible | Properties |
-|------|-------|------|---------|----------|---------|------------|
-| `fieldName` | Field Title | text-input | `$.path` | true | true | maxChars: 20 |
-
----
-
-## Validation Rules
-
-| Field | Trigger | Rule | Error Message |
-|-------|---------|------|---------------|
-| `fieldName` | On blur | Required field | "Please enter value" |
-
----
-
-## Visibility Rules
-
-| Component | Initially Visible | Shown When |
-|-----------|-------------------|------------|
-| `panelName` | No | Screen becomes active |
-
----
-
-## Business Rules
-
-### On Screen Load
-- Initialize field values
-- Call prefill API
-- Pre-fill fields from response
-
-### On Button Click
-- Validate fields
-- Call API
-- Navigate to next screen
-
----
-
-## API Calls
-
-| Order | API | Purpose | Trigger |
-|-------|-----|---------|---------|
-| 1 | `apiName.json` | Description | On screen load |
-
----
-
-## Fragment References
-
-| Fragment Name | Fragment Path | Purpose |
-|---------------|---------------|---------|
-| `fragmentName` | `/content/dam/formsanddocuments/.../fragment` | Description |
-
----
-
-## Summary
-
-| Section          | Fields | Validation | Visibility | Business | APIs | Fragments |
-|------------------|--------|------------|------------|----------|------|-----------|
-| Section Name     | X      | X          | X          | X        | X    | X         |
-| **Screen Total** | **X**  | **X**      | **X**      | **X**    | **X** | **X**     |
-
-### Complexity Check
-
-| Metric             | Value | Threshold | Status |
-|--------------------|-------|-----------|--------|
-| Fields             | X     | ≤ 25      | 🟢/🟡/🔴 |
-| Validation rules   | X     | ≤ 15      | 🟢/🟡/🔴 |
-| Visibility rules   | X     | ≤ 10      | 🟢/🟡/🔴 |
-| Business rules     | X     | ≤ 6       | 🟢/🟡/🔴 |
-| API calls          | X     | ≤ 3       | 🟢/🟡/🔴 |
-| Fragments          | X     | ≤ 3       | 🟢/🟡/🔴 |
-| Logical sections   | X     | ≤ 4       | 🟢/🟡/🔴 |
-
----
-
-## Open Items
-
-- [ ] Item needing clarification
-- [ ] API endpoint TBD
-```
-
-## Output Structure
-
-When analyzing a complete journey, produce:
-
-```
-{output-directory}/{journey-name}/
-├── README.md              # Journey overview with screen list
-├── WORKFLOW.md            # User flow, API sequence, business rules
-└── screens/
-    ├── 01-{screen-name}/
-    │   └── Screen.md
-    ├── 02-{screen-name}/
-    │   └── Screen.md
-    └── ...
-```
+Add to `## Open Items` in spec:
+- Any API endpoint found as TBD or inferred
+- Business rules that could not be fully translated
+- Fragment paths that need verification
 
 ## What This Skill Does NOT Do
 

@@ -1,65 +1,77 @@
-# Routing Table
+# Orchestrator State Machine
 
-Orchestrator routing algorithm — classifies user intent and routes to plans or domains.
+Every session starts with a silent context read. No user prompt until a user-facing action is needed.
 
 ---
 
-## Architecture
+## State Machine
 
-```
-User Intent
-     │
-     ▼
-┌────────────────────────────────────────┐
-│  Step 1: Workspace Gate                 │──→ no workspace? → read assets/SETUP.md inline
-└──────────────────┬─────────────────────┘
-                   │ workspace exists
-                   ▼
-┌────────────────────────────────────────┐
-│  Step 1.5: Pre-Flight Check             │──→ AEM connectivity check (skip if mid-execution)
-└──────────────────┬─────────────────────┘
-                   │ connectivity OK
-                   ▼
-┌────────────────────────────────────────┐
-│  Step 2: Active Plan Check              │──→ 🔵 Active plan? → resume → execute steps
-└──────────────────┬─────────────────────┘
-                   │ no active plan
-                   ▼
-┌────────────────────────────────────────┐
-│  Step 3: Plans Check                    │
-│  plans/<journey>/                       │──→ pending plans exist? → activate next → execute
-└──────────────────┬─────────────────────┘
-                   │ no plans exist
-                   ▼
-┌────────────────────────────────────────┐
-│  Step 4: Generate Plans                 │
-│  references/planner/SKILL.md            │──→ user has requirements? → generate plans → Step 3
-└──────────────────┬─────────────────────┘
-                   │ no requirements / single task
-                   ▼
-┌────────────────────────────────────────┐
-│  Step 5: Domain Fallback                │
-│  references/domain-registry/SKILL.md    │──→ intent matches a domain? → execute skill
-└──────────────────┬─────────────────────┘
-                   │ no domain matched
-                   ▼
-              Ask user to clarify
+```dot
+digraph orchestrator {
+  rankdir=LR;
+  node [shape=box];
+
+  INIT [shape=doublecircle, label="INIT\n(session start)"];
+  COMPLETE [shape=doublecircle, label="COMPLETE"];
+  WORKSPACE_MISSING [label="WORKSPACE\nMISSING"];
+  FRESH [label="FRESH\n(no spec)"];
+  SPEC_READY [label="SPEC_READY\n(no plans)"];
+  EXECUTING [label="EXECUTING(N)"];
+  BLOCKED [label="BLOCKED"];
+  SINGLE_TASK [label="SINGLE_TASK"];
+
+  INIT -> WORKSPACE_MISSING [label="no workspace"];
+  INIT -> FRESH          [label="workspace OK\nno spec"];
+  INIT -> SPEC_READY     [label="spec exists\nno plans"];
+  INIT -> EXECUTING      [label="plans exist\nsome pending"];
+  INIT -> COMPLETE       [label="all plans done"];
+  INIT -> SINGLE_TASK    [label="isolated task\nno journey"];
+
+  WORKSPACE_MISSING -> INIT   [label="setup complete"];
+  FRESH      -> SPEC_READY    [label="spec.md written\nAPIs extracted"];
+  SPEC_READY -> EXECUTING     [label="plans generated"];
+  EXECUTING  -> EXECUTING     [label="plan N+1\nnot started"];
+  EXECUTING  -> BLOCKED       [label="acceptance\ncriteria fail"];
+  BLOCKED    -> EXECUTING     [label="user resolves\nissue"];
+  EXECUTING  -> COMPLETE      [label="last plan done"];
+  SINGLE_TASK -> INIT         [label="task complete"];
+}
 ```
 
+| State | Condition | Entry Action | Exit → Next State |
+|---|---|---|---|
+| **INIT** | Session start | Read `handover.md` silently (manage-context READ — no user prompt) | Determine state from table below |
+| **WORKSPACE_MISSING** | `FORMS_WORKSPACE` not set, no `.env` | Read `assets/SETUP.md` inline — hard gate, nothing else runs | Setup done → INIT |
+| **FRESH** | No `journeys/<j>/spec.md` | Invoke `forms-analysis` | spec.md written + APIs extracted → SPEC_READY |
+| **SPEC_READY** | spec.md exists, no plans yet | Invoke `references/planner/SKILL.md` | Plans written to `journeys/<j>/plans/` → EXECUTING(1) |
+| **EXECUTING(N)** | Plan N not complete | Execute plan N step by step | Acceptance criteria pass → EXECUTING(N+1) or COMPLETE |
+| **BLOCKED** | Plan N acceptance criteria fail | Report to user, await resolution | User resolves → resume EXECUTING(N) |
+| **COMPLETE** | All plans ✅ done | Report journey complete to user | Terminal |
+| **SINGLE_TASK** | Isolated intent, no journey context | Route to domain via domain registry | Task done → INIT |
+
 ---
 
-## Step 1 — Workspace Gate
+## INIT — State Determination
 
-| Condition | Action |
-|-----------|--------|
-| `FORMS_WORKSPACE` not set AND no `.env` found | Read `assets/SETUP.md` inline → follow setup steps → halt until complete |
-| Workspace exists | → Step 1.5 |
+After silent `handover.md` read, determine state:
+
+| `handover.md` condition | → State |
+|---|---|
+| File missing or empty | FRESH |
+| `analysis.spec: pending` | FRESH |
+| `analysis.spec: done`, no plans generated | SPEC_READY |
+| Plans exist, plan N `in-progress` | EXECUTING(N) — resume at last incomplete step |
+| Plans exist, plan N-1 `complete`, plan N `not-started` | EXECUTING(N) — start plan N |
+| All plans `complete` | COMPLETE |
+| User intent is isolated task (no journey) | SINGLE_TASK |
+
+> **Workspace gate (always first):** Before any state transition, verify `FORMS_WORKSPACE` is set or `.env` exists. Missing → WORKSPACE_MISSING. Nothing else runs until workspace is resolved.
 
 ---
 
-## Step 1.5 — Pre-Flight Connectivity Check
+## Pre-Flight Connectivity Check
 
-Skip if Step 2 finds a 🔵 Active plan.
+Run once per session after workspace confirmed, before first AEM operation. Skip if resuming an active plan mid-execution.
 
 ```bash
 source .skills-workspace/.env && \
@@ -68,158 +80,91 @@ source .skills-workspace/.env && \
 ```
 
 | Result | Action |
-|--------|--------|
-| ✅ `AEM OK` | → Step 2 |
-| ❌ 401 Unauthorized | Tell user: "Your AEM bearer token has expired. Regenerate from AEM Developer Console → Integrations → Local Token, paste into `.env` as `AEM_TOKEN`, and let me know when done." Wait — do not proceed. |
-| ❌ Other failure | Diagnose from error output (wrong host, network unreachable). Report with specific action required. Do not proceed until resolved. |
+|---|---|
+| ✅ AEM OK | Proceed |
+| ❌ 401 Unauthorized | Tell user: "AEM bearer token expired. Regenerate from AEM Developer Console → Integrations → Local Token, paste into `.env` as `AEM_TOKEN`." Wait — do not proceed. |
+| ❌ Other failure | Diagnose (wrong host, network unreachable). Report with specific action required. Do not proceed until resolved. |
 
 ---
 
-## Step 2 — Active Plan Check
+## FRESH → SPEC_READY
 
-| Condition | Action |
-|-----------|--------|
-| `.agent/handover.md` has a 🔵 Active plan | Read plan file at `plans/<journey>/NN-<title>.md` → find current step → execute via **Plan Execution Flow** |
-| No active plan | → Step 3 |
+Invoke `forms-analysis` skill.
 
-**Finding the active plan:** Read `.agent/handover.md` → Journey Status table (🔵 Active row) → Plan Execution Status table (🔵 Active row) → read that plan file.
+| Input type | Handling |
+|---|---|
+| Requirements doc in `inputs/` | Read directly |
+| Inline from user | Write to `inputs/<name>.md` first, then read |
+| `.docx` file | Run `scripts/docx-to-text.py` first, then analyze |
+| Screenshots / Figma / mockups | Route to `create-screen-doc` for visual analysis |
+| v1 AEM form JSON | Route to `analyze-v1-form` |
 
----
-
-## Step 3 — Existing Plans Check
-
-| Outcome | Action |
-|---------|--------|
-| ⬚ Pending plans exist in `plans/<journey>/` | Pick lowest `NN` pending plan → mark 🔵 Active in `.agent/handover.md` → execute via **Plan Execution Flow** |
-| All plans ✅ Done | Journey complete → archive via `manage-context` |
-| No plan files | → Step 4 |
+Outputs written by forms-analysis:
+- `journeys/<journey>/spec.md` — journey specification
+- `refs/apis/<name>.<ext>` — one file per API found in requirements
 
 ---
 
-## Step 4 — Generate Plans
+## SPEC_READY → EXECUTING
 
-User has requirements (journey docs, screenshots, Screen.md, etc.) but no plans. Route to `references/planner/SKILL.md`.
+Invoke `references/planner/SKILL.md`.
 
-| Outcome | Action |
-|---------|--------|
-| Plans generated | Written to `plans/<journey>/` → → Step 3 |
-| Insufficient requirements | Ask user for more context (Screen.md, journey description, screenshots) |
-| Single isolated task, not a journey | → Step 5 |
+- Input: `journeys/<journey>/spec.md`
+- Output: `journeys/<journey>/plans/NN-*.md`
 
----
-
-## Step 5 — Domain Match (Fallback)
-
-First match wins. Domain routers at `skills/forms-<domain>/SKILL.md`.
-
-| Intent Pattern | Domain | Skills |
-|----------------|--------|--------|
-| Analyze requirements, document screens, review docs, migrate v1 | `analysis` | `analyze-requirements`, `create-screen-doc`, `analyze-v1-form`, `jud-to-screen`, `review-screen-doc` |
-| Create form, add/modify/delete fields, panels, fragments, form content | `content-author` | `forms-author`, `forms-content-modeler` |
-| Custom component, extend field, custom EDS widget, fd:viewType | `content-author` | `forms-custom-components` |
-| Add rules, show/hide, validate, calculate, events | `rule-creator` | `forms-rule-author` |
-| Add/build APIs, OpenAPI, cURL | `integration` | `manage-apis` |
-| Update reports, save progress, session log | `context-management` | `manage-context` |
-
-| Outcome | Action |
-|---------|--------|
-| Single domain matches | → domain router SKILL.md |
-| Multiple domains match | Present top 2–3 options → let user choose |
-| No domain matches | → Step 6 |
-
-**Use direct domain routing (skip plans) when intent is a single isolated task:**
-
-| Example | Domain |
-|---------|--------|
-| "Add a visibility rule to panelX" | `rule-creator` |
-| "Show me the API client for checkEnquiry" | `integration` |
-| "Update the project reports" | `context-management` |
-| "Validate my Screen.md" | `analysis` |
-| "Create a custom date-picker component" | `content-author` |
+Planner reads spec → identifies which plan types apply → writes numbered plan files in dependency order.
 
 ---
 
-## Step 6 — No Match
-
-Ask user to clarify intent. Do not guess.
-
----
-
-## Plan Execution Flow
+## EXECUTING(N) — Plan Execution Flow
 
 ```
-Active plan selected
-     │
-     ▼
-Read plans/<journey>/NN-<title>.md
-     │
-     ▼
-Identify current step:
-  ├─ New plan     → first step
-  └─ Resumed plan → first incomplete step
-     │
-     ▼
-Read step: skill / input artifacts / output artifacts
-     │
-     ▼
-Resolve skill:
-  Read references/domain-registry/SKILL.md → find domain → read skills/forms-<domain>/SKILL.md
-  (Read tool — reference files, not invocable skills)
-     │
-     ▼
-Execute skill → advance to next step
+Read journeys/<journey>/plans/NN-<title>.md
+  │
+  ▼
+Find current step:
+  ├── New plan     → first step
+  └── Resumed plan → first step where [ ] not ticked
+  │
+  ▼
+Resolve skill via references/domain-registry/SKILL.md
+  │
+  ▼
+Execute step → mark step complete (tick [ ])
+  │
+  ▼
+All steps done?
+  ├── No  → next step
+  └── Yes → run Acceptance Criteria checks
+              ├── All pass → mark plan ✅ complete
+              │             offer manage-context WRITE (prompt user)
+              │             → EXECUTING(N+1) or COMPLETE
+              └── Any fail → BLOCKED → report to user
 ```
-
-**Step not in Domain Registry catalog** → halt and report. Do not guess or substitute.
-
-### Post-Completion
-
-| State | Action |
-|-------|--------|
-| Step done, more steps remain | → next step |
-| All steps done | Mark plan ✅ Done → post-plan checkpoint |
-| More plans remain for journey | → activate next pending plan (Step 3) |
-| All plans done | Journey complete → archive via `manage-context` to `.agent/history.md` |
-
-### Post-Plan Checkpoint
-
-Present to user:
-
-| Option | Deploy? | Reports? | Next |
-|--------|---------|----------|------|
-| **1. Deploy and update reports** | ✅ | ✅ | Deploy → update `.agent/` |
-| **2. Update reports only** | ❌ | ✅ | Update `.agent/` |
-| **3. Update reports and proceed** | ❌ | ✅ | Update `.agent/` → next plan |
-| **4. Proceed to next plan** | ❌ | ❌ | Next plan immediately |
-
-**Deploy (option 1) — EDS code** (`blocks/form/` modified):
-1. `npm run lint` in `$FORMS_EDS_ROOT` — fix violations before continuing
-2. `git checkout -b <branch>` → `git add blocks/form/` → `git commit` → `git push origin <branch>` → open PR (`gh pr create` if available)
-3. Wait for user to merge
-4. `git checkout main && git pull` in `$FORMS_EDS_ROOT`
-
-**AEM form content** — authored directly via `forms-author` / Sites Content MCP. No separate deploy step.
-
-**Update reports (options 1, 2, 3)** → `context-management` → `manage-context` → update `.agent/handover.md`, `.agent/history.md`, `.agent/sessions.md`.
 
 ---
 
-## Decision Summary
+## SINGLE_TASK — Domain Fallback
 
-```
-User Intent
-     │
-     ├─ No workspace?           → Step 1 → read assets/SETUP.md inline (hard gate)
-     │
-     ├─ Active plan exists?     → Step 2 → resume plan → execute steps
-     │
-     ├─ Pending plans exist?    → Step 3 → activate next plan → execute steps
-     │
-     ├─ Has requirements?       → Step 4 → generate plans → Step 3
-     │
-     ├─ Matches a domain?       → Step 5 → route to domain → execute skill
-     │
-     └─ Nothing matches?        → Step 6 → ask user to clarify
-```
+For isolated tasks with no journey context. First match wins.
 
-Every path reaches a skill execution or an explicit "ask user" fallback. No silent failures.
+| Intent | Domain / Skill |
+|---|---|
+| Analyze requirements, migrate v1, visuals → spec | `forms-analysis` |
+| Create form, add / modify / delete fields, panels | `forms-author`, `forms-content-modeler` |
+| Custom component, extend field, fd:viewType block | `forms-custom-components` |
+| Component inventory, what components exist | `forms-component-inventory` |
+| Add rules, show/hide, validate, calculate | `forms-rule-author` |
+| Add / build APIs, OpenAPI, cURL | `forms-integration` |
+| Save progress, update handover | `forms-context-management` |
+
+No match → ask user to clarify. Never guess.
+
+---
+
+## manage-context Modes
+
+| Mode | Trigger | User Prompt? |
+|---|---|---|
+| **READ** | INIT — every session start, determine state | ❌ Silent — no announcement, no prompt |
+| **WRITE** | After plan completes, user requests save | ✅ Always prompt before writing |

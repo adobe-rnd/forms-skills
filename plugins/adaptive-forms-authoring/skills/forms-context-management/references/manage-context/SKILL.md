@@ -1,8 +1,8 @@
 ---
 name: manage-context
 description: >
-  Use when saving session progress or updating .agent/ memory files
-  (handover.md, history.md, sessions.md). Always prompts user before writing.
+  Use when reading current journey state at session start (silent READ), or
+  when saving session progress to handover.md (WRITE — always prompts user).
 license: Apache-2.0
 metadata:
   author: Adobe
@@ -25,20 +25,34 @@ metadata:
 
 # Context Manager
 
-Manages the `.agent/` directory — the agent's memory across sessions.
+Manages `handover.md` — the agent's persistent state across sessions. Two distinct modes: READ (silent) and WRITE (always prompts).
+
+---
+
+## Modes
+
+| Mode | When | User Prompt | Action |
+|---|---|---|---|
+| **READ** | Session start — orchestrator determines journey state | ❌ Never | Read `handover.md` silently, return state to caller |
+| **WRITE** | After plan completes, user asks to save progress | ✅ Always | Prompt user, then write on confirmation |
+
+**READ is always silent.** No announcement, no "I'm reading the handover", no output to user. Return state internally to the orchestrator.
+
+**WRITE always prompts.** Never update `handover.md` without explicit user confirmation.
 
 ---
 
 ## When to Use
 
-- After executing or implementing a plan (prompt the user first)
+**READ mode:**
+- Orchestrator session start — determine current state (FRESH / SPEC_READY / EXECUTING / COMPLETE)
+- Orchestrator needs to know which plan is active and what step was last completed
+
+**WRITE mode:**
+- After a plan's acceptance criteria pass — offer to update handover
 - User explicitly asks to save progress, update handover, or log the session
 - At the end of a session when the user confirms they're done
 - User asks "what did we do?" or "summarize this session"
-- User asks to generate a progress report or status update
-- At the end of a significant agentic task to capture decisions and context
-
-**Do NOT** update `.agent/` files silently. Always ask the user first.
 
 ---
 
@@ -86,73 +100,57 @@ If `handover.md` does not exist or is empty, skip this step.
 
 ### Step 2 — Write new handover
 
-Overwrite `.agent/handover.md` with a fresh snapshot using this template:
+Overwrite `handover.md` (workspace root) with a fresh snapshot using this template:
 
 ```
-# Project Handover
+# Handover
 
 **Last updated:** YYYY-MM-DD HH:MM
 **Workspace:** <workspace name>
-**Active journey:** <journey name> | **Active plan:** <plan number>
+**Journey:** <journey name>
 
 ---
 
-## Journey Status
+## Analysis
 
-| Journey | Total Plans | Completed | Status | Progress |
-|---------|-------------|-----------|--------|----------|
-| <journey-1> | N | X | 🔵 Active / ✅ Done / ⏸️ Paused | X/N (XX%) |
-| <journey-2> | N | X | ⏸️ Paused | X/N (XX%) |
+- spec: journeys/<journey>/spec.md — `done` | `pending`
+- api-refs: refs/apis/ — `done` | `pending` | `none`
 
 ---
 
-## Plan Execution Status — <active journey>
+## Plans
 
-| Plan | Title | Phase(s) | Status | Summary |
-|------|-------|----------|--------|---------|
-| 01 | <title> | Build | ✅ Done | <one-line summary of what was delivered> |
-| 02 | <title> | Logic | ✅ Done | <one-line summary> |
-| 03 | <title> | Logic | 🔵 Active | <what's in progress> |
-| 04 | <title> | Integrate, Logic | ⬚ Pending | |
-| ... | ... | ... | ... | |
-
-**Plan statuses:** ✅ Done — 🔵 Active — ⬚ Pending — ⏸️ Blocked — ❌ Failed
-
----
-
-## Current Plan Details
-
-**Plan:** <number> — <title>
-**File:** `plans/<journey>/<plan-file>.md`
-**Skills:** <skills this plan invokes>
-**Depends on:** <plan numbers>
-
-### What's Done (this session)
-
-- <completed item 1>
-- <completed item 2>
-
-### What's Remaining (this plan)
-
-- <next step 1>
-- <next step 2>
-
-### Key Files Modified
-
-| File | Status | Notes |
-|------|--------|-------|
-| <path> | created/modified | <brief note> |
+| Plan | Type | Status |
+|---|---|---|
+| 01-custom-component.md | Custom Component | `not-started` \| `in-progress` \| `complete` |
+| 02-screen-01-<name>.md | Screen | `not-started` \| `in-progress` \| `complete` |
+| 03-screen-02-<name>.md | Screen | `not-started` \| `in-progress` \| `complete` |
+| 04-interaction-flow.md | Interaction Flow | `not-started` \| `in-progress` \| `complete` |
+| 05-functional-rules.md | Functional Rules | `not-started` \| `in-progress` \| `complete` |
+| 06-validation.md | Validation | `not-started` \| `in-progress` \| `complete` |
+| 07-integration.md | Integration | `not-started` \| `in-progress` \| `complete` |
+| 08-submit.md | Submit | `not-started` \| `in-progress` \| `complete` |
+| 09-qa.md | QA | `not-started` \| `in-progress` \| `complete` |
 
 ---
 
-## How to Resume
+## Current
 
-<1-2 sentences: which plan, which step within that plan, which skill to invoke>
+- Active plan: `NN-<name>.md` (or `none`)
+- Last completed step: <step description or "—">
+
+---
+
+## Next
+
+- <Explicit next action for orchestrator — one line>
 ```
 
-Keep it concise — aim for ≤ 60 lines. The Plan Execution Status table is the primary dashboard; Current Plan Details covers only the active plan.
+Keep it concise — aim for ≤ 40 lines. Plans table is the primary dashboard.
 
-When **multiple journeys** exist, show the Plan Execution Status table only for the active journey. Completed journeys show only their row in the Journey Status table (details are in `history.md`).
+When **analysis not yet done**, omit the Plans section entirely — orchestrator reads `analysis.spec: pending` and routes to FRESH state.
+
+When **multiple journeys** exist, maintain one handover file per active journey and archive completed journeys to `history.md`.
 
 ### Step 3 — Log session
 
