@@ -42,7 +42,7 @@ The orchestrator runs a state machine every session — reading context silently
 
 | State | When | Action |
 |-------|------|--------|
-| **WORKSPACE_MISSING** | No `.env` or `FORMS_WORKSPACE` | Read `assets/SETUP.md` — hard gate |
+| **WORKSPACE_MISSING** | No `.env` or `FORMS_WORKSPACE` | Read `skills/forms-orchestrator/assets/SETUP.md` — hard gate |
 | **FRESH** | No `journeys/<j>/spec.md` | Invoke `forms-analysis` → produce spec |
 | **SPEC_READY** | spec.md exists, no plans | Invoke `planner` → produce plan files |
 | **EXECUTING(N)** | Plan N pending | Execute plan N step by step |
@@ -50,7 +50,7 @@ The orchestrator runs a state machine every session — reading context silently
 | **COMPLETE** | All plans done | Report journey complete |
 | **SINGLE_TASK** | Isolated intent, no journey | Route directly to matching domain |
 
-> Full state machine: `assets/ROUTES.md`
+> Full state machine: `skills/forms-orchestrator/assets/ROUTES.md`
 
 ### Domains
 
@@ -124,7 +124,7 @@ After installation, tell your agent:
 
 > _"Set up a new AEM Forms workspace for my project."_
 
-The orchestrator reads `assets/SETUP.md` at the workspace gate — directory structure, `.env` credentials, system checks, and first-run validation.
+The orchestrator reads `skills/forms-orchestrator/assets/SETUP.md` at the workspace gate — directory structure, `.env` credentials, system checks, and first-run validation.
 
 Once your workspace is ready:
 

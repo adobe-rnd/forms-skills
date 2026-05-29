@@ -95,11 +95,11 @@ forms-skills/
 │       ├── setup.sh
 │       ├── api-manager
 │       └── api_manager/
+├── ONBOARDING.md                        # User onboarding — architecture, install, get started
+├── DEVELOPER.md                         # This file
 └── skills/
     ├── forms-orchestrator/              # Entry point router
     │   ├── SKILL.md
-    │   ├── ONBOARDING.md
-    │   ├── DEVELOPER.md                 # This file
     │   ├── assets/
     │   │   ├── GUARDRAILS.md
     │   │   ├── ROUTES.md               # Orchestrator state machine
@@ -203,7 +203,7 @@ Pre-built bundles — run with `node $SKILL_DIR/scripts/<name>.bundle.js`.
 
 ## Adding a New Skill
 
-1. Decide which domain it belongs to — see `references/domain-registry/SKILL.md`
+1. Decide which domain it belongs to — see `skills/forms-orchestrator/references/domain-registry/SKILL.md`
 2. Create `skills/forms-<domain>/references/<skill-name>/SKILL.md`
 3. Add frontmatter (`name`, `description`, `license`, `metadata.type`)
 4. If the skill needs a CLI tool, add `scripts/` inside the skill directory
@@ -215,4 +215,4 @@ Pre-built bundles — run with `node $SKILL_DIR/scripts/<name>.bundle.js`.
 
 ## License
 
-Apache 2.0 — see [LICENSE](../../../LICENSE) for details.
+Apache 2.0 — see [LICENSE](../../LICENSE) for details.

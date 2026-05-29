@@ -76,8 +76,8 @@ forms-skills/
 
 ## Guides
 
-- [Onboarding Guide](skills/forms-orchestrator/ONBOARDING.md) — architecture, state machine, plan types, getting started
-- [Developer Guide](skills/forms-orchestrator/DEVELOPER.md) — setup, tests, evals, repo structure, adding skills
+- [Onboarding Guide](ONBOARDING.md) — architecture, state machine, plan types, getting started
+- [Developer Guide](DEVELOPER.md) — setup, tests, evals, repo structure, adding skills
 
 ## Contributing
 
