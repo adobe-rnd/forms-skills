@@ -2,30 +2,33 @@
 name: <domain-id>
 description: >
   <One-line purpose of this domain>
-type: router
-triggers:
-  - <trigger keyword 1>
-  - <trigger keyword 2>
-  - <trigger keyword 3>
 license: Apache-2.0
 metadata:
+  type: router
   author: Adobe
   version: "0.1"
+  triggers:
+    - <trigger keyword 1>
+    - <trigger keyword 2>
+    - <trigger keyword 3>
 ---
 
 # <Domain Name> — Domain Router
 
-> **Base pattern:** This template is a forms-specific specialization of the [Skill Router Template](../../../../../docs/skill-architecture/skill-router-template.md). See the [Skill Architecture Guide](../../../../../docs/skill-architecture/README.md) for the generalized patterns (directory structure, routing tables, guidelines).
+> **Base pattern:** Forms-specific specialization of [`docs/architecture/skill-router-template.md`](../../../../../docs/architecture/skill-router-template.md).
 
 **ID:** `<domain-id>`
-**Version:** 0.1
 **Description:** <One-line purpose of this domain>
 
-This router does not implement — it delegates. It matches user intents to the correct skill within this domain.
+This router does not implement — it delegates. Matches user intents to the correct skill within this domain.
 
 ---
 
-## Routing Table
+## Routing
+
+Choose one format:
+
+**Option A — Simple routing table** (use when skills have clear non-overlapping intents):
 
 First match wins.
 
@@ -33,103 +36,71 @@ First match wins.
 |--------|----------|-------|
 | <Intent category 1> | "<example phrase>", "<example phrase>" | `<skill-id-1>` |
 | <Intent category 2> | "<example phrase>", "<example phrase>" | `<skill-id-2>` |
-| <Intent category 3> | "<example phrase>", "<example phrase>" | `<skill-id-3>` |
 
-> If the intent is ambiguous between two skills, present the options to the user and let them choose.
+> If intent is ambiguous between two skills, present options to the user.
+
+**Option B — State machine** (use when routing depends on workflow phase or sequential pipeline):
+
+```dot
+digraph <domain>_pipeline {
+  rankdir=LR;
+  node [shape=box];
+
+  STATE_A [shape=doublecircle, label="STATE_A"];
+  STATE_B [label="STATE_B"];
+  DONE    [shape=doublecircle, label="DONE"];
+
+  STATE_A -> STATE_B [label="condition"];
+  STATE_B -> DONE    [label="condition"];
+}
+```
+
+| State | Action | Exit → Next |
+|-------|--------|-------------|
+| **STATE_A** | <what happens> | <condition> → STATE_B |
+| **STATE_B** | <what happens> | <condition> → DONE |
 
 ---
 
 ## Skills
 
-All skills owned by this domain.
-
-| # | Skill | Purpose | Triggers |
-|---|-------|---------|----------|
-| 1 | `<skill-id-1>` | <One-line purpose> | <comma-separated trigger keywords> |
-| 2 | `<skill-id-2>` | <One-line purpose> | <comma-separated trigger keywords> |
-| 3 | `<skill-id-3>` | <One-line purpose> | <comma-separated trigger keywords> |
-
-### Skill Locations
-
-| Skill | Path |
-|-------|------|
-| `<skill-id-1>` | [`references/<skill-id-1>/SKILL.md`](references/<skill-id-1>/SKILL.md) |
-| `<skill-id-2>` | [`references/<skill-id-2>/SKILL.md`](references/<skill-id-2>/SKILL.md) |
-| `<skill-id-3>` | [`references/<skill-id-3>/SKILL.md`](references/<skill-id-3>/SKILL.md) |
+| # | Skill | Path | Purpose |
+|---|-------|------|---------|
+| 1 | `<skill-id-1>` | `references/<skill-id-1>/SKILL.md` | <One-line purpose> |
+| 2 | `<skill-id-2>` | `references/<skill-id-2>/SKILL.md` | <One-line purpose> |
 
 ---
 
 ## Guard Policies
 
-Guard policies are constraints that apply across all skills in this domain. They prevent unsafe or incorrect operations.
+| Policy | Rule |
+|--------|------|
+| `<policy-id>` | <What is forbidden and why> |
 
-> **<guard-policy-id>:** <Description of what is forbidden and why. Example: "Never edit `.rule.json` directly. All business logic must go through `forms-rule-author`.">
-
-> **<guard-policy-id>:** <Description of another constraint.>
-
-Remove this section if the domain has no guard policies. Most domains should have at least one.
+Remove this section if no domain-wide constraints apply.
 
 ---
 
 ## File Locations
 
-Canonical paths for assets managed by skills in this domain.
-
 | Asset | Path |
 |-------|------|
-| <Asset type 1> | `<canonical/path/pattern>` |
-| <Asset type 2> | `<canonical/path/pattern>` |
-| <Asset type 3> | `<canonical/path/pattern>` |
-
----
-
-## Dependencies
-
-Other domains or skills that this domain's skills may delegate to or depend on.
-
-| Dependency | Direction | Reason |
-|------------|-----------|--------|
-| `<other-domain>` | This domain → `<other-domain>` | <Why this domain depends on or delegates to the other> |
-| `<other-domain>` | `<other-domain>` → This domain | <Why the other domain feeds into this one> |
-
-Remove this section if the domain has no cross-domain dependencies.
-
----
-
-## Plan Integration
-
-Which plan types commonly invoke skills in this domain.
-
-| Plan Type | Typical Step(s) | Skill(s) Invoked |
-|-----------|-----------------|------------------|
-| `<plan-type>` | Step <N>: <Name> | `<skill-id>` |
-| `<plan-type>` | Step <N>: <Name> | `<skill-id>` |
-
-Remove this section if no plan types typically invoke this domain's skills.
+| <Asset type> | `<canonical/path/pattern>` |
 
 ---
 
 ## Extending This Domain
 
-### Adding a New Skill
+### Adding a skill
 
-1. Create the skill folder: `skills/forms-<domain-id>/references/<skill-name>/`
-2. Add a `SKILL.md` inside the skill folder — this is the skill's entry point
-3. Add the skill to the **Routing Table** above with its intent patterns
-4. Add the skill to the **Skills** table and **Skill Locations** table above
-5. Register the skill in the domain registry (`references/domain-registry/SKILL.md`) — **Registry** table
-6. If the skill manages new file types, add them to the **File Locations** table
-7. If needed, add guard policies that apply to the new skill
+1. Create `skills/forms-<domain-id>/references/<skill-name>/SKILL.md`
+2. Add row to **Skills** table above
+3. Add intent pattern to **Routing** section
+4. Register in `references/domain-registry/SKILL.md` domain's skill list
 
-### Creating a New Domain from This Template
+### Creating a new domain from this template
 
-1. Copy this file to `skills/forms-<domain-name>/SKILL.md`
-2. Update the YAML frontmatter — set `name`, `description`, and `triggers`
-3. Fill in the routing table — one row per skill in the domain
-4. Fill in the skills table — catalog every skill with its purpose and triggers
-5. Define guard policies — constraints that prevent unsafe operations
-6. Fill in file locations — canonical paths for assets this domain manages
-7. Map cross-domain dependencies if any exist
-8. Map plan types that commonly invoke skills in this domain
-9. Create skill sub-folders under `skills/forms-<domain-name>/references/<skill-name>/`
-10. Register the domain in the domain registry `references/domain-registry/SKILL.md` — **Registry** table
+1. Copy to `skills/forms-<domain-name>/SKILL.md`
+2. Update YAML frontmatter — `name`, `description`, `triggers`
+3. Fill Routing, Skills, Guard Policies, File Locations
+4. Add domain entry in `references/domain-registry/SKILL.md`

@@ -43,7 +43,7 @@ Parse requirements input into a structured journey spec at `journeys/<journey>/s
 | Requirements doc at `inputs/<name>.md` | Read directly |
 | Inline text from user | Write to `inputs/<journey>-requirements.md` first, then read |
 | `.docx` file | Run `scripts/docx-to-text.py <path>` → read output, then proceed |
-| With screenshots | Pass visuals to `create-screen-doc` to fill screen structure gaps |
+| With screenshots | Pass visuals to `visual-analysis` to fill screen structure gaps |
 
 ## Step 1 — Extract APIs to refs/apis/
 

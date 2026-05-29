@@ -1,5 +1,5 @@
 ---
-name: create-screen-doc
+name: visual-analysis
 description: >
   Use when extracting form structure from visual inputs — screenshots, Figma
   frames, or design mockups — to populate the Screens, Navigation, and Custom
@@ -43,12 +43,22 @@ Analyzes visual inputs (screenshots, Figma, mockups) and produces the `## Screen
 | Screenshots | `.png`, `.jpg`, `.pdf` image files |
 | Figma frames | Figma export or shared frame URL |
 | Design specs | Exported design documents with annotated fields |
+| JUD (.docx) | Word document with embedded screenshots |
+| Live form URL | Existing deployed form for inspection |
 
 Collect all available materials — desktop AND mobile viewports if available.
 
 ---
 
 ## Workflow
+
+### Step 0 — Gather All Visuals
+
+Before analysis, collect:
+- Desktop viewport screenshots/frames
+- Mobile viewport screenshots/frames (layout is CSS only — same field structure)
+- Any annotated design spec or JUD document
+- Live form URL if the form already exists
 
 ### Step 1 — Map Visual Structure to Form Structure
 
@@ -162,6 +172,11 @@ If a spec file already exists, merge these sections into it — do not overwrite
 **Two-column field layout:**
 - Side-by-side fields on desktop = CSS only (same Screen)
 - NOT separate screens or panels
+
+**Responsive layout:**
+- Desktop/tablet/mobile show the same fields — layout differences are CSS only
+- Do NOT create separate panels or screens for different viewports
+- Note responsive constraints (e.g., "max 2-column on tablet") as CSS notes, not structural changes
 
 **Repeatable section:**
 - "Add another" button + repeating row = repeatable panel within a screen

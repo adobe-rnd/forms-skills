@@ -66,7 +66,7 @@ digraph analysis_pipeline {
 | Input type | Sub-skill |
 |---|---|
 | Requirements doc, inline text, journey.md | `analyze-requirements` |
-| Screenshots, Figma frames, design mockups | `create-screen-doc` (visual analysis mode) |
+| Screenshots, Figma frames, design mockups | `visual-analysis` |
 | v1 AEM Adaptive Form JSON | `analyze-v1-form` |
 
 First match wins. If multiple input types present, start with requirements doc — use visual analysis to fill gaps in screen structure.
@@ -78,7 +78,7 @@ First match wins. If multiple input types present, start with requirements doc �
 | # | Skill | Path | Purpose |
 |---|---|---|---|
 | 1 | `analyze-requirements` | `references/analyze-requirements/SKILL.md` | Parse requirements docs → journey spec |
-| 2 | `create-screen-doc` | `references/create-screen-doc/SKILL.md` | Analyze visuals (screenshots, Figma) → journey spec sections |
+| 2 | `visual-analysis` | `references/visual-analysis/SKILL.md` | Analyze visuals (screenshots, Figma) → journey spec sections |
 | 3 | `analyze-v1-form` | `references/analyze-v1-form/SKILL.md` | Read v1 AEM form JSON → journey spec |
 
 ---
@@ -105,3 +105,11 @@ First match wins. If multiple input types present, start with requirements doc �
 | v1 form JSON | `refs/<form-name>.v1.json` |
 | Screenshots / design files | `inputs/<journey>/` or `journeys/<journey>/` |
 | `.docx` extraction script | `references/analyze-requirements/scripts/docx-to-text.py` |
+
+---
+
+## Reference Docs
+
+| Doc | Path | Purpose |
+|---|---|---|
+| Task Types | `references/task-types.md` | Change-type classification — apply matching analysis questions and acceptance criteria format |

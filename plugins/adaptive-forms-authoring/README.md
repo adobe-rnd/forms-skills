@@ -41,7 +41,7 @@ The **forms-orchestrator** routes intents through a 6-step algorithm — it gene
 
 | Domain | Skills |
 |--------|--------|
-| `analysis` | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `jud-to-screen` |
+| `analysis` | `analyze-requirements`, `analyze-v1-form`, `visual-analysis` |
 | `content-author` | `forms-author`, `forms-content-modeler`, `forms-custom-components` |
 | `rule-creator` | `forms-rule-author` |
 | `integration` | `manage-apis` |

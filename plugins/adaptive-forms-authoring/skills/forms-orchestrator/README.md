@@ -78,7 +78,7 @@ You don't need to memorize this — just start talking to the agent. The orchest
 
 | Domain | Purpose | Skills |
 |--------|---------|--------|
-| `analysis` | Requirements & documentation | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `jud-to-screen` |
+| `analysis` | Requirements & documentation | `analyze-requirements`, `analyze-v1-form`, `visual-analysis` |
 | `content-author` | Form structure & components via Sites Content MCP | `forms-author`, `forms-content-modeler`, `forms-custom-components` |
 | `rule-creator` | Business rules & custom functions | `forms-rule-author` |
 | `integration` | APIs & data | `manage-apis` |
@@ -254,8 +254,7 @@ forms-skills/                            # repo root — aem-forms plugin
     │   └── references/
     │       ├── analyze-requirements/
     │       ├── analyze-v1-form/
-    │       ├── create-screen-doc/
-    │       └── jud-to-screen/
+    │       └── visual-analysis/
     ├── forms-author/                    # Content authoring domain (type: skill)
     │   ├── SKILL.md
     │   ├── scripts/                     # Pre-built bundles (no npm install at runtime)

@@ -36,6 +36,9 @@ You create custom form components by extending out-of-the-box (OOTB) field types
 - **[references/field-html-structure.md](references/field-html-structure.md)** — HTML structure and properties for every OOTB field type
 - **[references/subscribe-api.md](references/subscribe-api.md)** — subscribe function API reference, callback patterns, child subscriptions
 - **[scripts/validate-registration.js](scripts/validate-registration.js)** — browser MCP diagnostic to verify the component loads
+- **[references/examples.md](references/examples.md)** — three worked examples: Countdown Timer, Card Choice, Modal/Overlay
+- **[references/css-guidelines.md](references/css-guidelines.md)** — CSS scoping, custom properties, mobile-first patterns, state classes
+- **[references/component-registry-schema.md](references/component-registry-schema.md)** — schema for `journey/component-registry.md`, the optional per-project custom component catalog
 
 ## Critical Rules
 
@@ -272,92 +275,10 @@ These anti-patterns **do not apply** to enum-based bases — iterating `.checkbo
 
 ## Examples
 
-### Countdown Timer (extends `number-input`)
-
-- **base_type**: `number-input` — captures a numeric duration value
-- **fd:viewType**: `countdown-timer`
-
-```bash
-npm run create:custom-component -- --name countdown-timer --base number-input
-```
-
-Then register: add `'countdown-timer'` to `customComponents` in `mappings.js`.
-
-### Card Choice (extends `radio-group`)
-
-- **base_type**: `radio-group` — single selection from a set of options
-- **fd:viewType**: `card-choice`
-
-```bash
-npm run create:custom-component -- --name card-choice --base radio-group
-```
-
-Then register: add `'card-choice'` to `customComponents` in `mappings.js`.
-
-## Modal / Overlay Components
-
-Modal and overlay panels are custom components backed by `panel` as the base type. They are initially hidden in `form.json` and shown/hidden by rules or custom functions. Use `forms-custom-components` to attach CSS + JS behavior to a standard panel.
-
-### Pattern overview
-
-1. **Model the modal as a hidden panel** in `form.json`:
-
-```json
-"confirmModal": {
-  "fieldType": "panel",
-  "sling:resourceType": "core/fd/components/form/panelcontainer/v1/panelcontainer",
-  "fd:viewType": "confirm-modal",
-  "name": "confirmModal",
-  "jcr:title": "Confirm",
-  "visible": false
-}
-```
-
-2. **Scaffold and register:**
-
-```bash
-npm run create:custom-component -- --name confirm-modal --base panel
-```
-
-Add `'confirm-modal'` to `customComponents` in `mappings.js`.
-
-3. **Implement `decorate()`** — add a backdrop, apply CSS transitions, and wire the close gesture:
-
-```js
-import { subscribe } from '../../rules/index.js';
-
-export default function decorate(fieldDiv, fieldJson, container, formId) {
-  fieldDiv.classList.add('modal-panel');
-
-  // Backdrop — click outside to close
-  const backdrop = document.createElement('div');
-  backdrop.className = 'modal-backdrop';
-  backdrop.addEventListener('click', () => {
-    // Dispatch a close event; the rule wired to the close button handles hiding
-    fieldDiv.dispatchEvent(new CustomEvent('modal:close', { bubbles: true }));
-  });
-  fieldDiv.prepend(backdrop);
-
-  subscribe(fieldDiv, formId, (_el, _model, eventType, payload) => {
-    if (eventType === 'change') {
-      payload?.changes?.forEach((change) => {
-        if (change?.propertyName === 'visible') {
-          // Sync backdrop visibility with panel visibility
-          backdrop.style.display = change.currentValue ? 'block' : 'none';
-        }
-      });
-    }
-  }, { listenChanges: true });
-
-  return fieldDiv;
-}
-```
-
-4. **Style** `confirm-modal.css` — position the panel as a fixed overlay and style the backdrop.
-
-5. **Wire visibility rules** in `forms-rule-creator` — use SHOW_STATEMENT / HIDE_STATEMENT on the modal panel from any trigger (button click, API error, custom event).
-
-> **Key point:** Showing/hiding is always done via the form model (rules or `globals.functions.setProperty`), never by toggling CSS `display` directly. The `subscribe` callback on the `visible` property is how the component learns it was shown/hidden so it can sync any secondary DOM (like the backdrop).
+See **[references/examples.md](references/examples.md)** for three worked examples:
+- **Countdown Timer** (extends `number-input`) — live countdown display
+- **Card Choice** (extends `radio-group`) — radio options as clickable image cards
+- **Modal / Overlay** (extends `panel`) — fixed overlay with backdrop
 
 ## Troubleshooting
 

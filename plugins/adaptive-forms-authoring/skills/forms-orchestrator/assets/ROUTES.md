@@ -96,7 +96,7 @@ Invoke `forms-analysis` skill.
 | Requirements doc in `inputs/` | Read directly |
 | Inline from user | Write to `inputs/<name>.md` first, then read |
 | `.docx` file | Run `scripts/docx-to-text.py` first, then analyze |
-| Screenshots / Figma / mockups | Route to `create-screen-doc` for visual analysis |
+| Screenshots / Figma / mockups | Route to `visual-analysis` |
 | v1 AEM form JSON | Route to `analyze-v1-form` |
 
 Outputs written by forms-analysis:
