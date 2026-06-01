@@ -1,65 +1,82 @@
 # adaptive-forms-authoring plugin
 
-Build, edit, and integrate AEM Adaptive Forms through conversation — analyze requirements, scaffold forms, add rules and functions, manage APIs, and sync with Edge Delivery Services.
+Create, edit, and manage AEM Adaptive Forms through conversation — describe a form in plain English and let the agent build it directly on your AEM Cloud Service instance via the Sites Content MCP API.
 
 ## Prerequisites
 
 | Requirement | Why |
 |-------------|-----|
-| Node.js 18+ | Runs the form validator, rule transformer, and rule save tools |
-| Python 3.10+ | Runs form sync, API manager, and rule validation (deps managed by the plugin) |
-| `git` on PATH | Used by `eds-code-sync` and `git-sandbox` for repo operations |
-
-The plugin bundles its own Python virtual environment — you don't install Python packages yourself.
-
-## Required environment variables
-
-Set these in `<workspace>/.env` after running `setup-workspace`:
-
-```bash
-AEM_HOST="https://author-pXXXX-eYYYY.adobeaemcloud.com"
-AEM_TOKEN="<service token>"
-FORMS_WORKSPACE="<absolute path to your workspace>"
-GITHUB_TOKEN="<PAT with repo scope>"   # optional — only for eds-code-sync
-```
-
-The `setup-workspace` skill walks you through this on first use; you don't have to populate it by hand.
+| Node.js 18+ | Runs the component resolver, patch validator, and rule builder scripts |
+| AEM as a Cloud Service instance | Target environment for form creation and editing |
 
 ## Install
 
-### Claude Code
+### 1. Register the marketplace and install the plugin
 
-```bash
-/plugin marketplace add adobe/skills
-/plugin install adaptive-forms-authoring@adobe-skills
+```
+/plugin marketplace add adobe-rnd/forms-skills
+/plugin install adaptive-forms-authoring@forms-skills
 ```
 
-### Vercel Skills (npx)
+Restart Claude Code after installing.
 
+### 2. Add the AEM Sites Content MCP server
+
+The plugin communicates with AEM through the Sites Content MCP API. Add it once per machine:
+
+**AEM as a Cloud Service:**
 ```bash
-# Install all skills
-npx skills add adobe/skills --path plugins/adaptive-forms-authoring --all
-
-# Install a single skill
-npx skills add adobe/skills --path plugins/adaptive-forms-authoring --skill create-form
-
-# List what's available
-npx skills add adobe/skills --path plugins/adaptive-forms-authoring --list
+claude mcp add --transport http aem-sites-content https://mcp.adobeaemcloud.com/adobe/mcp/content
 ```
 
-Python dependencies install on first use.
+**Local AEM (localhost:4502):**
+```bash
+claude mcp add aem-sites-content -- node /tmp/aem-sites-contentapi-mcp-server/build/index.js
+```
+Set env vars: `AEM_AUTHOR_URL=http://localhost:4502` and `AEM_AUTHOR_AUTH_PARAMETER=admin:admin`
 
-## Verify
+Restart Claude Code after adding the MCP server.
 
-After installation, ask your agent:
+## First use
 
-> _"Set up a new AEM Forms workspace for my project."_
+The first time you make a request in a new session, Claude will start an OAuth browser flow to authorize access to your AEM instance:
 
-The `setup-workspace` skill creates the workspace, writes `.env`, runs system checks, and performs the first form sync. Once that succeeds you're ready to build:
+1. A browser URL is printed — open it and sign in with your Adobe ID
+2. If the browser shows a connection error on the redirect page, paste the full URL from the address bar back into Claude
+3. Once authorized, the MCP tools become available and Claude proceeds automatically
 
-> _"Here's the requirements doc for a personal loan application. Build the form."_
+Authentication is per-session — you repeat this once each time you restart Claude Code.
 
-The `forms-orchestrator` (entry point) generates plans, routes through six domains (`analysis`, `build`, `logic`, `integration`, `infra`, `context`), and dispatches to leaf skills.
+## Usage
+
+Just describe what you want in plain English:
+
+```
+Create a personal loan application form with fields for name, email, phone, loan amount, and income.
+```
+
+```
+Add a dropdown for loan purpose to the personal loan form.
+```
+
+```
+Make the income field required and add a rule to show it only when loan amount is above 50000.
+```
+
+Claude will:
+1. Discover your AEM environments and ask which one to use (first time only)
+2. Find a suitable form template to copy from
+3. Show a concrete proposal — field names, types, panel structure — and wait for your confirmation
+4. Apply all changes in a single patch to AEM
+5. Return the editor URL so you can open the form immediately
+
+## Skills
+
+| Skill | Trigger phrases |
+|-------|----------------|
+| `forms-author` | create form, add field, add panel, change property, delete field, move field, set required, set submit action, apply rule, show/hide, validate, calculate |
+| `forms-content-modeler` | (invoked automatically by `forms-author` when building component JSON) |
+| `forms-rule-author` | (invoked automatically by `forms-author` when generating business rules) |
 
 ## Plugin layout
 
@@ -67,99 +84,34 @@ The `forms-orchestrator` (entry point) generates plans, routes through six domai
 plugins/adaptive-forms-authoring/
 ├── .claude-plugin/plugin.json
 ├── README.md
-├── pyproject.toml
-├── setup.sh                                # wrapper → skills/forms-orchestrator/scripts/setup.sh
-├── skills/
-│   └── forms-orchestrator/                  # entry-point skill
-│       ├── SKILL.md
-│       ├── assets/
-│       ├── scripts/                          # shared CLI tools
-│       └── references/
-│           ├── planner/                      # plan generator (skill)
-│           └── domain-registry/              # domain & skill catalog (skill)
-│               └── references/<domain>/...
-├── agents/                                   # custom subagents (none yet)
-├── hooks/                                    # plugin hooks (none yet)
-└── tests/
+└── skills/
+    ├── forms-author/           # orchestrator — page resolution, MCP calls, workflow routing
+    │   ├── SKILL.md
+    │   ├── scripts/            # find-field, resolve-insert-position, validate-patch, build-insert-ops, …
+    │   └── references/
+    │       └── workflows/      # add-field, edit-field, delete-field, create-form, …
+    ├── forms-content-modeler/  # builds validated component JSON from a definition + intent
+    │   ├── SKILL.md
+    │   ├── scripts/            # resolve-component-type, filter-definition, get-component-def, validate-add, …
+    │   └── references/
+    ├── forms-rule-author/      # generates fd:rules / fd:events from natural language + form definition
+    │   ├── SKILL.md
+    │   └── scripts/
+    └── tests/
 ```
 
 ## How it works
 
-The plugin is a **Plan-Driven Skill Gateway** — a layered router with a planner and a domain registry that maps user intent to the right skill.
-
 ```
-User Intent → forms-orchestrator → Planner / Domain Registry → Domain Router → Skill → Tools
-```
-
-| Domain | Purpose | Skills |
-|--------|---------|--------|
-| `analysis` | Requirements & documentation | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `review-screen-doc` |
-| `build` | Form structure & components | `scaffold-form`, `create-form`, `create-component` |
-| `logic` | Business rules & functions | `add-rules`, `create-function`, `optimize-rules` |
-| `integration` | APIs & data | `manage-apis` |
-| `infra` | Setup, sync, deploy | `setup-workspace`, `sync-forms`, `sync-eds-code`, `git-sandbox` |
-| `context` | Agent memory & session continuity | `manage-context` |
-
-Routing follows the 6-step algorithm in `skills/forms-orchestrator/assets/routing-table.md`. See `skills/forms-orchestrator/SKILL.md` for the full constraints and table.
-
-## Develop on the plugin
-
-```bash
-git clone <repo-url>
-cd plugins/adaptive-forms-authoring
-./skills/forms-orchestrator/scripts/setup.sh
+User Intent
+    │
+    ▼
+forms-author          ← resolves page, plans changes, calls AEM MCP
+    ├── forms-content-modeler   ← resolves component types, builds + validates component JSON
+    └── forms-rule-author       ← generates AEM Forms rule expressions
 ```
 
-The setup script:
-1. Creates `.venv/` at the plugin root (uses `uv` if available, falls back to `python3 -m venv`).
-2. Installs the project in editable mode (`pip install -e ".[dev]"`).
-3. Installs Node.js bridge dependencies (`npm install` in `skills/forms-orchestrator/scripts/rule_coder/bridge/`).
-
-Activate the venv in a new shell:
-
-```bash
-source .venv/bin/activate
-```
-
-| Flag | Purpose |
-|------|---------|
-| `--force` | Delete existing `.venv/` and recreate |
-| `--skip-deps` | Create the venv without installing packages |
-
-Run the structure test:
-
-```bash
-bash tests/test_plugin_structure.sh
-```
-
-There's also a manual end-to-end plan in `tests/e2e-test-plan.md` and an error-handling guide in `tests/error-handling-guide.md`.
-
-## CLI tools
-
-Shared tools at `skills/forms-orchestrator/scripts/`:
-
-| Tool | Description |
-|------|-------------|
-| `api-manager` | Manage OpenAPI specs and JS clients |
-| `rule-transform` | Transform form JSON for rule editing |
-| `rule-validate` | Validate rule JSON against grammar |
-| `rule-save` | Save compiled rules back to form |
-| `rule-grammar` | Print the rule grammar reference |
-| `parse-functions` | Parse custom function JSDoc annotations |
-
-Skill-embedded tools live under `skills/forms-orchestrator/references/domain-registry/references/<domain>/references/<skill>/scripts/`:
-
-| Tool | Skill | Language |
-|------|-------|----------|
-| `form-sync` | `infra/sync-forms` | Python |
-| `eds-code-sync` | `infra/sync-eds-code` | Python |
-| `git-sandbox` | `infra/git-sandbox` | Python |
-| `form-validate` | `build/create-form` | Node.js |
-| `scaffold-form` | `build/scaffold-form` | Python |
-| `cct-create` | `build/create-component` | Python |
-| `api-skill` | `integration/manage-apis` | Python |
-
-Always reference these from a SKILL.md as `${CLAUDE_PLUGIN_ROOT}/skills/forms-orchestrator/scripts/<tool>` — never hardcode absolute paths. See `skills/forms-orchestrator/assets/guidelines.md` and `skills/forms-orchestrator/references/domain-registry/assets/contribution-guide.md`.
+`forms-author` is the entry point. It resolves which AEM page to work on, proposes a plan for user confirmation, then delegates component building to `forms-content-modeler` and rule generation to `forms-rule-author`. All AEM reads and writes go through the Sites Content MCP API.
 
 ## License
 
