@@ -1,12 +1,12 @@
 ---
 name: manage-apis
 description: >
-  Use when discovering, adding, or syncing AEM Form Data Model API definitions,
-  or building OpenAPI 3.0 specs and generated JS clients.
+  Use when adding or documenting API integrations for a form — writing OpenAPI 3.0 specs,
+  authoring JS API client files, or wiring external data sources from a cURL command.
 license: Apache-2.0
 metadata:
   author: Adobe
-  version: "0.1"
+  version: "0.2"
   type: skill
   triggers:
     - api
@@ -14,24 +14,20 @@ metadata:
     - endpoint
     - fdm
     - form data model
-    - sync APIs
-    - build clients
-    - api-manager
+    - add API
     - api integration
     - curl to api
 ---
 
-# API Manager Skill
+# API Integration Skill
 
-Manages API integrations for AEM Forms using OpenAPI 3.0 specifications and the `api-manager` CLI.
+Manages API integrations for AEM Forms by authoring OpenAPI 3.0 YAML specs and JavaScript API client files directly.
 
 ## When to Use
 
-- User wants to discover, list, or inspect available API integrations
-- Adding a new API definition (from scratch, from AEM FDM, or from a cURL command)
-- Syncing API specs from an AEM Form Data Model instance
-- Building/regenerating JavaScript API clients from YAML specs
-- Comparing staging vs deployed API clients
+- Adding a new API definition (from scratch or from a cURL command)
+- Writing a JS API client file for use in custom functions
+- Inspecting or listing existing API specs in `refs/apis/`
 - Troubleshooting API integration issues in forms
 
 **Do NOT use for:** Writing custom function logic that calls APIs — use the **forms-rule-author** skill instead (it covers custom function authoring, the async wrapper pattern, and `globals.functions.request()`).
@@ -39,45 +35,24 @@ Manages API integrations for AEM Forms using OpenAPI 3.0 specifications and the 
 ## Critical Rules
 
 1. **Always use `globals.functions.request()`** — NEVER use `fetch()` directly in AEM Forms
-2. **Always `--dry-run` first** — run `build --dry-run` or `sync --dry-run` before actual execution
-3. **Staging-then-copy workflow** — generated clients go to `refs/apis/generated/api-clients/` (staging), user manually copies needed clients to `blocks/form/api-clients/` (in `$FORMS_EDS_ROOT`)
-4. **Never fabricate API names or endpoints** — always discover via `list` / `show` or sync from AEM
-5. **CLI-first** — always use the `api-manager` CLI for all API operations; do not hand-edit generated files
+2. **Never fabricate API endpoints** — use only endpoints the user provides or that exist in `refs/apis/*.yaml`
+3. **Write files directly** — author YAML specs and JS client files manually; no CLI tooling required
 
-## Tool Commands
+## Tools
 
-| Action | Command |
-|--------|---------|
-| List all APIs | `api-manager list` |
-| List APIs as JSON | `api-manager list --json` |
-| Show API details | `api-manager show <name>` |
-| Show API as JSON | `api-manager show <name> --json` |
-| Build clients (preview) | `api-manager build --dry-run` |
-| Build clients | `api-manager build` |
-| Add new API | `api-manager add` |
-| Sync from AEM (preview) | `api-manager sync --dry-run` |
-| Sync from AEM | `api-manager sync` |
-| Test for spec changes | `api-manager test` |
-| Generate from cURL | `python3 scripts/api_skill.py --curl "<curl-command>" --repo-root "$FORMS_WORKSPACE"` |
-
-### Sync Requirements
-
-The `sync` command requires environment variables `AEM_HOST` and `AEM_TOKEN` to be set (see Environment section).
+| Action | How |
+|--------|-----|
+| Add API from cURL | `python3 scripts/api_skill.py --curl "<curl>" --repo-root "$FORMS_WORKSPACE"` |
+| Add API manually | Write OpenAPI YAML to `refs/apis/<name>.yaml` using template below |
+| List existing APIs | Read `refs/apis/*.yaml` files |
+| Write JS client | Author `blocks/form/api-clients/<name>.js` using client pattern below |
 
 ## Workflow
 
-1. **Discover** — `list` and `show` to inspect existing APIs
-2. **Sync or Add** — `sync` from AEM FDM or `add` a new spec manually
-3. **Build** — `build --dry-run` first, then `build` to generate JS clients
-4. **Compare** — diff staging vs code to see what changed:
-   ```
-   diff -rq "$FORMS_WORKSPACE/refs/apis/generated/api-clients/" "$FORMS_EDS_ROOT/blocks/form/api-clients/"
-   ```
-5. **Deploy** — copy needed clients from staging to code directory:
-   ```
-   cp "$FORMS_WORKSPACE/refs/apis/generated/api-clients/"*.js "$FORMS_EDS_ROOT/blocks/form/api-clients/"
-   ```
-6. **Wire into form** — use **forms-rule-author** to create the custom function wrapper (sync-wrapper pattern below), then **forms-author** to patch the rule into the form's content model
+1. **Discover** — read `refs/apis/*.yaml` to find existing API specs; ask user if none exist
+2. **Add API spec** — if user provides a cURL, run `api_skill.py`; otherwise write YAML manually from template
+3. **Write JS client** — author `blocks/form/api-clients/<name>.js` following the client pattern below
+4. **Wire into form** — use **forms-rule-author** to create the custom function wrapper, then **forms-author** to patch the rule into the form's content model
 
 ## OpenAPI YAML Template
 
@@ -146,14 +121,14 @@ components:
 | `x-aem-config.bodyStructure` | `"requestString"` wraps body in `{ requestString: {...} }`, `"none"` sends flat, `"RequestPayload"` or comma-separated names like `"requestContext,requestData"` for multi-root structures |
 | `x-aem-config.source` | `"local"` for manual, `"aem-api-integration"` for synced |
 | `x-success-condition` | JS expression to evaluate success from response |
-| `operationId` | Becomes the exported function name in generated client |
+| `operationId` | Becomes the exported function name in the JS client file |
 
-## Generated Client Pattern
+## API Client Pattern
 
-The `build` command generates `async` JavaScript clients like this:
+Write `async` JavaScript clients in `blocks/form/api-clients/<name>.js`:
 
 ```javascript
-// Auto-generated by api-manager - DO NOT EDIT
+// <operationId> client — derived from refs/apis/<name>.yaml
 export async function apiName(params, globals) {
   params = params || {};
   if (params.mobileNumber === undefined || params.mobileNumber === null) {
@@ -169,11 +144,11 @@ export async function apiName(params, globals) {
 ```
 
 Response shape: `Promise<{ ok: boolean, status: number, body: object }>`.
-Check the generated file header for the `x-success-condition` expression — use it to distinguish application-level success from HTTP success.
+Use the `x-success-condition` from the YAML spec to distinguish application-level success from HTTP success.
 
 ## Custom Function Pattern
 
-The rule editor parser **silently ignores `async function` declarations**. Generated clients are `async` and will not appear in the rule editor. Always wrap them in a plain sync exported function.
+The rule editor parser **silently ignores `async function` declarations**. API clients are `async` and will not appear in the rule editor. Always wrap them in a plain sync exported function.
 
 ### Full Pattern
 
@@ -247,38 +222,15 @@ After writing the custom function:
 1. Use **forms-rule-author** to generate the rule AST that calls `fetchApiName`
 2. Use **forms-author** to patch that rule into the form's content model JSON
 
-Do not hand-edit form content model files or custom function files directly.
+Do not hand-edit form content model files directly.
 
 ## File Structure
 
 ```
-refs/apis/                        # Source of truth (OpenAPI 3.0 YAML)
+refs/apis/                        # OpenAPI 3.0 YAML specs (source of truth)
 ├── _template.yaml                # Template for new APIs
-├── *.yaml                        # Individual API specs
-└── generated/
-    ├── spec/*.yaml               # Generated OpenAPI specs (from sync)
-    ├── api-clients/*.js          # Generated JavaScript clients (staging)
-    └── registry.json             # API registry
+└── *.yaml                        # Individual API specs
 
-<eds-repo-root>/blocks/form/api-clients/     # Deployed clients (copied from staging)
+<eds-repo-root>/blocks/form/api-clients/     # JS API client files
 └── *.js
 ```
-
-## Verifying the Setup
-
-```bash
-api-manager list          # should exit 0 (empty list is fine)
-api-manager build --dry-run   # should exit 0 when specs exist
-api-manager show <name>   # should show details for a known API
-```
-
-## Environment
-
-Create `.skills-workspace/.env` for AEM sync:
-
-```
-AEM_HOST=https://author.aem.example.com
-AEM_TOKEN=your-bearer-token
-```
-
-Both `AEM_HOST` and `AEM_TOKEN` are required for `sync` operations. Other commands (`list`, `show`, `build`, `add`, `test`) work without them.
