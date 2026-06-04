@@ -135,7 +135,9 @@ Execute step → mark step complete (tick [ ])
   ▼
 All steps done?
   ├── No  → next step
-  └── Yes → run Acceptance Criteria checks
+  └── Yes → Plan Completion Gate (assets/GUARDRAILS.md)
+              Verify EVERY - [ ] criterion against live form state
+              Check all Deferred Items assigned to this plan are resolved
               ├── All pass → mark plan ✅ complete
               │             offer manage-context WRITE (prompt user)
               │             → EXECUTING(N+1) or COMPLETE

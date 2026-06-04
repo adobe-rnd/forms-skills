@@ -57,6 +57,8 @@ Two entry points:
 |-------|------|---------|
 | `forms-rule-author` | `skills/forms-rule-author/SKILL.md` | Rules, conditions, custom functions, optimization |
 
+> **Guard:** `rule-creator` generates `{ fd:rules, fd:events }` only. Applying rules to the form is owned by `forms-author` (content-author domain) via `references/apply-rule-workflow.md` → `apply-rule-patch.bundle.js`. Direct `properties/fd:rules` PATCH from this domain is forbidden.
+
 ---
 
 ### integration

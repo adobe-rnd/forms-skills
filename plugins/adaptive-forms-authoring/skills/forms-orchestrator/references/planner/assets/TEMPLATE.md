@@ -19,7 +19,7 @@ Standard structure for plan files. Copy the template below when creating a new p
 ````
 # Plan NN: <Plan Title>
 
-**Type:** <Custom Component | Screen | Interaction Flow | Functional Rules | Complex Rules | Validation | Integration | Submit | QA>
+**Type:** <Custom Component | Screen | Interaction Flow | Functional Rules | Complex Rules | Validation | Style | Integration | Submit | QA>
 **Source:** `journeys/<journey>/spec.md` sections <X>, <Y>
 **Skills:** `<skill-1>`, `<skill-2>`
 **Depends on:** Plan <NN> (<what it provides>) — or "Nothing (first plan)"
@@ -337,6 +337,45 @@ Show "<error message>" — do not clear form
 2. Implement success handler (message or redirect)
 3. Implement error handler (user message, form preserved)
 4. Verify: submit → success state shown; API error → error message shown
+
+---
+
+### Style
+
+Applies brand colors, typography, and spacing to `form.css` and registered component CSS files. Run `forms-component-inventory` first to confirm which components have their own CSS files.
+
+**Specification Pattern:**
+
+```
+### Design Tokens
+
+| CSS Variable | Value | Source |
+|---|---|---|
+| `--button-primary-color` | `#d84800` | CTA button fill from design |
+| `--form-input-border-color` | `#d0d0d0` | Input border |
+| `--form-label-color` | `#333` | Label text |
+| `--form-input-font-size` | `1rem` | Input typography |
+
+### Component-Specific Styles
+
+| Component | CSS File | What to style |
+|---|---|---|
+| wizard | components/wizard/wizard.css | Nav strip background, step colors |
+| card-choice | components/card-choice/card-choice.css | Card border, selected state |
+
+### Selector Rules (not covered by vars)
+
+| Target | Selector | Properties |
+|---|---|---|
+| fullName field accent | `.field-fullName` | `border-left: 4px solid #d84800` |
+```
+
+**Typical Steps:**
+1. Run `forms-component-inventory` — list registered components and CSS file paths
+2. Override `--form-*` vars in `:root` of `form.css` using `forms-style`
+3. Add scoped selector rules in `form.css` for anything not covered by vars
+4. Edit per-component CSS files for component-specific styles
+5. Verify: form renders with correct colors, typography, spacing; no unscoped rules
 
 ---
 
