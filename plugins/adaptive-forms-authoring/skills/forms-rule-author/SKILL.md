@@ -27,6 +27,7 @@ metadata:
 Generate AEM Forms business rules from a form definition (JCR or Sites Content API), a natural language prompt, and an optional custom functions JS file. Produces `{ fd:rules, fd:events }` ready for insertion into the rule store.
 
 > **Script path:** All scripts are in `$SKILL_DIR/scripts/`. Run with `node $SKILL_DIR/scripts/<name>.jsh` (Node.js) or `<name>` (SLICC jsh — auto-discovered as commands). No `npm install` required.
+> **Script invocation:** `references/tools-reference.md` is the authoritative reference for every script — args, output format, and exit codes. Consult it before running any script. Do not guess invocation from inline examples.
 
 ## Inputs
 
@@ -168,6 +169,8 @@ node $SKILL_DIR/scripts/merge-formula.jsh /tmp/formula-output.json
 
 ### Step 12: Output
 
+**This skill generates rules only — it does NOT apply them.** Return the `merge-formula` output to `forms-author`, which applies it via `references/apply-rule-workflow.md` → `apply-rule-patch.bundle.js` → `patch-aem-page-content`. Do NOT PATCH `fd:rules` or `fd:events` directly from this skill.
+
 Return the `merge-formula` output directly:
 ```json
 {
@@ -219,7 +222,7 @@ Use `qualifiedId` (the `$form.*` path from `find-field.jsh`) as the field bindin
 | SHOW_EXPRESSION / VISIBLE_EXPRESSION | `references/grammar/visibility-expressions.md`, `references/grammar/conditions.md`, `references/component-lookup.md` | `05` always; `06` for property conditions |
 | ACCESS_EXPRESSION / DISABLE_EXPRESSION | `references/grammar/enabled-expressions.md`, `references/grammar/conditions.md`, `references/component-lookup.md` | `05` always; `06` for property conditions |
 | Custom function needed (write or call) | (any above) + Step 5 (`parse-functions`) | `12`, `13` |
-| Always | `references/tools-reference.md` | `05` |
+| Always | — | `05` |
 
 **Rule:** Load the minimum set. Do NOT load all grammar files for every request.
 
