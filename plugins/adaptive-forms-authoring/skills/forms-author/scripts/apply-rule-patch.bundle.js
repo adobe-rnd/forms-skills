@@ -4,7 +4,10 @@ var __import_meta_url__ = require("url").pathToFileURL(__filename).href;
 // src/apply-rule-patch.js
 var import_fs = require("fs");
 function capiToPointer(capiKey) {
-  return capiKey.split(":").map((s) => `/items/${s}`).join("");
+  return capiKey
+    .split(":")
+    .map((s) => `/items/${s}`)
+    .join("");
 }
 function pointerToCapiKey(pointer) {
   return pointer.replace(/^\/items\//, "").replace(/\/items\//g, ":");
@@ -25,15 +28,36 @@ function resolveRuleNodesFromContentModel(contentModel, fieldPointer2) {
   const fieldNode = navigateByCapiKey(contentModel, capiKey);
   const result = [
     { name: "fd:rules", found: false },
-    { name: "fd:events", found: false }
+    { name: "fd:events", found: false },
+    { name: "validationExpression", found: false },
   ];
-  if (!fieldNode?.items) return result;
+  if (!fieldNode) return result;
+  const vExpResult = result.find((r) => r.name === "validationExpression");
+  Object.assign(vExpResult, {
+    found: !!fieldNode.properties?.validationExpression,
+    capiKey,
+    pointer: fieldPointer2,
+    propertyPointer: fieldPointer2 + "/properties/validationExpression",
+  });
+  if (!fieldNode.items) return result;
   for (const [childCapiKey, child] of Object.entries(fieldNode.items)) {
     const childPointer = capiToPointer(childCapiKey);
     if (child.id === "fd:rules") {
-      result[0] = { name: "fd:rules", found: true, capiKey: childCapiKey, pointer: childPointer, propertyPointer: childPointer + "/properties" };
+      result[0] = {
+        name: "fd:rules",
+        found: true,
+        capiKey: childCapiKey,
+        pointer: childPointer,
+        propertyPointer: childPointer + "/properties",
+      };
     } else if (child.id === "fd:events") {
-      result[1] = { name: "fd:events", found: true, capiKey: childCapiKey, pointer: childPointer, propertyPointer: childPointer + "/properties" };
+      result[1] = {
+        name: "fd:events",
+        found: true,
+        capiKey: childCapiKey,
+        pointer: childPointer,
+        propertyPointer: childPointer + "/properties",
+      };
     }
   }
   return result;
@@ -53,22 +77,30 @@ var fieldPointer = get("--field-pointer");
 var hasMergedRule = mergedRuleJson || mergedRuleFile;
 var hasFfResult = ffResultJson || ffResultFile;
 var hasContentModel = contentModelJson || contentModelFile;
-if (!hasMergedRule || !hasFfResult && !hasContentModel || !fieldPointer) {
+if (!hasMergedRule || (!hasFfResult && !hasContentModel) || !fieldPointer) {
   process.stderr.write(
-    "Usage: apply-rule-patch.bundle.js --merged-rule-file <path> --find-field-result-file <path> --field-pointer <ptr>\n       apply-rule-patch.bundle.js --merged-rule-file <path> --content-model-file <path>      --field-pointer <ptr>\n"
+    "Usage: apply-rule-patch.bundle.js --merged-rule-file <path> --find-field-result-file <path> --field-pointer <ptr>\n       apply-rule-patch.bundle.js --merged-rule-file <path> --content-model-file <path>      --field-pointer <ptr>\n",
   );
   process.exit(2);
 }
 var mergedRule;
 var ffResult;
 try {
-  mergedRule = JSON.parse(mergedRuleJson ?? (0, import_fs.readFileSync)(mergedRuleFile, "utf8"));
+  mergedRule = JSON.parse(
+    mergedRuleJson ?? (0, import_fs.readFileSync)(mergedRuleFile, "utf8"),
+  );
   if (hasFfResult) {
-    ffResult = JSON.parse(ffResultJson ?? (0, import_fs.readFileSync)(ffResultFile, "utf8"));
+    ffResult = JSON.parse(
+      ffResultJson ?? (0, import_fs.readFileSync)(ffResultFile, "utf8"),
+    );
   } else {
-    const rawCM = contentModelJson ?? (0, import_fs.readFileSync)(contentModelFile, "utf8");
+    const rawCM =
+      contentModelJson ?? (0, import_fs.readFileSync)(contentModelFile, "utf8");
     const parsedCM = JSON.parse(rawCM);
-    const contentModel = parsedCM.data && typeof parsedCM.data === "object" ? parsedCM.data : parsedCM;
+    const contentModel =
+      parsedCM.data && typeof parsedCM.data === "object"
+        ? parsedCM.data
+        : parsedCM;
     ffResult = resolveRuleNodesFromContentModel(contentModel, fieldPointer);
   }
 } catch (err) {
@@ -76,27 +108,60 @@ try {
   process.exit(1);
 }
 if (!Array.isArray(ffResult)) {
-  process.stderr.write("Error: --find-field-result must be an array (output of find-field --names)\n");
+  process.stderr.write(
+    "Error: --find-field-result must be an array (output of find-field --names)\n",
+  );
   process.exit(1);
 }
 var rEntry = ffResult.find((r) => r.name === "fd:rules");
 var eEntry = ffResult.find((r) => r.name === "fd:events");
-var ni = ffResult.filter((r) => r.found).length;
+var vExpEntry = ffResult.find((r) => r.name === "validationExpression");
+var ni = ffResult.filter(
+  (r) => r.found && (r.name === "fd:rules" || r.name === "fd:events"),
+).length;
 var fdR = mergedRule["fd:rules"] || {};
 var fdE = mergedRule["fd:events"] || {};
+var rawVExp = mergedRule["validationExpression"];
+if (rawVExp !== void 0 && typeof rawVExp !== "string") {
+  process.stderr.write(
+    "Warning: validationExpression must be a string; ignoring non-string value\n",
+  );
+}
+var vExp = typeof rawVExp === "string" ? rawVExp : "";
 var ops = [];
 if (Object.keys(fdR).length) {
   if (rEntry && rEntry.found) {
     ops.push({ op: "replace", path: rEntry.propertyPointer, value: fdR });
   } else {
-    ops.push({ op: "add", path: `${fieldPointer}/items/${ni++}`, value: { id: "fd:rules", componentType: "fd:rules", properties: fdR } });
+    ops.push({
+      op: "add",
+      path: `${fieldPointer}/items/${ni++}`,
+      value: { id: "fd:rules", componentType: "fd:rules", properties: fdR },
+    });
   }
 }
 if (Object.keys(fdE).length) {
   if (eEntry && eEntry.found) {
     ops.push({ op: "replace", path: eEntry.propertyPointer, value: fdE });
   } else {
-    ops.push({ op: "add", path: `${fieldPointer}/items/${ni++}`, value: { id: "fd:events", componentType: "fd:events", properties: fdE } });
+    ops.push({
+      op: "add",
+      path: `${fieldPointer}/items/${ni++}`,
+      value: { id: "fd:events", componentType: "fd:events", properties: fdE },
+    });
+  }
+}
+if (vExp && vExp.length) {
+  if (vExpEntry && vExpEntry.found) {
+    ops.push({ op: "replace", path: vExpEntry.propertyPointer, value: vExp });
+  } else {
+    ops.push({
+      op: "add",
+      path:
+        vExpEntry?.propertyPointer ??
+        `${fieldPointer}/properties/validationExpression`,
+      value: vExp,
+    });
   }
 }
 process.stdout.write(JSON.stringify(ops, null, 2) + "\n");
