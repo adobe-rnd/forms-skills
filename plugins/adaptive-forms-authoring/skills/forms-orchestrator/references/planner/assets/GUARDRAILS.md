@@ -35,6 +35,7 @@ Read the journey spec and determine which plan types apply:
 | **Complex Rules** | `## Complex Rules` section with entries | `forms-rule-author` |
 | **Validation** | `## Validations` section with entries | `forms-rule-author` |
 | **Integration** | `## Integrations` section with entries | `forms-integration`, `forms-rule-author` |
+| **Style** | `## Style` section, or spec has brand colors / design tokens / theming requirements | `forms-style`, `forms-component-inventory` |
 | **Submit** | `## Submit` section (always present) | `forms-author`, `forms-integration` |
 | **QA** | Always — every journey ends with QA | lint + smoke test |
 
@@ -89,6 +90,7 @@ digraph plan_order {
 | Next | **Complex Rules** | Functional Rules |
 | Next | **Validation** | All Screen plans complete |
 | Next | **Integration** | All Screen plans complete |
+| Next | **Style** | All Screen plans complete (style what exists) |
 | Last-1 | **Submit** | Integration (if any), Validation |
 | Last | **QA** | All preceding plans |
 

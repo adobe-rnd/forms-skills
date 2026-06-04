@@ -1,8 +1,8 @@
-# journey/component-registry.md — Schema Reference
+# refs/component-registry.md — Schema Reference
 
-`journey/component-registry.md` is an **optional per-project file** cataloging custom `fd:viewType` components. When present, `forms-content-modeler` and `forms-component-inventory` check it before defaulting to OOTB types.
+`$FORMS_WORKSPACE/refs/component-registry.md` is an **optional per-project file** cataloging custom `fd:viewType` components. When present, `forms-content-modeler` and `forms-component-inventory` check it before defaulting to OOTB types.
 
-**Location:** `journey/component-registry.md` (project root, alongside `plans/`)
+**Location:** `$FORMS_WORKSPACE/refs/component-registry.md`
 
 ---
 
@@ -39,7 +39,7 @@ Create when the project has 2+ custom components. If it doesn't exist, `forms-co
 ## How forms-component-inventory Uses It
 
 When resolving a field intent:
-1. Check `journey/component-registry.md` for a matching custom component
+1. Check `$FORMS_WORKSPACE/refs/component-registry.md` for a matching custom component
 2. If found: prefer the custom component — it exists because OOTB was insufficient
 3. If not found: fall back to `mappings.js` → then `field-types.md`
 

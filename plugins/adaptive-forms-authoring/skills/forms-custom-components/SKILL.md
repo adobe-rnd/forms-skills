@@ -89,13 +89,21 @@ This creates three files in `blocks/form/components/<fd:viewType>/`:
 | `<fd:viewType>.css` | Component styling |
 | `_<fd:viewType>.json` | Custom authoring properties |
 
-### 4. Register in mappings.js
+### 4. Register in mappings.js and update component registry
 
 Add your `fd:viewType` to the `customComponents` array in `blocks/form/mappings.js` (EDS repo root):
 
 ```js
 let customComponents = ['range', 'employer-search', '<fd:viewType>'];
 ```
+
+Then update `$FORMS_WORKSPACE/refs/component-registry.md` (create if absent — schema: `references/component-registry-schema.md`):
+
+```markdown
+| <fd:viewType> | <base_type> | <one-line description> | blocks/form/mappings.js |
+```
+
+This keeps `forms-component-inventory` accurate — it reads both `mappings.js` and `component-registry.md` to produce the component palette. Skipping this step means the new component won't appear in inventory or styling discovery.
 
 ### 5. Implement `decorate()` with subscribe wiring
 
@@ -285,6 +293,7 @@ See **[references/examples.md](references/examples.md)** for three worked exampl
 | Problem | Solution |
 |---------|----------|
 | Component not rendering | Check that `fd:viewType` is added to `customComponents` in `mappings.js` |
+| Component missing from inventory / styling discovery | Add entry to `$FORMS_WORKSPACE/refs/component-registry.md` — `forms-component-inventory` reads this for descriptions and base types |
 | `decorate()` not called | Verify `fd:viewType` in `form.json` matches the component folder name exactly |
 | Invalid base_type error | Use only valid base types from the table above |
 | Styles not loading | Ensure CSS file name matches `<fd:viewType>.css` exactly |
@@ -305,6 +314,7 @@ See **[references/examples.md](references/examples.md)** for three worked exampl
 3. Edit `custom-slider.js`: create `<input type="range">`, wire `subscribe` with `{ listenChanges: true }` to sync value
 4. Edit `custom-slider.css`: style the range input
 5. Add `'custom-slider'` to `customComponents` in `mappings.js`
-6. Add `fd:viewType: custom-slider` to the field in `form.json`
-7. Run `npm run build:json`
-8. Validate on running form (optional)
+6. Add row to `$FORMS_WORKSPACE/refs/component-registry.md`: `| custom-slider | number-input | Slider for numeric ranges | blocks/form/mappings.js |`
+7. Add `fd:viewType: custom-slider` to the field in `form.json`
+8. Run `npm run build:json`
+9. Validate on running form (optional)

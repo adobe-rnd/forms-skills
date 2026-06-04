@@ -1,15 +1,16 @@
 ---
 name: forms-component-inventory
 description: >
-  Use when selecting field types for a form — checks what custom fd:viewType
-  components exist in this project before defaulting to OOTB AEM Forms types.
-  Also use when forms-content-modeler is resolving a field intent and the
-  project may have registered custom components.
+  Use when selecting field types for a form, discovering which components have
+  CSS files for styling, or auditing what is registered in mappings.js. Reads
+  both customComponents and OOTBComponentDecorators arrays. Also use when
+  forms-content-modeler is resolving a field intent, or forms-style needs to
+  know which component CSS files exist for this project.
 license: Apache-2.0
 metadata:
   type: skill
   author: Adobe
-  version: "0.1"
+  version: "0.2"
   triggers:
     - component inventory
     - available components
@@ -19,83 +20,118 @@ metadata:
     - component registry
     - field palette
     - what field types are available
+    - component css files
+    - which components have css
+    - styling components
 ---
 
 # Forms Component Inventory
 
-Survey available form components — project-specific custom `fd:viewType` components AND OOTB field types — before making field selection decisions.
+Survey all registered form components — custom `fd:viewType` components AND OOTB decorator components — before making field selection or styling decisions.
 
-**Run this before resolving any field intent.** Custom components take priority over OOTB equivalents — they exist because OOTB was insufficient for this project.
+**Run this before resolving any field intent or styling any component.** Custom components take priority over OOTB equivalents for field selection. All registered components (custom + OOTB) have their own CSS files under `blocks/form/components/{name}/{name}.css`.
 
 ---
 
 ## When to Use
 
 - Starting field type resolution in `forms-content-modeler`
-- User asks "what components are available?"
+- Starting component CSS discovery in `forms-style`
+- User asks "what components are available?" or "which components can I style?"
 - Authoring a new form and need the full component palette
 
 **Skip when:**
-- You already know the exact `fd:viewType` needed and it's confirmed registered
+- You already know the exact component needed and it's confirmed registered
 - `blocks/form/mappings.js` does not exist in this project (OOTB only — go straight to `field-types.md`)
 
 ---
 
 ## Workflow
 
-### Step 1 — Read custom component registrations
+### Step 1 — Read both component arrays from mappings.js
 
 ```bash
-grep -n "customComponents" blocks/form/mappings.js
+grep -n "customComponents\|OOTBComponentDecorators" $FORMS_EDS_ROOT/blocks/form/mappings.js
 ```
 
-Extract the array value. Each string is a registered `fd:viewType`.
+Extract both array values:
+- `customComponents` — project-specific custom `fd:viewType` renderers (e.g. `range`, `autocomplete`)
+- `OOTBComponentDecorators` — built-in decorator components with their own CSS + JS (e.g. `accordion`, `wizard`, `modal`)
 
-### Step 2 — Check journey/component-registry.md
+Both arrays are loaded via the same `loadComponent()` — both get `blocks/form/components/{name}/{name}.css` loaded at runtime.
 
-If `journey/component-registry.md` exists, read it for descriptions and base types per custom component. Schema: see `skills/forms-custom-components/references/component-registry-schema.md`.
+### Step 2 — Check $FORMS_WORKSPACE/refs/component-registry.md
 
-If the file doesn't exist, infer base type from component name where possible (e.g., `card-choice` → likely `radio-group` base).
+If `$FORMS_WORKSPACE/refs/component-registry.md` exists, read it for descriptions and base types per custom component. Schema: see `skills/forms-custom-components/references/component-registry-schema.md`.
+
+If absent, infer base type from component name where possible (e.g., `card-choice` → `radio-group`).
 
 ### Step 3 — Produce unified palette
 
 ```
-Custom Components (project-specific — prefer these):
+Custom Components (project-specific fd:viewType — prefer for field selection):
 - card-choice   (base: radio-group)   — radio options as clickable image cards
-- confirm-modal (base: panel)         — fixed overlay modal panel
 - range         (base: number-input)  — range slider input
+- autocomplete  (base: text-input)    — searchable autocomplete field
 
-OOTB Field Types (fallback):
+OOTB Decorator Components (built-in — each has own CSS + JS):
+- accordion     — collapsible panel sections
+- file          — file upload with drag-and-drop area
+- modal         — overlay dialog panel
+- password      — password field with show/hide toggle
+- rating        — star rating input
+- repeat        — repeatable panel with add/remove controls
+- tnc           — terms and conditions with scrollable text
+- toggleable-link — link that toggles content visibility
+- wizard        — multi-step wizard navigation wrapper
+
+OOTB Field Types (no separate component file — styled via form.css):
 → See skills/forms-content-modeler/references/field-types.md
 ```
 
-### Step 4 — Match user intent, custom first
+### Step 4a — Field selection (forms-content-modeler context)
 
-For each field the user needs:
-1. Does any custom component match the intent better than its OOTB base? → use it
-2. No match → fall back to `field-types.md` resolution
+For each field intent:
+1. Custom component matches intent better than OOTB base? → use it
+2. No match → fall back to `field-types.md`
 
-**Example:** User says "single selection displayed as image cards":
-- ✅ `card-choice` (fd:viewType) + `radio-group` (fieldType) — custom component exists for this
-- ❌ `radio-group` alone — correct base type, wrong UI; use the custom component
+**Example:** "single selection as image cards" → `card-choice` (fd:viewType) + `radio-group` (fieldType) ✅
+
+### Step 4b — CSS discovery (forms-style context)
+
+For each component in both arrays, its CSS file is:
+```
+$FORMS_EDS_ROOT/blocks/form/components/{name}/{name}.css
+```
+
+Verify files exist:
+```bash
+ls $FORMS_EDS_ROOT/blocks/form/components/
+```
+
+Report which components have a CSS file — these are the per-component styling targets. Components NOT in either array (plain inputs, dropdowns, checkboxes, etc.) are styled via `blocks/form/form.css` selectors only.
 
 ---
 
 ## Output Format
 
-Report the palette before resolving field intents:
-
 ```
 ## Component Palette
 
-### Custom (prefer these)
-| fd:viewType | Base fieldType | Description |
-|---|---|---|
-| card-choice | radio-group | Radio options as clickable image cards |
-| confirm-modal | panel | Fixed overlay modal — shown via form rules |
-| range | number-input | Slider for numeric ranges |
+### Custom fd:viewType (project-specific — prefer for field selection)
+| Name | Base fieldType | CSS file | Description |
+|---|---|---|---|
+| card-choice | radio-group | components/card-choice/card-choice.css | Image card radio options |
+| range | number-input | components/range/range.css | Slider input |
 
-### OOTB (fallback)
+### OOTB Decorators (built-in — each has own CSS + JS)
+| Name | CSS file | Description |
+|---|---|---|
+| accordion | components/accordion/accordion.css | Collapsible panel |
+| wizard | components/wizard/wizard.css | Multi-step navigation |
+| modal | components/modal/modal.css | Overlay dialog |
+
+### OOTB Field Types (styled via form.css)
 → forms-content-modeler/references/field-types.md
 ```
 
@@ -103,7 +139,8 @@ Report the palette before resolving field intents:
 
 ## Rules
 
-1. **Always check mappings.js before resolving field intents.** Never skip this step because OOTB "seems right."
-2. **Custom wins.** If a custom component covers the use case, use it — that's why it was built.
+1. **Always read both arrays.** `customComponents` alone misses OOTB decorator components.
+2. **Custom wins for field selection.** If a custom component covers the use case, use it.
 3. **fieldType is always required.** Even when `fd:viewType` is set, `fieldType` must reflect the semantic data type.
-4. **If mappings.js is absent**, OOTB only — proceed directly to `field-types.md`.
+4. **CSS file path is deterministic.** `components/{name}/{name}.css` — no lookup needed.
+5. **If mappings.js is absent**, OOTB only — proceed directly to `field-types.md`.

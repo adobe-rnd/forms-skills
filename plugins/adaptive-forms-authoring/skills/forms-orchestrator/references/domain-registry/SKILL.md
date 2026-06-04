@@ -70,6 +70,17 @@ Two entry points:
 
 ---
 
+### style
+**No single router** — invoke `forms-style` directly.
+**Route when:** user asks to style, theme, or set colors/typography/layout on a form or component
+
+| Skill | Path | Purpose |
+|-------|------|---------|
+| `forms-style` | `skills/forms-style/SKILL.md` | Edit `form.css` and component CSS files — CSS vars, selector rules, per-component styles |
+| `forms-component-inventory` | `skills/forms-component-inventory/SKILL.md` | Discover registered components and their CSS file locations before styling |
+
+---
+
 ### context-management
 **Router:** `skills/forms-context-management/SKILL.md`
 **Route when:** saving or loading session state, updating handover, logging sessions

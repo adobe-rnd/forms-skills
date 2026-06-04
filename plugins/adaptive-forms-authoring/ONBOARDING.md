@@ -58,6 +58,7 @@ The orchestrator runs a state machine every session — reading context silently
 |--------|---------|--------|
 | `analysis` | Requirements → journey spec | `analyze-requirements`, `visual-analysis`, `analyze-v1-form` |
 | `content-author` | Form structure & components | `forms-author`, `forms-content-modeler`, `forms-custom-components`, `forms-component-inventory` |
+| `style` | CSS theming & component styling | `forms-style`, `forms-component-inventory` |
 | `rule-creator` | Business rules & custom functions | `forms-rule-author` |
 | `integration` | APIs, FDM, prefill, submit | `manage-apis` |
 | `context-management` | Session state & handover | `manage-context` |

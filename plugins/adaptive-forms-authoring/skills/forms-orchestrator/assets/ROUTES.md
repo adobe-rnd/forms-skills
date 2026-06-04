@@ -154,6 +154,7 @@ For isolated tasks with no journey context. First match wins.
 | Create form, add / modify / delete fields, panels | `forms-author`, `forms-content-modeler` |
 | Custom component, extend field, fd:viewType block | `forms-custom-components` |
 | Component inventory, what components exist | `forms-component-inventory` |
+| Style, theme, CSS, colors, typography, layout, border | `forms-style`, `forms-component-inventory` |
 | Add rules, show/hide, validate, calculate | `forms-rule-author` |
 | Add / build APIs, OpenAPI, cURL | `forms-integration` |
 | Save progress, update handover | `forms-context-management` |
