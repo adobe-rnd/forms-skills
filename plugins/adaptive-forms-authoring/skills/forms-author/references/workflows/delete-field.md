@@ -26,4 +26,4 @@ node $SKILL_DIR/scripts/find-rule-refs.bundle.js \
 5. If `isPanel` — warn: *"Removing this panel removes ALL its children. Confirm?"* Wait for confirmation.
 6. Run `validate-patch` with `[{ op: "remove", path: "<pointer>" }]`
 7. Call `patch-aem-page-content`
-8. Call `get-aem-page-content` → confirm field gone
+8. Call `get-aem-page-content` → confirm field gone. Save response to `/tmp/content-model.json` (overwrites stale copy — keeps content model current for subsequent rule generation).

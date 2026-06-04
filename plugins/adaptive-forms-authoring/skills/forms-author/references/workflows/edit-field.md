@@ -19,7 +19,7 @@ node $SKILL_DIR/scripts/diff-component.bundle.js \
 ```
 
 7. Run `validate-patch`. Call `patch-aem-page-content`.
-8. Call `get-aem-page-content` → confirm new value
+8. Call `get-aem-page-content` → confirm new value. Save response to `/tmp/content-model.json` (overwrites stale copy — keeps content model current for subsequent rule generation).
 
 ## Intent disambiguation
 

@@ -8,7 +8,7 @@
 6. Run `resolve-insert-position` → insert pointer
 7. Build `add` ops from component array + pointer. Run `validate-patch`.
 8. Call `patch-aem-page-content` — ALL ops in one call (no separate call per field)
-9. Call `get-aem-page-content` → confirm fields present
+9. Call `get-aem-page-content` → confirm fields present. Save response to `/tmp/content-model.json` (overwrites stale copy — keeps content model current for subsequent rule generation).
 
 ```bash
 node $SKILL_DIR/scripts/find-field.bundle.js \

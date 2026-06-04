@@ -30,10 +30,13 @@ node $SKILL_DIR/scripts/diff-component.bundle.js \
 
 6. Run `find-rule-refs(oldQualifiedId)` — if total > 0: warn *"N rule(s) will be migrated after rename."* Wait for confirmation.
 7. Run `validate-patch`. Call `patch-aem-page-content` (rename op only).
-8. Call `get-aem-page-content` → POST-PATCH model. Save to `/tmp/post-model.json` using Bash:
+8. Call `get-aem-page-content` → POST-PATCH model. Save to both `/tmp/post-model.json` and `/tmp/content-model.json` using Bash (keeps content model current for subsequent rule generation):
 
    ```bash
    cat > /tmp/post-model.json << 'HEREDOC'
+   <POST-PATCH CONTENT MODEL JSON>
+   HEREDOC
+   cat > /tmp/content-model.json << 'HEREDOC'
    <POST-PATCH CONTENT MODEL JSON>
    HEREDOC
    ```
