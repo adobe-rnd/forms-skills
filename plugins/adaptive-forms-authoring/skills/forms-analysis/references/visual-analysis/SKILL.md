@@ -118,7 +118,43 @@ Note visible show/hide patterns for `analyze-requirements` to formalize:
 
 Document as: `When <field> = <value>: show/hide <target>` — these become entries in `## Functional Rules`.
 
-### Step 6 — Write Spec Sections
+### Step 6 — Extract Design Tokens
+
+Identify brand colors, typography, and spacing from the visual. Map each to its `--form-*` CSS custom property. This output feeds the `## Style` section of the journey spec, which the planner uses to generate a Style plan.
+
+**Colors** — sample from buttons, input borders, labels, error states, backgrounds:
+
+| Visual element | CSS Variable | Observed Value |
+|---|---|---|
+| Primary CTA button fill | `--button-primary-color` | e.g., `#d84800` |
+| Input border | `--form-input-border-color` | e.g., `#d0d0d0` |
+| Label text | `--form-label-color` | e.g., `#333333` |
+| Error / required indicator | `--form-error-color` | e.g., `#cc0000` |
+| Form background | `--form-background-color` | e.g., `#f8f8f8` |
+
+**Typography** — read from design spec annotations or Figma text styles:
+
+| Usage | CSS Variable | Observed Value |
+|---|---|---|
+| Input text size | `--form-input-font-size` | e.g., `1rem` |
+| Label size | `--form-label-font-size` | e.g., `0.875rem` |
+| Label weight | `--form-label-font-weight` | e.g., `500` |
+| Button text size | `--form-button-font-size` | e.g., `1rem` |
+
+**Spacing** — read from design gutters, field gaps:
+
+| Usage | CSS Variable | Observed Value |
+|---|---|---|
+| Vertical gap between fields | `--form-field-vert-gap` | e.g., `24px` |
+| Horizontal gap between fields | `--form-field-horz-gap` | e.g., `32px` |
+
+> If the visual doesn't provide explicit values, note the token as `TBD` — do not guess. The Style plan will refine.
+
+**Custom component tokens** — if custom components (wizard, card-choice, etc.) have distinct visual treatment, note their specific vars (see `forms-style/references/form-css-vars.md` for the full list).
+
+Skip this step if the design has no brand styling information (wireframe-only, no color/type specs).
+
+### Step 7 — Write Spec Sections
 
 Output the following sections in journey spec format:
 
@@ -146,7 +182,17 @@ Purpose: <what user does here>
 | From | To | Condition |
 |---|---|---|
 | Screen 1 | Screen 2 | always |
+
+## Style
+
+| CSS Variable | Value | Source |
+|---|---|---|
+| `--button-primary-color` | `#d84800` | CTA button fill |
+| `--form-input-border-color` | `#d0d0d0` | Input border |
+| `--form-label-color` | `#333` | Label text color |
 ```
+
+Omit `## Style` if Step 6 was skipped (wireframe-only design).
 
 ---
 
