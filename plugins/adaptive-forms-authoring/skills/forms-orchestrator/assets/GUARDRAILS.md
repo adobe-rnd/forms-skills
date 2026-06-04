@@ -83,6 +83,38 @@ Plan status is tracked in `handover.md` (workspace root) via the Plans table, ma
 
 **Statuses:** ✅ Done — 🔵 Active — ⬚ Pending — ⏸️ Blocked — ❌ Failed
 
+### Plan Completion Gate
+
+**A plan MUST NOT be marked ✅ based on intent or step execution alone.** Before marking ✅, verify EVERY `- [ ]` in the plan's `## Acceptance Criteria` section against live form state:
+
+| Criterion type | How to verify |
+|---|---|
+| Field exists / panel exists | Read form JSON from `$FORMS_WORKSPACE/repo/…/<form>.form.json` and confirm the field name and `fieldType` are present |
+| Rule fires correctly | Read the field's `fd:rules` / `fd:events` entries in the rule store JSON and confirm the compiled formula is present |
+| API call wired | Confirm the custom function and its `fd:init` / `fd:valueCommit` trigger exist in `fd:events` |
+| No console errors | Report as manual — flag to user if browser MCP is unavailable |
+| Acceptance criterion is ambiguous | Do NOT self-certify — flag to user and enter BLOCKED |
+
+**Only after all criteria are independently verified** may the plan be marked ✅ and `manage-context WRITE` offered.
+
+### Deferred Items Tracker
+
+When any plan step contains language like "wired in Plan N", "deferred to Integration plan", or "handled later", the orchestrator MUST:
+
+1. Append a row to `handover.md → ## Deferred Items` (create the section if absent):
+
+```markdown
+## Deferred Items
+
+| Plan | Item | Deferred to | Status |
+|------|------|-------------|--------|
+| 03-screen-01 | API prefill wiring for `city` field | 07-integration | ⬚ Pending |
+```
+
+2. Before marking the **target plan** (e.g. `07-integration`) ✅, verify every deferred item assigned to it is resolved. Unresolved deferred items → BLOCKED.
+
+3. When a deferred item is resolved, update its `Status` to ✅ Done in `handover.md`.
+
 ### Journey Completion
 
 When all plans for a journey show ✅ Done:
