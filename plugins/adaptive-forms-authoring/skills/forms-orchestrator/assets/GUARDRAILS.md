@@ -6,10 +6,9 @@ Constraints, conventions, and reference tables for the Forms Orchestrator.
 
 ## Script & Path Resolution
 
-CLI tools are distributed across domain modules. When referencing any script from a SKILL.md, always use `${CLAUDE_PLUGIN_ROOT}` as the base followed by the owning module path:
+Scripts live in domain skill directories. When referencing any script from a SKILL.md, always use `${CLAUDE_PLUGIN_ROOT}` as the base followed by the owning skill path:
 
 ```
-"${CLAUDE_PLUGIN_ROOT}/lib/scripts/<tool-name>" <args>
 "${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-author/scripts/<tool-name>" <args>
 ```
 
@@ -18,7 +17,7 @@ CLI tools are distributed across domain modules. When referencing any script fro
 | # | Rule |
 |---|------|
 | 1 | **Always use `${CLAUDE_PLUGIN_ROOT}`** — never construct paths from the skill's own base directory. The base directory injected by Claude Code (e.g., `Base directory for this skill: /path/to/...`) is for resolving skill-local assets (`assets/`, `references/`), **not** for locating scripts. |
-| 2 | **Always include the module name** — the plugin root (`${CLAUDE_PLUGIN_ROOT}`) is the directory containing `.claude-plugin/`. Scripts live in the owning module: `lib/scripts/`, `skills/forms-rule-author/scripts/`. |
+| 2 | **Always include the skill name** — the plugin root (`${CLAUDE_PLUGIN_ROOT}`) is the directory containing `.claude-plugin/`. Scripts live in the owning skill directory, e.g. `skills/forms-rule-author/scripts/`. |
 | 3 | **Never hardcode absolute paths** — no `/Users/...` paths in SKILL.md files. Use `${CLAUDE_PLUGIN_ROOT}` for plugin-relative paths and `<cwd>/<name>` style placeholders for documentation examples. |
 | 4 | **Skill-local assets use relative paths** — files within a skill's own directory tree (e.g., `assets/TEMPLATE.md`, `references/grammar-reference.md`) should be referenced with relative paths from the SKILL.md, not with `${CLAUDE_PLUGIN_ROOT}`. |
 
@@ -26,7 +25,6 @@ CLI tools are distributed across domain modules. When referencing any script fro
 
 | Script | Full Path |
 |--------|-----------|
-| `api-manager` | `${CLAUDE_PLUGIN_ROOT}/lib/scripts/api-manager` |
 | `transform-jcr.jsh` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-author/scripts/transform-jcr.jsh` |
 | `transform-content-model.jsh` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-author/scripts/transform-content-model.jsh` |
 | `validate-rule.jsh` | `${CLAUDE_PLUGIN_ROOT}/skills/forms-rule-author/scripts/validate-rule.jsh` |
@@ -171,7 +169,6 @@ When all plans for a journey show ✅ Done:
 | Form-level scripts | `blocks/form/scripts/form/<form>.js` (in `$FORMS_EDS_ROOT`) |
 | Shared libraries | `blocks/form/scripts/script-libs/libs.js` (in `$FORMS_EDS_ROOT`) |
 | API clients (live) | `blocks/form/api-clients/` (in `$FORMS_EDS_ROOT`) |
-| API clients (staging) | `refs/apis/api-clients/` |
 | API definitions | `refs/apis/` |
 | Screen docs | `journeys/<journey>/screens/<screen>/Screen.md` |
 | Custom components | `blocks/form/components/<view-type>/` (in `$FORMS_EDS_ROOT`) |
