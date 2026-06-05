@@ -287,10 +287,9 @@ Confirm to the user:
 | Requirement | Minimum | Why |
 |-------------|---------|-----|
 | Node.js | 18+ | Runs the form validator, rule transformer, and rule save tools |
-| Python | 3.10+ | Runs API manager and rule validation |
+| Python | 3.10+ | Runs rule validation scripts |
 | `git` | on PATH | Version control for EDS code changes in the repo |
 
-> **Note:** The plugin bundles its own Python virtual environment and dependencies — you don't need to install any Python packages yourself. The first time the agent calls a Python-based tool, a venv is created automatically inside the plugin directory.
 
 ## Sites Content MCP Server
 
@@ -388,7 +387,7 @@ Restart Claude Code after adding the MCP server in either setup.
 |-----------|---------|
 | `blocks/form/` | EDS form code — edit directly in the EDS repo (scripts, api-clients, components) |
 | `.skills-workspace/repo/` | Mirrors AEM Author content structure; forms are pulled here under their AEM content path |
-| `.skills-workspace/refs/` | Read-only references — fragments, API specs, and generated API clients (staging area) |
+| `.skills-workspace/refs/` | Read-only references — fragments and API specs |
 | `.skills-workspace/journeys/` | One sub-directory per journey — contains `spec.md` and `plans/` with execution plans |
 | `.skills-workspace/.agent/` | Agent memory — handover state, history, and session log for continuity across sessions |
 
@@ -402,7 +401,7 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 2. **`FORMS_WORKSPACE` read from `.env` in cwd** — written during this setup flow
 3. **Fall back to cwd** — backwards-compatible default
 
-> **Key point:** `FORMS_WORKSPACE` must be the first entry in `.env`. This is how every tool — `api-manager`, etc. — knows where to find the workspace and all its files. `FORMS_EDS_ROOT` points to the EDS repo root where EDS code lives.
+> **Key point:** `FORMS_WORKSPACE` must be the first entry in `.env`. `FORMS_EDS_ROOT` points to the EDS repo root where EDS code lives.
 
 ## Environment Variable Reference
 
@@ -425,7 +424,6 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 
 | Tool | Location | Purpose |
 |------|----------|---------|
-| `api-manager` | `lib/scripts/` | Manage API definitions, generate typed JS clients |
 | `transform-jcr.jsh` | `skills/forms-rule-author/scripts/` | Transform JCR form JSON for rule editing |
 | `transform-content-model.jsh` | `skills/forms-rule-author/scripts/` | Transform content model JSON for rule editing |
 | `validate-rule.jsh` | `skills/forms-rule-author/scripts/` | Validate rule AST against grammar |
@@ -444,7 +442,6 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 | Tool writes files in wrong directory | `FORMS_WORKSPACE` missing from `.env` | Add `FORMS_WORKSPACE=/absolute/path/.skills-workspace` as the first line of `.env` |
 | `401 Unauthorized` from AEM | Token expired or invalid | Regenerate bearer token from AEM Developer Console |
 | `403 Forbidden` on push | Path not in allowlist | Add the AEM path to `AEM_WRITE_PATHS` in `.env` |
-| Python venv errors | Corrupted venv | Delete the venv directory inside the plugin and retry (it auto-recreates) |
 | Form not found via MCP | Wrong JCR path | Use `get-aem-pages(publishPath: "<path>")` to discover the correct pageId first |
 | `.env` committed to git | Security risk | Add `.env` to `.skills-workspace/.gitignore` immediately; rotate all exposed credentials |
 | Hooks not firing | `.claude/settings.json` in wrong location | Make sure `.claude/settings.json` is at the EDS repo root, not inside `.skills-workspace/` |
