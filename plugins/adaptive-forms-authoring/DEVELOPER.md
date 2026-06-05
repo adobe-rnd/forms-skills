@@ -18,26 +18,9 @@ Everything needed to work on the plugin — add skills, modify scripts, run test
 ```bash
 git clone <repo-url>
 cd forms-skills
-
-# Creates .venv at project root, installs everything
-./lib/scripts/setup.sh
 ```
 
-The script:
-1. Creates a `.venv` virtual environment (uses `uv` if available, falls back to `python3 -m venv`)
-2. Installs the project in editable mode (`pip install -e ".[dev]"`)
-3. No additional Node.js install needed — bundles are pre-built in `scripts/` directories
-
-Activate the venv in any new shell:
-
-```bash
-source .venv/bin/activate
-```
-
-| Flag | What it does |
-|------|-------------|
-| `--force` | Delete existing `.venv/` and recreate from scratch |
-| `--skip-deps` | Create/activate venv but skip package installation |
+No Python or Node install step required — Node.js bundles are pre-built in `scripts/` directories.
 
 ---
 
@@ -131,10 +114,6 @@ forms-skills/
         └── references/
             └── manage-context/
 ```
-
----
-
-## Shared CLI Tools (`lib/scripts/`)
 
 ---
 
