@@ -56,7 +56,7 @@ forms-skills/
 ├── .claude-plugin/plugin.json          ← plugin identity (aem-forms)
 ├── evals/                              ← eval scenarios, fixtures, runner scripts
 ├── lib/                                ← shared scripts and Python runtime
-│   └── scripts/                           (api-manager, setup.sh, venv)
+│   └── scripts/                           (rule transform/validate .jsh scripts)
 └── skills/
     ├── forms-orchestrator/             ← entry point router
     ├── forms-analysis/                 ← analysis domain
