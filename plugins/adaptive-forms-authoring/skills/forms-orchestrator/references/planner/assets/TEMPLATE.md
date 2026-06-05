@@ -303,7 +303,7 @@ API wiring — prefill on load, mid-flow service calls. Read `refs/apis/<name>.<
 
 **Typical Steps:**
 1. Register/sync API using `forms-integration` → `manage-apis`
-2. Generate JS client (`api-manager build`)
+2. Write JS client to `blocks/form/api-clients/<name>.js` following the client pattern in `manage-apis`
 3. Create custom function wrappers using `forms-rule-author`
 4. Wire triggers: field change / form load → custom function call
 5. Verify: trigger fires → response prefills correct fields; error → correct message shown
