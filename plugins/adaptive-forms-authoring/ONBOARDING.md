@@ -88,11 +88,9 @@ Plans are written to `journeys/<journey>/plans/NN-<title>.md` and executed seque
 
 | Requirement | Why |
 |-------------|-----|
-| Node.js 18+ | Form validator, rule transformer, rule save tools |
-| Python 3.10+ | API manager and rule validation (deps managed by plugin) |
+| Node.js 18+ | Rule transformer, rule save tools, form bundles |
+| Python 3.7+ | `api_skill.py` (stdlib only — no packages needed) |
 | `git` on PATH | Version control for EDS code changes |
-
-The plugin bundles its own Python virtual environment — no manual package installs.
 
 ---
 

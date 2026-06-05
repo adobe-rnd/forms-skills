@@ -6,10 +6,9 @@ Everything needed to work on the plugin — add skills, modify scripts, run test
 
 ## Prerequisites
 
-- Python 3.10+ (3.13 recommended)
 - Node.js 18+
 - `git` and `npm` on PATH
-- [`uv`](https://docs.astral.sh/uv/) (recommended) or `python3 -m venv`
+- Python 3.7+ (for `api_skill.py` — stdlib only, no packages needed)
 
 ---
 
@@ -73,9 +72,6 @@ forms-skills/
 │   ├── scenarios/
 │   ├── fixtures/
 │   └── .envrc.example
-├── lib/                                 # Shared scripts and Python runtime
-│   └── scripts/
-│       ├── setup.sh
 ├── ONBOARDING.md                        # User onboarding — architecture, install, get started
 ├── DEVELOPER.md                         # This file
 └── skills/
