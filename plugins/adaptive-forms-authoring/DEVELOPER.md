@@ -93,8 +93,6 @@ forms-skills/
 ├── lib/                                 # Shared scripts and Python runtime
 │   └── scripts/
 │       ├── setup.sh
-│       ├── api-manager
-│       └── api_manager/
 ├── ONBOARDING.md                        # User onboarding — architecture, install, get started
 ├── DEVELOPER.md                         # This file
 └── skills/
@@ -137,10 +135,6 @@ forms-skills/
 ---
 
 ## Shared CLI Tools (`lib/scripts/`)
-
-| Tool | Backend | Description |
-|------|---------|-------------|
-| `api-manager` | `lib/scripts/api_manager/cli.py` | Manage OpenAPI specs and JS clients |
 
 ---
 
