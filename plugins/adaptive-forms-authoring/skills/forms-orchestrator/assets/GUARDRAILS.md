@@ -175,4 +175,4 @@ When all plans for a journey show ✅ Done:
 | Plans | `journeys/<journey>/plans/NN-<title>.md` |
 | Journey spec | `journeys/<journey>/spec.md` |
 | API refs | `refs/apis/<name>.<ext>` |
-| Handover | `handover.md` (workspace root) |
+| Handover | `.agent/handover.md` |
