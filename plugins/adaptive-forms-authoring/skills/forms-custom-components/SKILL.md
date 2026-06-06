@@ -97,7 +97,7 @@ Add your `fd:viewType` to the `customComponents` array in `blocks/form/mappings.
 let customComponents = ['range', 'employer-search', '<fd:viewType>'];
 ```
 
-Then invoke `forms-component-discovery` to refresh `$FORMS_WORKSPACE/refs/component-registry.md` — it reads `mappings.js`, merges with any existing registry entries, and writes the updated file. Do NOT write to `refs/component-registry.md` directly.
+Then invoke `forms-component-discovery` to refresh `$FORMS_WORKSPACE/refs/component-registry.md` — it reads `mappings.js`, merges with any existing registry entries, and writes the updated file. Do NOT write to `$FORMS_WORKSPACE/refs/component-registry.md` directly.
 
 ### 5. Implement `decorate()` with subscribe wiring
 
