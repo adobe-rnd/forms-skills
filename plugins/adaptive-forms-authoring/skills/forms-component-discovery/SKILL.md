@@ -64,7 +64,7 @@ Both arrays are loaded via the same `loadComponent()` — both get `blocks/form/
 
 ### Step 2 — Read existing registry
 
-Read `$FORMS_WORKSPACE/refs/component-registry.md` if present. Existing rows (descriptions, base types) carry forward into the Step 5 merge — they are not regenerated.
+Read `$FORMS_WORKSPACE/refs/component-registry.md` if present. Existing rows (descriptions, base types) carry forward into **Step 5** (Write/merge registry) — they are preserved for components still in `mappings.js`.
 
 If absent, skip. Step 5 will create it.
 
@@ -126,7 +126,8 @@ Write the unified palette to `$FORMS_WORKSPACE/refs/component-registry.md`:
 - **File absent:** create using schema from `skills/forms-custom-components/references/component-registry-schema.md`
 - **File exists:** merge —
   - Add rows for components in `mappings.js` not yet in registry
-  - Preserve all existing rows unchanged (descriptions, base types)
+  - Preserve existing rows for components still in `mappings.js` (descriptions, base types unchanged)
+  - Remove rows for components no longer in `mappings.js` — registry must reflect current mappings
 
 Order: custom components (`customComponents` array) first, OOTB decorators (`OOTBComponentDecorators` array) second.
 
