@@ -91,13 +91,13 @@ source .skills-workspace/.env && \
 
 ### Step 1 — Component Inventory (conditional)
 
-Before invoking `forms-analysis`, run `forms-component-inventory` to populate the component palette:
+Before invoking `forms-analysis`, run `forms-component-discovery` to populate the component palette:
 
 | Condition | Action |
 |---|---|
 | `refs/component-registry.md` exists | Skip — registry already populated |
 | `$FORMS_EDS_ROOT/blocks/form/mappings.js` absent | Skip — OOTB-only project, no custom components |
-| Neither skip condition met | Run `forms-component-inventory` → write `refs/component-registry.md` |
+| Neither skip condition met | Run `forms-component-discovery` → write `refs/component-registry.md` |
 
 `forms-analysis` proceeds after Step 1 regardless of registry content — an empty registry (no custom components) is a valid state.
 
@@ -170,8 +170,8 @@ For isolated tasks with no journey context. First match wins.
 | Analyze requirements, migrate v1, visuals → spec | `forms-analysis` |
 | Create form, add / modify / delete fields, panels | `forms-author`, `forms-content-modeler` |
 | Custom component, extend field, fd:viewType block | `forms-custom-components` |
-| Component inventory, what components exist | `forms-component-inventory` |
-| Style, theme, CSS, colors, typography, layout, border | `forms-style`, `forms-component-inventory` |
+| Component inventory, what components exist | `forms-component-discovery` |
+| Style, theme, CSS, colors, typography, layout, border | `forms-style`, `forms-component-discovery` |
 | Add rules, show/hide, validate, calculate | `forms-rule-author` |
 | Add / build APIs, OpenAPI, cURL | `forms-integration` |
 | Save progress, update handover | `forms-context-management` |

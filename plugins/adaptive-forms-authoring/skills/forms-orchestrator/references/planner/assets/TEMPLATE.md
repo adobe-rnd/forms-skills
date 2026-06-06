@@ -342,7 +342,7 @@ Show "<error message>" — do not clear form
 
 ### Style
 
-Applies brand colors, typography, and spacing to `form.css` and registered component CSS files. Run `forms-component-inventory` first to confirm which components have their own CSS files.
+Applies brand colors, typography, and spacing to `form.css` and registered component CSS files. Run `forms-component-discovery` first to confirm which components have their own CSS files.
 
 **Specification Pattern:**
 
@@ -371,7 +371,7 @@ Applies brand colors, typography, and spacing to `form.css` and registered compo
 ```
 
 **Typical Steps:**
-1. Run `forms-component-inventory` — list registered components and CSS file paths
+1. Run `forms-component-discovery` — list registered components and CSS file paths
 2. Override `--form-*` vars in `:root` of `form.css` using `forms-style`
 3. Add scoped selector rules in `form.css` for anything not covered by vars
 4. Edit per-component CSS files for component-specific styles

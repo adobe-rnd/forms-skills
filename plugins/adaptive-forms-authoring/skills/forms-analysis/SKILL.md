@@ -106,7 +106,7 @@ First match wins. If multiple input types present, start with requirements doc �
 | v1 form JSON | `refs/<form-name>.v1.json` |
 | Screenshots / design files | `inputs/<journey>/` or `journeys/<journey>/` |
 | `.docx` extraction script | `references/analyze-requirements/scripts/docx-to-text.py` |
-| Component registry | `refs/component-registry.md` — written by `forms-component-inventory` at FRESH startup. Read at INTAKE state if present. |
+| Component registry | `refs/component-registry.md` — written by `forms-component-discovery` at FRESH startup. Read at INTAKE state if present. |
 
 ---
 

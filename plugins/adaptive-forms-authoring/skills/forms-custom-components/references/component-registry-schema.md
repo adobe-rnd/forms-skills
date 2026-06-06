@@ -1,6 +1,6 @@
 # refs/component-registry.md — Schema Reference
 
-`$FORMS_WORKSPACE/refs/component-registry.md` is an **optional per-project file** cataloging custom `fd:viewType` components. When present, `forms-content-modeler` and `forms-component-inventory` check it before defaulting to OOTB types.
+`$FORMS_WORKSPACE/refs/component-registry.md` is an **optional per-project file** cataloging custom `fd:viewType` components. When present, `forms-content-modeler` and `forms-component-discovery` check it before defaulting to OOTB types.
 
 **Location:** `$FORMS_WORKSPACE/refs/component-registry.md`
 
@@ -32,11 +32,11 @@
 
 ## When to Create This File
 
-Create when the project has 2+ custom components. If it doesn't exist, `forms-content-modeler` and `forms-component-inventory` fall back to reading `mappings.js` directly.
+Create when the project has 2+ custom components. If it doesn't exist, `forms-content-modeler` and `forms-component-discovery` fall back to reading `mappings.js` directly.
 
 ---
 
-## How forms-component-inventory Uses It
+## How forms-component-discovery Uses It
 
 When resolving a field intent:
 1. Check `$FORMS_WORKSPACE/refs/component-registry.md` for a matching custom component

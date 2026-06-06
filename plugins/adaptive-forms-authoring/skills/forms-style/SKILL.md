@@ -49,7 +49,7 @@ Apply CSS styling to AEM EDS forms. Two target files, two selector axes, one rul
 
 ## Dependencies
 
-- **[forms-component-inventory](../forms-component-inventory/SKILL.md)** — run first to discover which components have their own CSS files and where they live
+- **[forms-component-discovery](../forms-component-discovery/SKILL.md)** — run first to discover which components have their own CSS files and where they live
 - **[references/form-css-vars.md](references/form-css-vars.md)** — all `--form-*` custom properties with defaults and purpose
 
 ---
@@ -63,13 +63,13 @@ Apply CSS styling to AEM EDS forms. Two target files, two selector axes, one rul
 | A specific field by name | `$FORMS_EDS_ROOT/blocks/form/form.css` |
 | A registered component (wizard, accordion, modal, or custom) | `$FORMS_EDS_ROOT/blocks/form/components/{name}/{name}.css` |
 
-Run `forms-component-inventory` to confirm which components have a CSS file. If the component's CSS file does not exist yet, create it at the deterministic path above.
+Run `forms-component-discovery` to confirm which components have a CSS file. If the component's CSS file does not exist yet, create it at the deterministic path above.
 
 ---
 
 ## Workflow
 
-### Step 1 — Run forms-component-inventory
+### Step 1 — Run forms-component-discovery
 
 Identify which components are registered and whether they have their own CSS file. This determines where to write styles.
 

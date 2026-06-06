@@ -44,7 +44,7 @@ Two entry points:
 |-------|------|---------|
 | `forms-author` | `skills/forms-author/SKILL.md` | Create and edit forms via AEM Sites Content MCP |
 | `forms-content-modeler` | `skills/forms-content-modeler/SKILL.md` | Resolve field types and build form component JSON |
-| `forms-component-inventory` | `skills/forms-component-inventory/SKILL.md` | Survey registered custom fd:viewType components before field selection |
+| `forms-component-discovery` | `skills/forms-component-discovery/SKILL.md` | Survey and register custom fd:viewType components; owns `$FORMS_WORKSPACE/refs/component-registry.md` |
 | `forms-custom-components` | `skills/forms-custom-components/SKILL.md` | Scaffold and implement custom EDS form components |
 
 ---
@@ -79,7 +79,7 @@ Two entry points:
 | Skill | Path | Purpose |
 |-------|------|---------|
 | `forms-style` | `skills/forms-style/SKILL.md` | Edit `form.css` and component CSS files — CSS vars, selector rules, per-component styles |
-| `forms-component-inventory` | `skills/forms-component-inventory/SKILL.md` | Discover registered components and their CSS file locations before styling |
+| `forms-component-discovery` | `skills/forms-component-discovery/SKILL.md` | Discover registered components and their CSS file locations before styling |
 
 ---
 

@@ -95,7 +95,7 @@ forms-skills/
     ├── forms-content-modeler/           # Component JSON builder
     │   ├── scripts/
     │   └── references/
-    ├── forms-component-inventory/       # Custom component discovery
+    ├── forms-component-discovery/       # Custom component discovery
     ├── forms-custom-components/         # Custom EDS component authoring
     │   ├── scripts/
     │   └── references/
