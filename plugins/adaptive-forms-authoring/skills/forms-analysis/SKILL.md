@@ -26,7 +26,7 @@ metadata:
 
 # Analysis — Domain Router
 
-Sequential pipeline that transforms raw inputs into a journey spec (`journeys/<journey>/spec.md`). This router does not implement — it delegates to sub-skills in order.
+Sequential pipeline that transforms raw inputs into a journey spec (`$FORMS_WORKSPACE/journeys/<journey>/spec.md`). This router does not implement — it delegates to sub-skills in order.
 
 ---
 
@@ -53,10 +53,10 @@ digraph analysis_pipeline {
 
 | State | Action | Exit → Next |
 |---|---|---|
-| **INTAKE** | Confirm input exists on disk. Write inline input to `inputs/` if needed. For `.docx` → run `scripts/docx-to-text.py` first. | Input confirmed → EXTRACTING |
+| **INTAKE** | Confirm input exists on disk. Write inline input to `$FORMS_WORKSPACE/inputs/` if needed. For `.docx` → run `scripts/docx-to-text.py` first. | Input confirmed → EXTRACTING |
 | **BLOCKED** | Input file not found or insufficient. Prompt user. | User provides → INTAKE |
-| **EXTRACTING** | Scan input for API definitions (inline, attached files, cURL examples). Write each to `refs/apis/<name>.<ext>`. | APIs extracted → GENERATING |
-| **GENERATING** | Invoke the appropriate sub-skill to produce `journeys/<journey>/spec.md`. | spec.md written → DONE |
+| **EXTRACTING** | Scan input for API definitions (inline, attached files, cURL examples). Write each to `$FORMS_WORKSPACE/refs/apis/<name>.<ext>`. | APIs extracted → GENERATING |
+| **GENERATING** | Invoke the appropriate sub-skill to produce `$FORMS_WORKSPACE/journeys/<journey>/spec.md`. | spec.md written → DONE |
 | **DONE** | Return spec path to orchestrator. Orchestrator routes to planner. | — |
 
 ---
@@ -88,11 +88,11 @@ First match wins. If multiple input types present, start with requirements doc �
 | Policy | Rule |
 |---|---|
 | `intake-gate` | Confirm input files exist on disk before routing. Never proceed with missing inputs. |
-| `no-guessing-endpoints` | Never guess API endpoints. Mark unknowns as `TBD` in spec and `refs/apis/`. |
+| `no-guessing-endpoints` | Never guess API endpoints. Mark unknowns as `TBD` in spec and `$FORMS_WORKSPACE/refs/apis/`. |
 | `no-currentFormContext` | Never emit `PL.currentFormContext` references. Mark data sources as TBD instead. |
-| `spec-convergence` | All paths converge to produce `journeys/<journey>/spec.md`. No sub-skill is done until spec.md is written. |
-| `api-extraction-first` | Always extract and write API refs to `refs/apis/` before writing spec.md. Spec references files, not inline schemas. |
-| `registry-aware-spec` | If `refs/component-registry.md` exists, read it at INTAKE state before routing to a sub-skill. Sub-skills must use the component palette when resolving field types. Never spec a Custom Component if a registered `fd:viewType` component matches the field intent (same input type, same interaction pattern) — use the existing component instead. |
+| `spec-convergence` | All paths converge to produce `$FORMS_WORKSPACE/journeys/<journey>/spec.md`. No sub-skill is done until spec.md is written. |
+| `api-extraction-first` | Always extract and write API refs to `$FORMS_WORKSPACE/refs/apis/` before writing spec.md. Spec references files, not inline schemas. |
+| `registry-aware-spec` | If `$FORMS_WORKSPACE/refs/component-registry.md` exists, read it at INTAKE state before routing to a sub-skill. Sub-skills must use the component palette when resolving field types. Never spec a Custom Component if a registered `fd:viewType` component matches the field intent (same input type, same interaction pattern) — use the existing component instead. |
 
 ---
 
@@ -100,13 +100,13 @@ First match wins. If multiple input types present, start with requirements doc �
 
 | Asset | Path |
 |---|---|
-| Raw input documents | `inputs/` |
-| Journey spec | `journeys/<journey>/spec.md` |
-| API reference docs | `refs/apis/<name>.<ext>` |
-| v1 form JSON | `refs/<form-name>.v1.json` |
-| Screenshots / design files | `inputs/<journey>/` or `journeys/<journey>/` |
+| Raw input documents | `$FORMS_WORKSPACE/inputs/` |
+| Journey spec | `$FORMS_WORKSPACE/journeys/<journey>/spec.md` |
+| API reference docs | `$FORMS_WORKSPACE/refs/apis/<name>.<ext>` |
+| v1 form JSON | `$FORMS_WORKSPACE/refs/<form-name>.v1.json` |
+| Screenshots / design files | `$FORMS_WORKSPACE/inputs/<journey>/` or `$FORMS_WORKSPACE/journeys/<journey>/` |
 | `.docx` extraction script | `references/analyze-requirements/scripts/docx-to-text.py` |
-| Component registry | `refs/component-registry.md` — written by `forms-component-discovery` at FRESH startup. Read at INTAKE state if present. |
+| Component registry | `$FORMS_WORKSPACE/refs/component-registry.md` — written by `forms-component-discovery` at FRESH startup. Read at INTAKE state if present. |
 
 ---
 

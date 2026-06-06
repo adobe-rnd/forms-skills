@@ -56,7 +56,7 @@ All skills owned by this domain.
 | Asset | Path |
 |-------|------|
 | API clients | `blocks/form/api-clients/` (in `$FORMS_EDS_ROOT`) |
-| API definitions | `refs/apis/` |
+| API definitions | `$FORMS_WORKSPACE/refs/apis/` |
 
 ## Dependencies
 

@@ -2,7 +2,7 @@
 name: forms-context-management
 description: >
   Use when reading current journey state at session start (silent READ), or
-  when saving session progress to .agent/handover.md (WRITE — always prompts user).
+  when saving session progress to $FORMS_WORKSPACE/.agent/handover.md (WRITE — always prompts user).
 license: Apache-2.0
 metadata:
   author: Adobe
@@ -27,7 +27,7 @@ metadata:
 
 # Context Manager
 
-Manages `.agent/handover.md` — the agent's persistent state across sessions. Two distinct modes: READ (silent) and WRITE (always prompts).
+Manages `$FORMS_WORKSPACE/.agent/handover.md` — the agent's persistent state across sessions. Two distinct modes: READ (silent) and WRITE (always prompts).
 
 ---
 
@@ -35,12 +35,12 @@ Manages `.agent/handover.md` — the agent's persistent state across sessions. T
 
 | Mode | When | User Prompt | Action |
 |---|---|---|---|
-| **READ** | Session start — orchestrator determines journey state | ❌ Never | Read `.agent/handover.md` silently, return state to caller |
+| **READ** | Session start — orchestrator determines journey state | ❌ Never | Read `$FORMS_WORKSPACE/.agent/handover.md` silently, return state to caller |
 | **WRITE** | After plan completes, user asks to save progress | ✅ Always | Prompt user, then write on confirmation |
 
 **READ is always silent.** No announcement, no "I'm reading the handover", no output to user. Return state internally to the orchestrator.
 
-**WRITE always prompts.** Never update `.agent/handover.md` without explicit user confirmation.
+**WRITE always prompts.** Never update `$FORMS_WORKSPACE/.agent/handover.md` without explicit user confirmation.
 
 ---
 
@@ -62,13 +62,13 @@ Manages `.agent/handover.md` — the agent's persistent state across sessions. T
 
 | File | Purpose | Update Mode |
 |------|---------|-------------|
-| `.agent/handover.md` | Latest project state snapshot — what's done, what's pending, how to resume | Overwrite |
-| `.agent/history.md` | Append-only archive of previous handover snapshots with timestamps | Append |
-| `.agent/sessions.md` | Chronological session log — date, agent, session ID, summary | Append |
+| `$FORMS_WORKSPACE/.agent/handover.md` | Latest project state snapshot — what's done, what's pending, how to resume | Overwrite |
+| `$FORMS_WORKSPACE/.agent/history.md` | Append-only archive of previous handover snapshots with timestamps | Append |
+| `$FORMS_WORKSPACE/.agent/sessions.md` | Chronological session log — date, agent, session ID, summary | Append |
 
-> **Agentic context note:** These files collectively form the agent's persistent memory. `.agent/handover.md` is the active state, `.agent/history.md` is the archive, and `.agent/sessions.md` is the audit trail.
+> **Agentic context note:** These files collectively form the agent's persistent memory. `$FORMS_WORKSPACE/.agent/handover.md` is the active state, `$FORMS_WORKSPACE/.agent/history.md` is the archive, and `$FORMS_WORKSPACE/.agent/sessions.md` is the audit trail.
 
-All files live in `.agent/` at the workspace root.
+All files live in `$FORMS_WORKSPACE/.agent/` at the workspace root.
 
 ---
 
@@ -83,7 +83,7 @@ After each plan completes, the orchestrator prompts **"Would you like me to upda
 After a plan is executed or a significant milestone is reached, ask:
 
 > **Would you like me to update the project reports?**
-> This saves the current progress to `.agent/` so the next session can pick up where we left off.
+> This saves the current progress to `$FORMS_WORKSPACE/.agent/` so the next session can pick up where we left off.
 
 Only proceed if the user confirms. If declined, skip silently — do not ask again until the next plan completes.
 
@@ -95,7 +95,7 @@ When the user confirms, execute these steps in order:
 
 ### Step 1 — Archive current handover
 
-Read `.agent/handover.md`. If it exists and is non-empty, append its content to `.agent/history.md` with a timestamp header:
+Read `$FORMS_WORKSPACE/.agent/handover.md`. If it exists and is non-empty, append its content to `$FORMS_WORKSPACE/.agent/history.md` with a timestamp header:
 
 ```
 ---
@@ -104,11 +104,11 @@ Read `.agent/handover.md`. If it exists and is non-empty, append its content to 
 <previous handover.md content>
 ```
 
-If `.agent/handover.md` does not exist or is empty, skip this step.
+If `$FORMS_WORKSPACE/.agent/handover.md` does not exist or is empty, skip this step.
 
 ### Step 2 — Write new handover
 
-Overwrite `.agent/handover.md` with a fresh snapshot using this template:
+Overwrite `$FORMS_WORKSPACE/.agent/handover.md` with a fresh snapshot using this template:
 
 ```
 # Handover
@@ -151,11 +151,11 @@ Keep it concise — aim for ≤ 40 lines. Plans table is the primary dashboard.
 
 When **analysis not yet done**, omit the Plans section entirely — orchestrator reads `analysis.spec: pending` and routes to FRESH state.
 
-When **multiple journeys** exist, maintain one handover file per active journey and archive completed journeys to `.agent/history.md`.
+When **multiple journeys** exist, maintain one handover file per active journey and archive completed journeys to `$FORMS_WORKSPACE/.agent/history.md`.
 
 ### Step 3 — Log session
 
-Append a row to `.agent/sessions.md`. If the file doesn't exist, create it with the header first:
+Append a row to `$FORMS_WORKSPACE/.agent/sessions.md`. If the file doesn't exist, create it with the header first:
 
 ```
 # Session Log
@@ -214,8 +214,8 @@ When **all plans** for a journey show status ✅ Done:
 - <any notable decisions, workarounds, or technical debt>
 ```
 
-2. **Append** this record to `.agent/history.md`
-3. **Update** `.agent/handover.md`:
+2. **Append** this record to `$FORMS_WORKSPACE/.agent/history.md`
+3. **Update** `$FORMS_WORKSPACE/.agent/handover.md`:
    - Move the journey's row in Journey Status to ✅ Done
    - Remove that journey's Plan Execution Status table
    - If another journey is queued, promote it to active
@@ -243,27 +243,27 @@ When the user asks for a progress report or status update, generate a concise su
 <bullet list of remaining steps>
 ```
 
-This is read-only — do NOT update `.agent/` files just because a progress report was requested. Only update on explicit confirmation.
+This is read-only — do NOT update `$FORMS_WORKSPACE/.agent/` files just because a progress report was requested. Only update on explicit confirmation.
 
 ---
 
 ## Reading Context (Session Start)
 
-When starting a new session, if `.agent/handover.md` exists, read it to understand:
+When starting a new session, if `$FORMS_WORKSPACE/.agent/handover.md` exists, read it to understand:
 - What phase the project is in
 - What was completed previously
 - What's pending
 - Key file locations
 
-Do NOT read `.agent/history.md` or `.agent/sessions.md` unless the user asks about past sessions. They exist for traceability, not for routine context loading.
+Do NOT read `$FORMS_WORKSPACE/.agent/history.md` or `$FORMS_WORKSPACE/.agent/sessions.md` unless the user asks about past sessions. They exist for traceability, not for routine context loading.
 
 ---
 
 ## Rules
 
-1. **Always ask before writing.** Never update `.agent/` files without user confirmation.
+1. **Always ask before writing.** Never update `$FORMS_WORKSPACE/.agent/` files without user confirmation.
 2. **Handover must be concise.** No more than 60 lines. The Plans table is the primary dashboard — keep plan summaries to one line each.
-3. **History is append-only.** Never modify or truncate `.agent/history.md`.
-4. **Sessions is append-only.** Never modify or truncate `.agent/sessions.md`.
-5. **No sensitive data.** Never write credentials, tokens, or secrets to `.agent/` files.
-6. **Create if missing.** If any `.agent/` file doesn't exist, create it — don't error.
+3. **History is append-only.** Never modify or truncate `$FORMS_WORKSPACE/.agent/history.md`.
+4. **Sessions is append-only.** Never modify or truncate `$FORMS_WORKSPACE/.agent/sessions.md`.
+5. **No sensitive data.** Never write credentials, tokens, or secrets to `$FORMS_WORKSPACE/.agent/` files.
+6. **Create if missing.** If any `$FORMS_WORKSPACE/.agent/` file doesn't exist, create it — don't error.

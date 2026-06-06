@@ -22,7 +22,7 @@ metadata:
 
 # Visual Analysis — Screens to Spec
 
-Analyzes visual inputs (screenshots, Figma, mockups) and produces the `## Screens`, `## Navigation`, and `## Custom Components` sections of `journeys/<journey>/spec.md`.
+Analyzes visual inputs (screenshots, Figma, mockups) and produces the `## Screens`, `## Navigation`, and `## Custom Components` sections of `$FORMS_WORKSPACE/journeys/<journey>/spec.md`.
 
 ---
 
@@ -198,7 +198,7 @@ Omit `## Style` if Step 6 was skipped (wireframe-only design).
 
 ## Output
 
-The three spec sections above, ready to paste into (or merge with) `journeys/<journey>/spec.md`.
+The three spec sections above, ready to paste into (or merge with) `$FORMS_WORKSPACE/journeys/<journey>/spec.md`.
 
 If a spec file already exists, merge these sections into it — do not overwrite sections populated by `analyze-requirements`.
 

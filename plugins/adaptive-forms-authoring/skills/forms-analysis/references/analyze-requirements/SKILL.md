@@ -19,7 +19,7 @@ metadata:
 
 # Analyze Requirements
 
-Parse requirements input into a structured journey spec at `journeys/<journey>/spec.md`.
+Parse requirements input into a structured journey spec at `$FORMS_WORKSPACE/journeys/<journey>/spec.md`.
 
 ## When to Use
 
@@ -41,8 +41,8 @@ Parse requirements input into a structured journey spec at `journeys/<journey>/s
 
 | Input type | Action |
 |---|---|
-| Requirements doc at `inputs/<name>.md` | Read directly |
-| Inline text from user | Write to `inputs/<journey>-requirements.md` first, then read |
+| Requirements doc at `$FORMS_WORKSPACE/inputs/<name>.md` | Read directly |
+| Inline text from user | Write to `$FORMS_WORKSPACE/inputs/<journey>-requirements.md` first, then read |
 | `.docx` file | Run `scripts/docx-to-text.py <path>` → read output, then proceed |
 | With screenshots | Pass visuals to `visual-analysis` to fill screen structure gaps |
 
@@ -293,5 +293,5 @@ After writing the spec, evaluate:
 
 ## Output
 
-- `journeys/<journey>/spec.md` — journey specification
+- `$FORMS_WORKSPACE/journeys/<journey>/spec.md` — journey specification
 - `refs/apis/<name>.<ext>` — one file per API found (written in Step 1)

@@ -24,7 +24,7 @@ metadata:
 
 Analyze legacy AEM v1 Adaptive Form JSON files through **direct reading and human reasoning** to
 identify screens, extract fields and business rules, and produce a journey spec at
-`journeys/<journey>/spec.md` for migration to Edge Delivery forms.
+`$FORMS_WORKSPACE/journeys/<journey>/spec.md` for migration to Edge Delivery forms.
 
 ## When to Use
 
@@ -38,7 +38,7 @@ identify screens, extract fields and business rules, and produce a journey spec 
 
 1. **Read JSON directly** — open the file, read it section by section like a human analyst. NEVER write scripts, parsers, or automated heuristics to process the JSON
 2. **Distinguish screens from non-screens** — popups, helpers, loaders, and nested sub-panels are NOT screens (see Screen Definition below)
-3. **Document in journey spec format** — output to `journeys/<journey>/spec.md` following the Output section below
+3. **Document in journey spec format** — output to `$FORMS_WORKSPACE/journeys/<journey>/spec.md` following the Output section below
 4. **Use `name` not panel keys** — panel keys like `panel_1239854573` are auto-generated; always use the `name` property to identify panels
 5. **Mark unknowns as TBD** — if an API endpoint, field purpose, or rule behavior is unclear, mark it TBD rather than guessing
 6. **Complete field coverage** — every user-facing field in each screen must appear in the documentation
@@ -192,7 +192,7 @@ When comparing two or more journeys:
 
 ## Output
 
-Write `journeys/<journey>/spec.md` using the journey spec format defined in `analyze-requirements/SKILL.md`.
+Write `$FORMS_WORKSPACE/journeys/<journey>/spec.md` using the journey spec format defined in `analyze-requirements/SKILL.md`.
 
 Map v1 JSON concepts to spec sections:
 
