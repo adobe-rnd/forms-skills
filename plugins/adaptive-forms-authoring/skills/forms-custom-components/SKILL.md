@@ -89,7 +89,7 @@ This creates three files in `blocks/form/components/<fd:viewType>/`:
 | `<fd:viewType>.css` | Component styling |
 | `_<fd:viewType>.json` | Custom authoring properties |
 
-### 4. Register in mappings.js and update component registry
+### 4. Register in mappings.js and refresh component registry
 
 Add your `fd:viewType` to the `customComponents` array in `blocks/form/mappings.js` (EDS repo root):
 
@@ -97,13 +97,7 @@ Add your `fd:viewType` to the `customComponents` array in `blocks/form/mappings.
 let customComponents = ['range', 'employer-search', '<fd:viewType>'];
 ```
 
-Then update `$FORMS_WORKSPACE/refs/component-registry.md` (create if absent — schema: `references/component-registry-schema.md`):
-
-```markdown
-| <fd:viewType> | <base_type> | <one-line description> | blocks/form/mappings.js |
-```
-
-This keeps `forms-component-inventory` accurate — it reads both `mappings.js` and `component-registry.md` to produce the component palette. Skipping this step means the new component won't appear in inventory or styling discovery.
+Then invoke `forms-component-discovery` to refresh `$FORMS_WORKSPACE/refs/component-registry.md` — it reads `mappings.js`, merges with any existing registry entries, and writes the updated file. Do NOT write to `refs/component-registry.md` directly.
 
 ### 5. Implement `decorate()` with subscribe wiring
 
@@ -293,7 +287,7 @@ See **[references/examples.md](references/examples.md)** for three worked exampl
 | Problem | Solution |
 |---------|----------|
 | Component not rendering | Check that `fd:viewType` is added to `customComponents` in `mappings.js` |
-| Component missing from inventory / styling discovery | Add entry to `$FORMS_WORKSPACE/refs/component-registry.md` — `forms-component-inventory` reads this for descriptions and base types |
+| Component missing from inventory / styling discovery | Invoke `forms-component-discovery` to refresh `$FORMS_WORKSPACE/refs/component-registry.md` — it re-reads `mappings.js` and merges all registered components |
 | `decorate()` not called | Verify `fd:viewType` in `form.json` matches the component folder name exactly |
 | Invalid base_type error | Use only valid base types from the table above |
 | Styles not loading | Ensure CSS file name matches `<fd:viewType>.css` exactly |
