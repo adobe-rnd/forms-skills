@@ -77,7 +77,7 @@ Plans are sequentially ordered execution units within a journey. Each plan conta
 
 ### Plan Status Tracking
 
-Plan status is tracked in `handover.md` (workspace root) via the Plans table, managed by `forms-context-management` › `manage-context`.
+Plan status is tracked in `.agent/handover.md` via the Plans table, managed by `forms-context-management`.
 
 **Statuses:** ✅ Done — 🔵 Active — ⬚ Pending — ⏸️ Blocked — ❌ Failed
 
