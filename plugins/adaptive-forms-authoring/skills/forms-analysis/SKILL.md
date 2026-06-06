@@ -92,6 +92,7 @@ First match wins. If multiple input types present, start with requirements doc â
 | `no-currentFormContext` | Never emit `PL.currentFormContext` references. Mark data sources as TBD instead. |
 | `spec-convergence` | All paths converge to produce `journeys/<journey>/spec.md`. No sub-skill is done until spec.md is written. |
 | `api-extraction-first` | Always extract and write API refs to `refs/apis/` before writing spec.md. Spec references files, not inline schemas. |
+| `registry-aware-spec` | If `refs/component-registry.md` exists, read it before GENERATING state. Sub-skills must use the component palette when resolving field types. Never spec a Custom Component if a registered component already covers the use case. |
 
 ---
 
@@ -105,6 +106,7 @@ First match wins. If multiple input types present, start with requirements doc â
 | v1 form JSON | `refs/<form-name>.v1.json` |
 | Screenshots / design files | `inputs/<journey>/` or `journeys/<journey>/` |
 | `.docx` extraction script | `references/analyze-requirements/scripts/docx-to-text.py` |
+| Component registry | `refs/component-registry.md` â€” written by `forms-component-inventory` at FRESH startup. Read before GENERATING state if present. |
 
 ---
 
