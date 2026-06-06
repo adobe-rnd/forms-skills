@@ -21,7 +21,7 @@ metadata:
 
 # Planner
 
-Generates ordered, executable plans from a journey spec. The orchestrator routes here when `journeys/<journey>/spec.md` exists but no plans have been generated.
+Generates ordered, executable plans from a journey spec. The orchestrator routes here when `$FORMS_WORKSPACE/journeys/<journey>/spec.md` exists but no plans have been generated.
 
 ---
 
@@ -50,8 +50,8 @@ journeys/<journey>/spec.md
   └───────────────────────┘
 ```
 
-Input: `journeys/<journey>/spec.md`
-Output: `journeys/<journey>/plans/NN-<title>.md`
+Input: `$FORMS_WORKSPACE/journeys/<journey>/spec.md`
+Output: `$FORMS_WORKSPACE/journeys/<journey>/plans/NN-<title>.md`
 
 ---
 
@@ -79,7 +79,7 @@ Plan type selection, ordering, scope rules, acceptance criteria requirement: **[
 
 ## Output
 
-Plan files at `journeys/<journey>/plans/NN-<title>.md`, numbered sequentially, ready for execution.
+Plan files at `$FORMS_WORKSPACE/journeys/<journey>/plans/NN-<title>.md`, numbered sequentially, ready for execution.
 
 Each plan follows **[`assets/TEMPLATE.md`](assets/TEMPLATE.md)** and must include a `## Acceptance Criteria` section.
 
@@ -89,7 +89,7 @@ Each plan follows **[`assets/TEMPLATE.md`](assets/TEMPLATE.md)** and must includ
 
 | Property | Convention |
 |---|---|
-| **Path** | `journeys/<journey>/plans/NN-<short-title>.md` |
+| **Path** | `$FORMS_WORKSPACE/journeys/<journey>/plans/NN-<short-title>.md` |
 | **Numbering** | Zero-padded two digits: `01`, `02`, ..., `10`, `11` |
 | **Max per journey** | 15 — if more needed, journey is too complex; flag to user |
 | **Template** | `assets/TEMPLATE.md` |

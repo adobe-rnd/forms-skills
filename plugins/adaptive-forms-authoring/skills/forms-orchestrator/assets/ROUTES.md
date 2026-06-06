@@ -42,8 +42,8 @@ digraph orchestrator {
 |---|---|---|---|
 | **INIT** | Session start | Read `.agent/handover.md` silently (forms-context-management READ — no user prompt) | Determine state from table below |
 | **WORKSPACE_MISSING** | `FORMS_WORKSPACE` not set, no `.env` | Read `assets/SETUP.md` inline — hard gate, nothing else runs | Setup done → INIT |
-| **FRESH** | No `journeys/<j>/spec.md` | Run component-inventory (conditional) then invoke `forms-analysis` — see FRESH → SPEC_READY section for decision logic. | spec.md written + APIs extracted → SPEC_READY |
-| **SPEC_READY** | spec.md exists, no plans yet | Invoke `references/planner/SKILL.md` | Plans written to `journeys/<j>/plans/` → EXECUTING(1) |
+| **FRESH** | No `$FORMS_WORKSPACE/journeys/<j>/spec.md` | Run component-inventory (conditional) then invoke `forms-analysis` — see FRESH → SPEC_READY section for decision logic. | spec.md written + APIs extracted → SPEC_READY |
+| **SPEC_READY** | spec.md exists, no plans yet | Invoke `references/planner/SKILL.md` | Plans written to `$FORMS_WORKSPACE/journeys/<j>/plans/` → EXECUTING(1) |
 | **EXECUTING(N)** | Plan N not complete | Execute plan N step by step | Acceptance criteria pass → EXECUTING(N+1) or COMPLETE |
 | **BLOCKED** | Plan N acceptance criteria fail | Report to user, await resolution | User resolves → resume EXECUTING(N) |
 | **COMPLETE** | All plans ✅ done | Report journey complete to user | Terminal |
@@ -95,9 +95,9 @@ Before invoking `forms-analysis`, run `forms-component-discovery` to populate th
 
 | Condition | Action |
 |---|---|
-| `refs/component-registry.md` exists | Skip — registry already populated |
+| `$FORMS_WORKSPACE/refs/component-registry.md` exists | Skip — registry already populated |
 | `$FORMS_EDS_ROOT/blocks/form/mappings.js` absent | Skip — OOTB-only project, no custom components |
-| Neither skip condition met | Run `forms-component-discovery` → write `refs/component-registry.md` |
+| Neither skip condition met | Run `forms-component-discovery` → write `$FORMS_WORKSPACE/refs/component-registry.md` |
 
 `forms-analysis` proceeds after Step 1 regardless of registry content — an empty registry (no custom components) is a valid state.
 
@@ -107,15 +107,15 @@ Invoke `forms-analysis` skill.
 
 | Input type | Handling |
 |---|---|
-| Requirements doc in `inputs/` | Read directly |
-| Inline from user | Write to `inputs/<name>.md` first, then read |
+| Requirements doc in `$FORMS_WORKSPACE/inputs/` | Read directly |
+| Inline from user | Write to `$FORMS_WORKSPACE/inputs/<name>.md` first, then read |
 | `.docx` file | Run `scripts/docx-to-text.py` first, then analyze |
 | Screenshots / Figma / mockups | Route to `visual-analysis` |
 | v1 AEM form JSON | Route to `analyze-v1-form` |
 
 Outputs written by forms-analysis:
-- `journeys/<journey>/spec.md` — journey specification
-- `refs/apis/<name>.<ext>` — one file per API found in requirements
+- `$FORMS_WORKSPACE/journeys/<journey>/spec.md` — journey specification
+- `$FORMS_WORKSPACE/refs/apis/<name>.<ext>` — one file per API found in requirements
 
 ---
 
@@ -123,8 +123,8 @@ Outputs written by forms-analysis:
 
 Invoke `references/planner/SKILL.md`.
 
-- Input: `journeys/<journey>/spec.md`
-- Output: `journeys/<journey>/plans/NN-*.md`
+- Input: `$FORMS_WORKSPACE/journeys/<journey>/spec.md`
+- Output: `$FORMS_WORKSPACE/journeys/<journey>/plans/NN-*.md`
 
 Planner reads spec → identifies which plan types apply → writes numbered plan files in dependency order.
 

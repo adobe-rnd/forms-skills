@@ -7,7 +7,7 @@ description: >
 
 # Planner Guardrails
 
-How to decompose a journey spec into ordered plans. Use when generating plans from `journeys/<journey>/spec.md`.
+How to decompose a journey spec into ordered plans. Use when generating plans from `$FORMS_WORKSPACE/journeys/<journey>/spec.md`.
 
 ---
 
@@ -15,8 +15,8 @@ How to decompose a journey spec into ordered plans. Use when generating plans fr
 
 | Input | Path | Required |
 |---|---|---|
-| Journey spec | `journeys/<journey>/spec.md` | Yes |
-| API reference docs | `refs/apis/<name>.<ext>` | If integrations exist |
+| Journey spec | `$FORMS_WORKSPACE/journeys/<journey>/spec.md` | Yes |
+| API reference docs | `$FORMS_WORKSPACE/refs/apis/<name>.<ext>` | If integrations exist |
 
 ---
 
@@ -41,7 +41,7 @@ Read the journey spec and determine which plan types apply:
 **Always create:** Screen × N, Submit, QA.
 **Conditionally create:** all others.
 
-> **Registry check (Custom Component plans only):** Before generating a Custom Component plan, read `refs/component-registry.md` (written by `forms-component-discovery` at FRESH startup). If the required component is already registered in the `customComponents` array, no Custom Component plan is needed — reference the existing `fd:viewType` in the Screen plan instead. Only generate a Custom Component plan for genuinely unregistered components.
+> **Registry check (Custom Component plans only):** Before generating a Custom Component plan, read `$FORMS_WORKSPACE/refs/component-registry.md` (written by `forms-component-discovery` at FRESH startup). If the required component is already registered in the `customComponents` array, no Custom Component plan is needed — reference the existing `fd:viewType` in the Screen plan instead. Only generate a Custom Component plan for genuinely unregistered components.
 
 > **Fragment before Screen:** Fragment plans must complete before any Screen plan that references them. Fragment JSON must exist in the repo before it can be referenced in a host form panel.
 
@@ -106,7 +106,7 @@ digraph plan_order {
 3. **Incremental testability** — after each plan, the form must be in a testable, non-broken state.
 4. **Explicit dependencies** — every plan declares which prior plans must be complete.
 5. **Max 15 plans per journey** — if more needed, journey is too complex; split it or flag to user.
-6. **Read API refs** — for Integration plans, read `refs/apis/<name>.<ext>` for endpoint and schema details. Do not duplicate API schema in the plan — reference the file.
+6. **Read API refs** — for Integration plans, read `$FORMS_WORKSPACE/refs/apis/<name>.<ext>` for endpoint and schema details. Do not duplicate API schema in the plan — reference the file.
 
 ---
 
@@ -162,7 +162,7 @@ Valid Status values: `⬚ Pending` (not started) → `✅ Done` (resolved).
 
 | Property | Convention |
 |---|---|
-| **Path** | `journeys/<journey>/plans/NN-<short-title>.md` |
+| **Path** | `$FORMS_WORKSPACE/journeys/<journey>/plans/NN-<short-title>.md` |
 | **Numbering** | Zero-padded two digits: `01`, `02`, ..., `10`, `11` |
 | **Naming** | Lowercase, hyphen-separated: `01-custom-component.md`, `03-screen-01-personal-info.md` |
 | **Template** | `assets/TEMPLATE.md` |

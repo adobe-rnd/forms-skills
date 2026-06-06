@@ -54,8 +54,8 @@ User Intent
 When a user prompt arrives, follow the routing algorithm in [`assets/ROUTES.md`](assets/ROUTES.md):
 
 1. **Workspace gate** — no workspace? → read `assets/SETUP.md` and run setup inline (hard block)
-2. **Active plan** — 🔵 Active plan in `.agent/handover.md`? → resume it
-3. **Plans exist** — plans in `plans/<journey>/`? → pick next pending → execute
+2. **Active plan** — 🔵 Active plan in `$FORMS_WORKSPACE/.agent/handover.md`? → resume it
+3. **Plans exist** — plans in `$FORMS_WORKSPACE/journeys/<journey>/plans/`? → pick next pending → execute
 4. **Generate plans** — user has requirements but no plans? → Planner generates them → execute
 5. **Domain fallback** — intent is a single task? → route to domain directly
 6. **No match** — ask user to clarify
@@ -71,7 +71,7 @@ Full step-by-step logic, decision tables, and precedence rules: **[`assets/ROUTE
 | **Planner** | [`references/planner/SKILL.md`](references/planner/SKILL.md) | Generates plans from user requirements (journey docs, screenshots, Screen.md, etc.) using a default or custom strategy |
 | **Domain Registry** | [`references/domain-registry/SKILL.md`](references/domain-registry/SKILL.md) | Catalogs domains and skills, matches intents to domains, resolves plan step targets to executable skills. **Read this file — do not invoke it as a skill.** |
 
-Plan files live in `plans/<journey>/`. Domain skill trees live in `skills/forms-<domain>/` (sibling directories in the repo).
+Plan files live in `$FORMS_WORKSPACE/journeys/<journey>/plans/`. Domain skill trees live in `skills/forms-<domain>/` (sibling directories in the repo).
 
 ---
 
@@ -89,7 +89,7 @@ All orchestrator constraints, conventions, file locations, workspace resolution,
 | Constraints & conventions | `assets/GUARDRAILS.md` |
 | Plan template | `references/planner/assets/TEMPLATE.md` |
 | Planner | `references/planner/SKILL.md` |
-| Plan files | `plans/<journey>/NN-<title>.md` |
+| Plan files | `$FORMS_WORKSPACE/journeys/<journey>/plans/NN-<title>.md` |
 | Workspace setup (inline) | `assets/SETUP.md` |
 | Domain registry (read) | `references/domain-registry/SKILL.md` |
 | Domain routers (read)  | `skills/forms-<domain>/SKILL.md` |
