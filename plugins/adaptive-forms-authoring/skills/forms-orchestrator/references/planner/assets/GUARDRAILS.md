@@ -42,6 +42,8 @@ Read the journey spec and determine which plan types apply:
 **Always create:** Screen × N, Submit, QA.
 **Conditionally create:** all others.
 
+> **Registry check (Custom Component plans only):** Before generating a Custom Component plan, read `refs/component-registry.md` (written by `forms-component-inventory` at FRESH startup). If the required component is already registered in the `customComponents` array, no Custom Component plan is needed — reference the existing `fd:viewType` in the Screen plan instead. Only generate a Custom Component plan for genuinely unregistered components.
+
 > **Fragment before Screen:** Fragment plans must complete before any Screen plan that references them. Fragment JSON must exist in the repo before it can be referenced in a host form panel.
 
 ---
