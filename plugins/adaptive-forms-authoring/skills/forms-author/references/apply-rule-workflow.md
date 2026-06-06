@@ -38,6 +38,6 @@ node $SKILL_DIR/scripts/apply-rule-patch.bundle.js \
 ```
 
 **Path A** (neither node exists): generates 1–2 `add` ops, one full child node each.
-**Path B** (nodes exist): generates `replace` ops on the full `properties` object — overwrites all rules.
+**Path B** (nodes exist): generates `replace` ops on the full `properties` object — merges existing rules with new ones (new keys win on conflict).
 **Mixed** (one exists, one doesn't): each node follows its own path independently.
 **Validate / Format rules**: script also emits `add` ops on `<field-pointer>/properties/validationExpression` — included in the same patch call, no separate step needed.

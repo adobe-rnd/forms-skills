@@ -10358,10 +10358,18 @@ function inferFdKey(ruleJson) {
       "Usage: generate-formula <rule.json> --tree <treeJson.json> [options]",
       "",
       "Options:",
-      "  --tree          Path to treeJson (from transform-jcr or transform-content-model)",
-      "  --functions     Path to customFunction JSON array (from parse-functions)",
-      "  --event         fd:* key override (inferred from rule if omitted)",
-      "  --toggles       Path to JSON object of feature toggle overrides",
+      "  --tree                  Path to treeJson (from transform-jcr or transform-content-model)",
+      "  --functions             Path to customFunction JSON array (from parse-functions)",
+      "  --event                 fd:* key override (inferred from rule if omitted)",
+      "  --toggles               Path to JSON object of feature toggle overrides",
+      "  --content-model-file    Path to content model JSON (get-aem-page-content response).",
+      "                          When provided with --field-pointer, existing fd:* entries are",
+      "                          prepended so FieldTransformer compiles all rules together.",
+      "  --field-pointer         JSON pointer to the target field in the content model",
+      "                          (e.g. /items/0:1:2). Required when --content-model-file is set.",
+      "  --override              Skip prepending existing entries even when --content-model-file",
+      "                          and --field-pointer are provided. Use when intent is to replace",
+      "                          an existing rule rather than add a new one alongside it.",
       "",
       'Output (success):       { success:true, input, fdEvents, fdRules, formulaValid:true, validationStatus:"valid" }',
       'Output (formula error): { success:false, formulaValid:false, validationStatus:"invalid", errors:[...] }',
@@ -10376,7 +10384,10 @@ function inferFdKey(ruleJson) {
     treePath: null,
     functionsPath: null,
     explicitFdKey: null,
-    togglesPath: null
+    togglesPath: null,
+    contentModelFile: null,
+    fieldPointer: null,
+    override: false
   };
   for (let i = 0; i < rawArgs.length; i += 1) {
     if (rawArgs[i] === "--tree") {
@@ -10391,6 +10402,14 @@ function inferFdKey(ruleJson) {
     } else if (rawArgs[i] === "--toggles") {
       i += 1;
       parsed.togglesPath = rawArgs[i];
+    } else if (rawArgs[i] === "--content-model-file") {
+      i += 1;
+      parsed.contentModelFile = rawArgs[i];
+    } else if (rawArgs[i] === "--field-pointer") {
+      i += 1;
+      parsed.fieldPointer = rawArgs[i];
+    } else if (rawArgs[i] === "--override") {
+      parsed.override = true;
     } else if (!rawArgs[i].startsWith("--")) {
       parsed.rulePath = rawArgs[i];
     }
@@ -10400,7 +10419,10 @@ function inferFdKey(ruleJson) {
     treePath,
     functionsPath,
     explicitFdKey,
-    togglesPath
+    togglesPath,
+    contentModelFile,
+    fieldPointer,
+    override
   } = parsed;
   if (!rulePath || !treePath) {
     throw new Error("Usage: generate-formula <rule.json> --tree <treeJson.json> [--functions <cf.json>] [--event <fd:key>]");
@@ -10419,7 +10441,29 @@ function inferFdKey(ruleJson) {
   }
   const scope = new RBScope(treeJson, customFunctions, toggleProvider);
   const transformer = new RuleTransformer({ scope, toggleProvider });
-  const fdRulesNode = { [fdKey]: [JSON.stringify({ ...ruleJson, generatedByAgent: true })] };
+  const STACKABLE_FD_KEYS = new Set(["fd:visible", "fd:enabled", "fd:validate"]);
+  let existingEntries = [];
+  if (contentModelFile && fieldPointer && STACKABLE_FD_KEYS.has(fdKey) && !override) {
+    const rawCM = JSON.parse(await readFile(contentModelFile));
+    const contentModel = rawCM.data && typeof rawCM.data === "object" ? rawCM.data : rawCM;
+    const capiKey = fieldPointer.replace(/^\/items\//, "").replace(/\/items\//g, ":");
+    const segments = capiKey.split(":");
+    let node = contentModel;
+    let currentKey = "";
+    for (const seg of segments) {
+      currentKey = currentKey ? `${currentKey}:${seg}` : seg;
+      node = node?.items?.[currentKey];
+      if (!node) break;
+    }
+    if (node?.items) {
+      const fdRulesChild = Object.values(node.items).find((c) => c.id === "fd:rules");
+      if (fdRulesChild?.properties?.[fdKey]) {
+        const existing = fdRulesChild.properties[fdKey];
+        existingEntries = Array.isArray(existing) ? existing : [existing];
+      }
+    }
+  }
+  const fdRulesNode = { [fdKey]: [...existingEntries, JSON.stringify({ ...ruleJson, generatedByAgent: true })] };
   const jcrOutput = transformer.transform(fdRulesNode);
   const fdEvents = jcrOutput["fd:events"] || {};
   const fdRules = jcrOutput["fd:rules"] || {};

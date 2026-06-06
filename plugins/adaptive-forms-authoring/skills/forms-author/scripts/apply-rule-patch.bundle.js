@@ -49,6 +49,7 @@ function resolveRuleNodesFromContentModel(contentModel, fieldPointer2) {
         capiKey: childCapiKey,
         pointer: childPointer,
         propertyPointer: childPointer + "/properties",
+        existingProperties: child.properties ?? {},
       };
     } else if (child.id === "fd:events") {
       result[1] = {
@@ -57,6 +58,7 @@ function resolveRuleNodesFromContentModel(contentModel, fieldPointer2) {
         capiKey: childCapiKey,
         pointer: childPointer,
         propertyPointer: childPointer + "/properties",
+        existingProperties: child.properties ?? {},
       };
     }
   }
@@ -131,7 +133,7 @@ var vExp = typeof rawVExp === "string" ? rawVExp : "";
 var ops = [];
 if (Object.keys(fdR).length) {
   if (rEntry && rEntry.found) {
-    ops.push({ op: "replace", path: rEntry.propertyPointer, value: fdR });
+    ops.push({ op: "replace", path: rEntry.propertyPointer, value: { ...(rEntry.existingProperties ?? {}), ...fdR } });
   } else {
     ops.push({
       op: "add",
@@ -142,7 +144,7 @@ if (Object.keys(fdR).length) {
 }
 if (Object.keys(fdE).length) {
   if (eEntry && eEntry.found) {
-    ops.push({ op: "replace", path: eEntry.propertyPointer, value: fdE });
+    ops.push({ op: "replace", path: eEntry.propertyPointer, value: { ...(eEntry.existingProperties ?? {}), ...fdE } });
   } else {
     ops.push({
       op: "add",

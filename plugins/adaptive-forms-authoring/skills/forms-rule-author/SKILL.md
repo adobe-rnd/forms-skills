@@ -143,7 +143,29 @@ Fix any errors using the `code` field and the grammar files, then re-validate.
 
 ### Step 10: Generate formula
 
+If the target field already exists (`find-field` returned `found: true`), pass `--content-model-file` and `--field-pointer` so existing rules for the same `fd:*` key are prepended and compiled together. Omit both flags for new fields.
+
 ```bash
+# Existing field, adding a new rule alongside existing ones (fd:visible, fd:enabled, fd:validate only)
+node $SKILL_DIR/scripts/generate-formula.jsh \
+  /tmp/rule.json \
+  --tree /tmp/treeJson.json \
+  --functions /tmp/customFunctions.json \
+  --event <fd:key> \
+  --content-model-file /tmp/content-model.json \
+  --field-pointer <field-pointer>
+
+# Existing field, replacing/updating an existing rule (user intent: change, not add)
+node $SKILL_DIR/scripts/generate-formula.jsh \
+  /tmp/rule.json \
+  --tree /tmp/treeJson.json \
+  --functions /tmp/customFunctions.json \
+  --event <fd:key> \
+  --content-model-file /tmp/content-model.json \
+  --field-pointer <field-pointer> \
+  --override
+
+# New field — no prior rules, start fresh
 node $SKILL_DIR/scripts/generate-formula.jsh \
   /tmp/rule.json \
   --tree /tmp/treeJson.json \
