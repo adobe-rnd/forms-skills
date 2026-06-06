@@ -59,8 +59,6 @@ Output: `journeys/<journey>/plans/NN-<title>.md`
 
 Plan type selection, ordering, scope rules, acceptance criteria requirement: **[`assets/GUARDRAILS.md`](assets/GUARDRAILS.md)**
 
-**Strategy override:** If `plans/custom-strategy.md` exists in the workspace, use it instead of `GUARDRAILS.md`.
-
 ---
 
 ## Plan Types
@@ -106,4 +104,3 @@ Each plan follows **[`assets/TEMPLATE.md`](assets/TEMPLATE.md)** and must includ
 | Plan type selection + ordering | `assets/GUARDRAILS.md` |
 | Plan template + type patterns | `assets/TEMPLATE.md` |
 | Domain registry (skill resolution) | `../domain-registry/SKILL.md` |
-| User strategy override | `plans/custom-strategy.md` (workspace root) |

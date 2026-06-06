@@ -17,7 +17,6 @@ How to decompose a journey spec into ordered plans. Use when generating plans fr
 |---|---|---|
 | Journey spec | `journeys/<journey>/spec.md` | Yes |
 | API reference docs | `refs/apis/<name>.<ext>` | If integrations exist |
-| Custom strategy override | `plans/custom-strategy.md` (workspace root) | No — overrides this file if present |
 
 ---
 
@@ -35,14 +34,14 @@ Read the journey spec and determine which plan types apply:
 | **Complex Rules** | `## Complex Rules` section with entries | `forms-rule-author` |
 | **Validation** | `## Validations` section with entries | `forms-rule-author` |
 | **Integration** | `## Integrations` section with entries | `forms-integration`, `forms-rule-author` |
-| **Style** | `## Style` section, or spec has brand colors / design tokens / theming requirements | `forms-style`, `forms-component-inventory` |
+| **Style** | `## Style` section, or spec has brand colors / design tokens / theming requirements | `forms-style`, `forms-component-discovery` |
 | **Submit** | `## Submit` section (always present) | `forms-author`, `forms-integration` |
 | **QA** | Always — every journey ends with QA | lint + smoke test |
 
 **Always create:** Screen × N, Submit, QA.
 **Conditionally create:** all others.
 
-> **Registry check (Custom Component plans only):** Before generating a Custom Component plan, read `refs/component-registry.md` (written by `forms-component-inventory` at FRESH startup). If the required component is already registered in the `customComponents` array, no Custom Component plan is needed — reference the existing `fd:viewType` in the Screen plan instead. Only generate a Custom Component plan for genuinely unregistered components.
+> **Registry check (Custom Component plans only):** Before generating a Custom Component plan, read `refs/component-registry.md` (written by `forms-component-discovery` at FRESH startup). If the required component is already registered in the `customComponents` array, no Custom Component plan is needed — reference the existing `fd:viewType` in the Screen plan instead. Only generate a Custom Component plan for genuinely unregistered components.
 
 > **Fragment before Screen:** Fragment plans must complete before any Screen plan that references them. Fragment JSON must exist in the repo before it can be referenced in a host form panel.
 
