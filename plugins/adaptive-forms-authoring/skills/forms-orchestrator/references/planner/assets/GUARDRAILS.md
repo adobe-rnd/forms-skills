@@ -133,6 +133,11 @@ Every plan **must** end with a `## Acceptance Criteria` section. No exceptions.
 
 Criteria must be independently testable. "Works correctly" is not a criterion.
 
+> **Plan Completion Gate:** Before marking a plan ✅, the orchestrator MUST verify EVERY
+> `- [ ]` criterion against live form state (read AEM page content, check field properties,
+> confirm behaviour in rendered form). Marking ✅ based on intent or successful step
+> execution alone is forbidden.
+
 ---
 
 ## Plan File Convention
