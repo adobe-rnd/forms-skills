@@ -111,8 +111,8 @@ When a plan step declares a skill:
 
 | Pattern | Why forbidden | Correct alternative |
 |---------|--------------|---------------------|
-| Direct PATCH to `properties/fd:rules` or `properties/fd:events` via Sites Content API | Bypasses `apply-rule-patch.bundle.js` merge logic; overwrites all existing rules silently | Use `forms-author` › `references/apply-rule-workflow.md` which calls `apply-rule-patch.bundle.js` |
-| Setting `properties/validationExpression` via Sites Content API | Does not persist to JCR leaf node correctly | Use `curl POST <field-path> -F validationExpression=<formula>` |
+| Direct PATCH to `properties/fd:rules` or `properties/fd:events` via Sites Content API | Bypasses `apply-rule-patch.bundle.js` merge logic; overwrites all existing rules and events silently | Use `forms-author` › `references/apply-rule-workflow.md` which calls `apply-rule-patch.bundle.js` |
+| Setting `properties/validationExpression` via Sites Content API | Does not persist to JCR leaf node correctly | Use `curl POST <field-path> -F validationExpression=<formula>` — see `forms-rule-author` SKILL.md Step 12 for field-path format |
 
 ---
 
