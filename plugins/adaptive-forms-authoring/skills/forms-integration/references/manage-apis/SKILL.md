@@ -27,7 +27,7 @@ Manages API integrations for AEM Forms by authoring OpenAPI 3.0 YAML specs and J
 
 - Adding a new API definition (from scratch or from a cURL command)
 - Writing a JS API client file for use in custom functions
-- Inspecting or listing existing API specs in `refs/apis/`
+- Inspecting or listing existing API specs in `$FORMS_WORKSPACE/refs/apis/`
 - Troubleshooting API integration issues in forms
 
 **Do NOT use for:** Writing custom function logic that calls APIs — use the **forms-rule-author** skill instead (it covers custom function authoring, the async wrapper pattern, and `globals.functions.request()`).
@@ -35,7 +35,7 @@ Manages API integrations for AEM Forms by authoring OpenAPI 3.0 YAML specs and J
 ## Critical Rules
 
 1. **Always use `globals.functions.request()`** — NEVER use `fetch()` directly in AEM Forms
-2. **Never fabricate API endpoints** — use only endpoints the user provides or that exist in `refs/apis/*.yaml`
+2. **Never fabricate API endpoints** — use only endpoints the user provides or that exist in `$FORMS_WORKSPACE/refs/apis/*.yaml`
 3. **Write files directly** — author YAML specs and JS client files manually; no CLI tooling required
 
 ## Tools
@@ -43,20 +43,20 @@ Manages API integrations for AEM Forms by authoring OpenAPI 3.0 YAML specs and J
 | Action | How |
 |--------|-----|
 | Add API from cURL | `python3 scripts/api_skill.py --curl "<curl>" --repo-root "$FORMS_WORKSPACE"` |
-| Add API manually | Write OpenAPI YAML to `refs/apis/<name>.yaml` using template below |
-| List existing APIs | Read `refs/apis/*.yaml` files |
+| Add API manually | Write OpenAPI YAML to `$FORMS_WORKSPACE/refs/apis/<name>.yaml` using template below |
+| List existing APIs | Read `$FORMS_WORKSPACE/refs/apis/*.yaml` files |
 | Write JS client | Author `blocks/form/api-clients/<name>.js` using client pattern below |
 
 ## Workflow
 
-1. **Discover** — read `refs/apis/*.yaml` to find existing API specs; ask user if none exist
+1. **Discover** — read `$FORMS_WORKSPACE/refs/apis/*.yaml` to find existing API specs; ask user if none exist
 2. **Add API spec** — if user provides a cURL, run `api_skill.py`; otherwise write YAML manually from template
 3. **Write JS client** — author `blocks/form/api-clients/<name>.js` following the client pattern below
 4. **Wire into form** — use **forms-rule-author** to create the custom function wrapper, then **forms-author** to patch the rule into the form's content model
 
 ## OpenAPI YAML Template
 
-Each API is defined as an OpenAPI 3.0 YAML file in `refs/apis/`:
+Each API is defined as an OpenAPI 3.0 YAML file in `$FORMS_WORKSPACE/refs/apis/`:
 
 ```yaml
 openapi: 3.0.3
@@ -128,7 +128,7 @@ components:
 Write `async` JavaScript clients in `blocks/form/api-clients/<name>.js`:
 
 ```javascript
-// <operationId> client — derived from refs/apis/<name>.yaml
+// <operationId> client — derived from $FORMS_WORKSPACE/refs/apis/<name>.yaml
 export async function apiName(params, globals) {
   params = params || {};
   if (params.mobileNumber === undefined || params.mobileNumber === null) {
@@ -227,7 +227,7 @@ Do not hand-edit form content model files directly.
 ## File Structure
 
 ```
-refs/apis/                        # OpenAPI 3.0 YAML specs (source of truth)
+$FORMS_WORKSPACE/refs/apis/                        # OpenAPI 3.0 YAML specs (source of truth)
 ├── _template.yaml                # Template for new APIs
 └── *.yaml                        # Individual API specs
 

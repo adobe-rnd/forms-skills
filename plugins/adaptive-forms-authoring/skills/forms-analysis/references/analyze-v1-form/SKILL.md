@@ -205,10 +205,10 @@ Map v1 JSON concepts to spec sections:
 | `visibleExp` / `visible: false` rules | `## Functional Rules` |
 | Calculations in `valueCommitScript` | `## Complex Rules` |
 | `validateExp` / `validatePictureClause` | `## Validations` |
-| API calls in `initScript` / `clickExp` | `## Integrations` (write API details to `refs/apis/<name>.md`) |
+| API calls in `initScript` / `clickExp` | `## Integrations` (write API details to `$FORMS_WORKSPACE/refs/apis/<name>.md`) |
 | Submit button / form submit | `## Submit` |
 
-Also write API reference files to `refs/apis/<name>.md` for each API found in scripts — spec references these files, does not embed API schemas inline.
+Also write API reference files to `$FORMS_WORKSPACE/refs/apis/<name>.md` for each API found in scripts — spec references these files, does not embed API schemas inline.
 
 ### Open Items
 

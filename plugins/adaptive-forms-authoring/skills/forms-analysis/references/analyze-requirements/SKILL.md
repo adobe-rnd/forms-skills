@@ -3,7 +3,7 @@ name: analyze-requirements
 description: >
   Use when analyzing a requirements document, inline text, or journey.md to
   produce a journey spec at journeys/<journey>/spec.md. Extracts API
-  definitions to refs/apis/ before writing the spec.
+  definitions to $FORMS_WORKSPACE/refs/apis/ before writing the spec.
 license: Apache-2.0
 metadata:
   author: Adobe
@@ -30,7 +30,7 @@ Parse requirements input into a structured journey spec at `$FORMS_WORKSPACE/jou
 ## Critical Rules
 
 1. **Act autonomously** — read input, produce spec. Don't ask "should I analyze this?"
-2. **Extract APIs first** — write all API definitions to `refs/apis/` before writing spec.md. Spec references files, never inline schemas.
+2. **Extract APIs first** — write all API definitions to `$FORMS_WORKSPACE/refs/apis/` before writing spec.md. Spec references files, never inline schemas.
 3. **Mark unknowns TBD** — if an API endpoint, data source, or behavior is unclear, mark TBD
 4. **No PL.currentFormContext** — mark data sources as TBD instead
 5. **Custom components first** — identify custom `fd:viewType` components before describing screens
@@ -46,17 +46,17 @@ Parse requirements input into a structured journey spec at `$FORMS_WORKSPACE/jou
 | `.docx` file | Run `scripts/docx-to-text.py <path>` → read output, then proceed |
 | With screenshots | Pass visuals to `visual-analysis` to fill screen structure gaps |
 
-## Step 1 — Extract APIs to refs/apis/
+## Step 1 — Extract APIs to $FORMS_WORKSPACE/refs/apis/
 
 Before writing the spec, scan all input for API information:
 
 | API info type | Action |
 |---|---|
-| OpenAPI YAML | Copy to `refs/apis/<name>.yaml` as-is |
-| Custom YAML | Write to `refs/apis/<name>.yaml` |
-| JSON payload / schema | Write to `refs/apis/<name>.json` |
-| Inline description (URL, params, response) | Generate `refs/apis/<name>.md` with structured description |
-| cURL example | Write to `refs/apis/<name>.md` with endpoint, method, headers, body |
+| OpenAPI YAML | Copy to `$FORMS_WORKSPACE/refs/apis/<name>.yaml` as-is |
+| Custom YAML | Write to `$FORMS_WORKSPACE/refs/apis/<name>.yaml` |
+| JSON payload / schema | Write to `$FORMS_WORKSPACE/refs/apis/<name>.json` |
+| Inline description (URL, params, response) | Generate `$FORMS_WORKSPACE/refs/apis/<name>.md` with structured description |
+| cURL example | Write to `$FORMS_WORKSPACE/refs/apis/<name>.md` with endpoint, method, headers, body |
 | No APIs found | Skip — omit `## Integrations` section from spec |
 
 ## Step 2 — Write journeys/<journey>/spec.md
@@ -217,7 +217,7 @@ Field constraints and cross-field validations.
 
 ### Section 8 — Integrations
 
-Reference API files extracted to `refs/apis/` in Step 1.
+Reference API files extracted to `$FORMS_WORKSPACE/refs/apis/` in Step 1.
 
 ```markdown
 ## Integrations
@@ -226,7 +226,7 @@ Reference API files extracted to `refs/apis/` in Step 1.
 > in `.skills-workspace/.env`. Mark `sync-blocked: true` if credentials unknown.
 
 ### <api-name>
-- API ref: refs/apis/<name>.<ext>
+- API ref: $FORMS_WORKSPACE/refs/apis/<name>.<ext>
 - Source: `aem-fdm` | `new`
 - Sync blocked: true | false   ← aem-fdm only
 - Trigger: `form-load` | `field-change: <field_name>` | `button-click: <field_name>`
@@ -294,4 +294,4 @@ After writing the spec, evaluate:
 ## Output
 
 - `$FORMS_WORKSPACE/journeys/<journey>/spec.md` — journey specification
-- `refs/apis/<name>.<ext>` — one file per API found (written in Step 1)
+- `$FORMS_WORKSPACE/refs/apis/<name>.<ext>` — one file per API found (written in Step 1)

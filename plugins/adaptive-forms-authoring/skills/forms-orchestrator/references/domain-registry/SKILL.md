@@ -89,7 +89,7 @@ Two entry points:
 
 | Skill | Path | Purpose |
 |-------|------|---------|
-| `forms-context-management` | `skills/forms-context-management/SKILL.md` | Read/write `.agent/handover.md`, history, session log — READ (silent) and WRITE (prompts user) |
+| `forms-context-management` | `skills/forms-context-management/SKILL.md` | Read/write `$FORMS_WORKSPACE/.agent/handover.md`, history, session log — READ (silent) and WRITE (prompts user) |
 
 ---
 

@@ -29,7 +29,7 @@ Generates ordered, executable plans from a journey spec. The orchestrator routes
 
 ```
 journeys/<journey>/spec.md
-  + refs/apis/<name>.<ext> (if integrations)
+  + $FORMS_WORKSPACE/refs/apis/<name>.<ext> (if integrations)
           │
           ▼
   ┌───────────────────────┐
