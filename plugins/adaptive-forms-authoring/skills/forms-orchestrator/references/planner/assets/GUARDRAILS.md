@@ -140,6 +140,21 @@ Criteria must be independently testable. "Works correctly" is not a criterion.
 
 ---
 
+## Deferred Items
+
+When a plan step defers work to a later plan (e.g. "wired in Plan N", "deferred to Integration plan"):
+
+1. Annotate the step inline: `<!-- deferred to: NN-<plan-title> -->`
+2. The orchestrator appends a row to `handover.md` under `## Deferred Items`:
+
+| Plan | Item | Deferred to | Status |
+|------|------|-------------|--------|
+| `03-screen-01` | Wire submit button to Integration plan | `07-integration` | ⬚ Pending |
+
+**Gate:** A plan cannot transition to ✅ until every deferred item targeting it is resolved and its Status updated to ✅ Done.
+
+---
+
 ## Plan File Convention
 
 | Property | Convention |
