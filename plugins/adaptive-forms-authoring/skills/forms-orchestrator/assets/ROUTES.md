@@ -40,7 +40,7 @@ digraph orchestrator {
 
 | State | Condition | Entry Action | Exit → Next State |
 |---|---|---|---|
-| **INIT** | Session start | Read `handover.md` silently (manage-context READ — no user prompt) | Determine state from table below |
+| **INIT** | Session start | Read `.agent/handover.md` silently (forms-context-management READ — no user prompt) | Determine state from table below |
 | **WORKSPACE_MISSING** | `FORMS_WORKSPACE` not set, no `.env` | Read `assets/SETUP.md` inline — hard gate, nothing else runs | Setup done → INIT |
 | **FRESH** | No `journeys/<j>/spec.md` | Run component-inventory (conditional) then invoke `forms-analysis` — see FRESH → SPEC_READY section for decision logic. | spec.md written + APIs extracted → SPEC_READY |
 | **SPEC_READY** | spec.md exists, no plans yet | Invoke `references/planner/SKILL.md` | Plans written to `journeys/<j>/plans/` → EXECUTING(1) |
@@ -153,7 +153,8 @@ All steps done?
               Verify EVERY - [ ] criterion against live form state
               Check all Deferred Items assigned to this plan are resolved
               ├── All pass → mark plan ✅ complete
-              │             offer manage-context WRITE (prompt user)
+              │             route to context-management domain via domain-registry
+              │             → forms-context-management SKILL.md WRITE mode (prompts user before writing)
               │             → EXECUTING(N+1) or COMPLETE
               └── Any fail → BLOCKED → report to user
 ```
