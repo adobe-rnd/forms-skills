@@ -89,8 +89,7 @@ Two entry points:
 
 | Skill | Path | Purpose |
 |-------|------|---------|
-| `forms-context-management` | `skills/forms-context-management/SKILL.md` | Domain router for session state |
-| `manage-context` | `skills/forms-context-management/references/manage-context/SKILL.md` | Read/write handover.md, history, session log |
+| `forms-context-management` | `skills/forms-context-management/SKILL.md` | Read/write `.agent/handover.md`, history, session log — READ (silent) and WRITE (prompts user) |
 
 ---
 
