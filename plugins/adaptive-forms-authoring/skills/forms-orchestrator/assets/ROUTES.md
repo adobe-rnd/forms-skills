@@ -42,7 +42,7 @@ digraph orchestrator {
 |---|---|---|---|
 | **INIT** | Session start | Read `handover.md` silently (manage-context READ — no user prompt) | Determine state from table below |
 | **WORKSPACE_MISSING** | `FORMS_WORKSPACE` not set, no `.env` | Read `assets/SETUP.md` inline — hard gate, nothing else runs | Setup done → INIT |
-| **FRESH** | No `journeys/<j>/spec.md` | Invoke `forms-analysis` | spec.md written + APIs extracted → SPEC_READY |
+| **FRESH** | No `journeys/<j>/spec.md` | Run `forms-component-inventory` if `refs/component-registry.md` absent and `$FORMS_EDS_ROOT/blocks/form/mappings.js` present → write registry. Then invoke `forms-analysis`. | spec.md written + APIs extracted → SPEC_READY |
 | **SPEC_READY** | spec.md exists, no plans yet | Invoke `references/planner/SKILL.md` | Plans written to `journeys/<j>/plans/` → EXECUTING(1) |
 | **EXECUTING(N)** | Plan N not complete | Execute plan N step by step | Acceptance criteria pass → EXECUTING(N+1) or COMPLETE |
 | **BLOCKED** | Plan N acceptance criteria fail | Report to user, await resolution | User resolves → resume EXECUTING(N) |
@@ -88,6 +88,18 @@ source .skills-workspace/.env && \
 ---
 
 ## FRESH → SPEC_READY
+
+### Step 1 — Component Inventory (conditional)
+
+Before invoking `forms-analysis`, run `forms-component-inventory` to populate the component palette:
+
+| Condition | Action |
+|---|---|
+| `refs/component-registry.md` exists | Skip — registry already populated |
+| `$FORMS_EDS_ROOT/blocks/form/mappings.js` absent | Skip — OOTB-only project, no custom components |
+| Neither skip condition met | Run `forms-component-inventory` → write `refs/component-registry.md` |
+
+### Step 2 — Analysis
 
 Invoke `forms-analysis` skill.
 
