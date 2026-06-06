@@ -1,5 +1,5 @@
 ---
-name: forms-component-inventory
+name: forms-component-discovery
 description: >
   Use when selecting field types for a form, discovering which components have
   CSS files for styling, or auditing what is registered in mappings.js. Reads
@@ -10,9 +10,10 @@ license: Apache-2.0
 metadata:
   type: skill
   author: Adobe
-  version: "0.2"
+  version: "0.3"
   triggers:
     - component inventory
+    - component discovery
     - available components
     - custom components
     - what components exist
@@ -25,9 +26,9 @@ metadata:
     - styling components
 ---
 
-# Forms Component Inventory
+# Forms Component Discovery
 
-Survey all registered form components — custom `fd:viewType` components AND OOTB decorator components — before making field selection or styling decisions.
+Survey all registered form components — custom `fd:viewType` components AND OOTB decorator components — before making field selection or styling decisions. Owns reading and writing of `$FORMS_WORKSPACE/refs/component-registry.md`.
 
 **Run this before resolving any field intent or styling any component.** Custom components take priority over OOTB equivalents for field selection. All registered components (custom + OOTB) have their own CSS files under `blocks/form/components/{name}/{name}.css`.
 
@@ -39,6 +40,7 @@ Survey all registered form components — custom `fd:viewType` components AND OO
 - Starting component CSS discovery in `forms-style`
 - User asks "what components are available?" or "which components can I style?"
 - Authoring a new form and need the full component palette
+- After scaffolding a new custom component (invoked by `forms-custom-components`)
 
 **Skip when:**
 - You already know the exact component needed and it's confirmed registered
@@ -60,11 +62,15 @@ Extract both array values:
 
 Both arrays are loaded via the same `loadComponent()` — both get `blocks/form/components/{name}/{name}.css` loaded at runtime.
 
-### Step 2 — Check $FORMS_WORKSPACE/refs/component-registry.md
+### Step 2 — Read existing registry
 
-If `$FORMS_WORKSPACE/refs/component-registry.md` exists, read it for descriptions and base types per custom component. Schema: see `skills/forms-custom-components/references/component-registry-schema.md`.
+Read `$FORMS_WORKSPACE/refs/component-registry.md` if present. Existing rows (descriptions, base types) carry forward into the Step 5 merge — they are not regenerated.
 
-If absent, infer base type from component name where possible (e.g., `card-choice` → `radio-group`).
+If absent, skip. Step 5 will create it.
+
+Schema: see `skills/forms-custom-components/references/component-registry-schema.md`.
+
+If absent and `mappings.js` also absent, infer base type from component name where possible (e.g., `card-choice` → `radio-group`).
 
 ### Step 3 — Produce unified palette
 
@@ -89,7 +95,9 @@ OOTB Field Types (no separate component file — styled via form.css):
 → See skills/forms-content-modeler/references/field-types.md
 ```
 
-### Step 4a — Field selection (forms-content-modeler context)
+### Step 4 — Field selection or CSS discovery
+
+**Field selection (forms-content-modeler context):**
 
 For each field intent:
 1. Custom component matches intent better than OOTB base? → use it
@@ -97,7 +105,7 @@ For each field intent:
 
 **Example:** "single selection as image cards" → `card-choice` (fd:viewType) + `radio-group` (fieldType) ✅
 
-### Step 4b — CSS discovery (forms-style context)
+**CSS discovery (forms-style context):**
 
 For each component in both arrays, its CSS file is:
 ```
@@ -110,6 +118,17 @@ ls $FORMS_EDS_ROOT/blocks/form/components/
 ```
 
 Report which components have a CSS file — these are the per-component styling targets. Components NOT in either array (plain inputs, dropdowns, checkboxes, etc.) are styled via `blocks/form/form.css` selectors only.
+
+### Step 5 — Write/merge registry
+
+Write the unified palette to `$FORMS_WORKSPACE/refs/component-registry.md`:
+
+- **File absent:** create using schema from `skills/forms-custom-components/references/component-registry-schema.md`
+- **File exists:** merge —
+  - Add rows for components in `mappings.js` not yet in registry
+  - Preserve all existing rows unchanged (descriptions, base types)
+
+Order: custom components (`customComponents` array) first, OOTB decorators (`OOTBComponentDecorators` array) second.
 
 ---
 
@@ -144,3 +163,4 @@ Report which components have a CSS file — these are the per-component styling 
 3. **fieldType is always required.** Even when `fd:viewType` is set, `fieldType` must reflect the semantic data type.
 4. **CSS file path is deterministic.** `components/{name}/{name}.css` — no lookup needed.
 5. **If mappings.js is absent**, OOTB only — proceed directly to `field-types.md`.
+6. **Always write registry after palette production.** Every invocation writes/merges `$FORMS_WORKSPACE/refs/component-registry.md` — idempotent.
