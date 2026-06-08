@@ -50,7 +50,7 @@ If they do NOT exist, ask the user:
 Create the `.skills-workspace` directory **inside the current working directory** (the EDS repo root):
 
 ```bash
-mkdir -p .skills-workspace/{repo,refs/apis,.agent,journeys}
+mkdir -p .skills-workspace/{refs/apis,.agent,journeys}
 mkdir -p .claude
 ```
 
@@ -117,7 +117,7 @@ When implementing form UI components, prefer component-based approaches over dir
 
 ## Form Validation
 
-Use `constraintMessages` carefully in `form.json` and validate the schema before writing. For validation rules, test with a small subset first — never apply bulk rules without incremental validation.
+Use `constraintMessages` carefully and validate against the content model before patching. For validation rules, test with a small subset first — never apply bulk rules without incremental validation.
 ```
 
 **Then create `.claude/settings.json` at the EDS repo root with Claude Code hooks:**
@@ -226,6 +226,9 @@ AEM_TOKEN=<paste-your-bearer-token-here>
 
 # ── AEM Write Paths ──────────────────────────────────────
 AEM_WRITE_PATHS=<collected-value>
+
+# ── Figma (optional — required for forms-style-screen Figma-enhanced mode) ──
+# FIGMA_API_KEY=<paste-your-figma-api-key-here>
 
 # ── GitHub (optional — for authenticated git push over HTTPS or gh pr create) ──
 # GITHUB_TOKEN=<paste-your-github-pat-here>
@@ -341,6 +344,31 @@ This creates:
 
 Restart Claude Code after adding the MCP server in either setup.
 
+## Figma MCP Server
+
+The `forms-style-screen` skill uses the Figma MCP server to extract exact design values (colors, spacing, typography) from Figma URLs. This is optional — screenshot-only mode works without it.
+
+### Setup
+
+**Step 1 — Add `FIGMA_API_KEY` to `.env`**
+
+```
+# ── Figma (optional — required for forms-style-screen Figma-enhanced mode) ──
+FIGMA_API_KEY=<paste-your-figma-api-key-here>
+```
+
+Generate a key at [figma.com/settings](https://www.figma.com/settings) → Security → Personal access tokens. Paste directly into `.env` — do not paste in the conversation.
+
+**Step 2 — Add the MCP server**
+
+```bash
+claude mcp add figma -- npx -y figma-developer-mcp --figma-api-key=$FIGMA_API_KEY
+```
+
+Or if the Figma MCP is already registered in `.mcp.json`, ensure `FIGMA_API_KEY` is set in `$FORMS_EDS_ROOT/.env` before starting Claude Code.
+
+Restart Claude Code after adding. The MCP is optional — if not configured, `forms-style-screen` falls back to screenshot-only mode (±1–3 hex point color accuracy from JPG compression).
+
 ## Workspace Directory Structure
 
 ```
@@ -362,16 +390,9 @@ Restart Claude Code after adding the MCP server in either setup.
     │   ├── handover.md
     │   ├── history.md
     │   └── sessions.md
-    ├── repo/
-    │   └── content/forms/af/      ← Mirrors AEM content path — pulled forms land here
-    │       └── <team>/<app>/
-    │           └── <form>/
-    │               ├── <form>.form.json
-    │               └── <form>.rule.json
     ├── refs/
     │   ├── metadata.json          ← Fragment registry
-    │   ├── apis/                  ← OpenAPI 3.0 YAML specs and generated clients
-    │   └── <fragment>.form.json   ← Fragment content (read-only references)
+    │   └── apis/                  ← OpenAPI 3.0 YAML specs and generated clients
     └── journeys/
         └── <journey>/             ← One directory per journey
             ├── spec.md            ← Journey spec produced by forms-analysis
@@ -386,8 +407,7 @@ Restart Claude Code after adding the MCP server in either setup.
 | Directory | Purpose |
 |-----------|---------|
 | `blocks/form/` | EDS form code — edit directly in the EDS repo (scripts, api-clients, components) |
-| `.skills-workspace/repo/` | Mirrors AEM Author content structure; forms are pulled here under their AEM content path |
-| `.skills-workspace/refs/` | Read-only references — fragments and API specs |
+| `.skills-workspace/refs/` | Read-only references — fragment registry and API specs |
 | `.skills-workspace/journeys/` | One sub-directory per journey — contains `spec.md` and `plans/` with execution plans |
 | `.skills-workspace/.agent/` | Agent memory — handover state, history, and session log for continuity across sessions |
 
@@ -416,6 +436,7 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 | `AEM_WRITE_PATHS` | Yes | Comma-separated AEM paths allowed for push |
 | `GITHUB_TOKEN` | No | Classic personal access token with `repo` scope — required for authenticated git push over HTTPS or `gh pr create` |
 | `GITHUB_BRANCH` | No | Branch to work from (default: `main`) |
+| `FIGMA_API_KEY` | No | Figma personal access token — required for `forms-style-screen` Figma-enhanced mode |
 | `DEBUG` | No | Set to `true` to enable rule bridge debug output |
 
 *Either `AEM_TOKEN` or `AEM_USERNAME` + `AEM_PASSWORD` must be provided.

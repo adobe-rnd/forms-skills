@@ -87,9 +87,10 @@ Plan status is tracked in `$FORMS_WORKSPACE/.agent/handover.md` via the Plans ta
 
 | Criterion type | How to verify |
 |---|---|
-| Field exists / panel exists | Read form JSON from `$FORMS_WORKSPACE/repo/…/<form>.form.json` and confirm the field name and `fieldType` are present |
+| Field exists / panel exists | Use `get-aem-page-content` MCP to fetch the live content model and confirm the field name and `fieldType` are present |
 | Rule fires correctly | Read the field's `fd:rules` / `fd:events` entries in the rule store JSON and confirm the compiled formula is present |
 | API call wired | Confirm the custom function and its `fd:init` / `fd:valueCommit` trigger exist in `fd:events` |
+| Response handler complete | Read `$FORMS_EDS_ROOT/blocks/form/api-clients/<name>.js` — confirm the async helper has BOTH a success branch (sets field value(s) via `setProperty`) AND an error branch (`markFieldAsInvalid` or equivalent). A missing branch = BLOCKED, not done. |
 | No console errors | Report as manual — flag to user if browser MCP is unavailable |
 | Acceptance criterion is ambiguous | Do NOT self-certify — flag to user and enter BLOCKED |
 
