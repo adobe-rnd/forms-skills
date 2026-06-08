@@ -19,7 +19,7 @@ Standard structure for plan files. Copy the template below when creating a new p
 ````
 # Plan NN: <Plan Title>
 
-**Type:** <Custom Component | Screen | Interaction Flow | Functional Rules | Complex Rules | Validation | Style | Integration | Submit | QA>
+**Type:** <Custom Component | Fragment | Screen | Interaction Flow | Functional Rules | Complex Rules | Validation | Integration | Submit | QA>
 **Source:** `journeys/<journey>/spec.md` sections <X>, <Y>
 **Skills:** `<skill-1>`, `<skill-2>`
 **Depends on:** Plan <NN> (<what it provides>) — or "Nothing (first plan)"
@@ -136,12 +136,23 @@ Creates a reusable form panel as a standalone JSON file. Must complete before an
 ### Data Binding
 
 - Schema: <FDM path or JSON schema ref>
+
+### Design References
+
+Copied from spec. Pass to `forms-style-screen` in step 2.
+
+| Source | URL / Path | Viewport | Notes |
+|---|---|---|---|
+| Figma | https://figma.com/design/... | desktop | — |
+| Screenshot | $FORMS_WORKSPACE/inputs/fragment-<name>.png | desktop | — |
+
+_(Write `none` if spec has no design references for this fragment.)_
 ```
 
 **Typical Steps:**
 1. Create fragment JSON in Universal Editor using `forms-author`
-2. Commit fragment file: `forms/<fragment-name>.json`
-3. Verify fragment loads standalone without errors
+2. Style the fragment using `forms-style-screen` with the fragment identifier and design references from `### Design References` above
+3. Verify fragment loads standalone without errors and matches design
 
 ---
 
@@ -171,12 +182,25 @@ wizardPanel
 ### Layout / CSS Notes
 
 <Any CSS class or layout specifics — column count, spacing>
+
+### Design References
+
+Copied from spec. Pass to `forms-style-screen` in step 4.
+
+| Source | URL / Path | Viewport | Notes |
+|---|---|---|---|
+| Figma | https://figma.com/design/... | desktop | — |
+| Screenshot | $FORMS_WORKSPACE/inputs/screen-01.png | desktop | — |
+
+_(Write `none` if spec has no design references for this screen.)_
 ```
 
 **Typical Steps:**
 1. Add wizard panel step using `forms-author`
 2. Add fields using `forms-author` + `forms-content-modeler`
 3. Verify: screen renders all fields, no console errors
+4. Style the screen using `forms-style-screen` with the form URL, screen identifier, and design references from `### Design References` above
+5. Verify: screen matches design; rules scoped under panel selector; no CSS bleed across screens
 
 ---
 
@@ -304,9 +328,16 @@ API wiring — prefill on load, mid-flow service calls. Read `refs/apis/<name>.<
 **Typical Steps:**
 1. Register/sync API using `forms-integration` → `manage-apis`
 2. Write JS client to `blocks/form/api-clients/<name>.js` following the client pattern in `manage-apis`
-3. Create custom function wrappers using `forms-rule-author`
+3. Create custom function wrappers using `forms-rule-author` — async helper MUST have both success and error branches (see `manage-apis` workflow step 4)
 4. Wire triggers: field change / form load → custom function call
 5. Verify: trigger fires → response prefills correct fields; error → correct message shown
+
+> **Integration plan acceptance criteria must include per-API response handler checks:**
+> ```
+> - [ ] <api-name>: trigger fires on <event>
+> - [ ] <api-name>: success — <field(s)> populated from response
+> - [ ] <api-name>: error — user-facing message shown (or "silent" if spec says so)
+> ```
 
 ---
 
@@ -337,45 +368,6 @@ Show "<error message>" — do not clear form
 2. Implement success handler (message or redirect)
 3. Implement error handler (user message, form preserved)
 4. Verify: submit → success state shown; API error → error message shown
-
----
-
-### Style
-
-Applies brand colors, typography, and spacing to `form.css` and registered component CSS files. Run `forms-component-discovery` first to confirm which components have their own CSS files.
-
-**Specification Pattern:**
-
-```
-### Design Tokens
-
-| CSS Variable | Value | Source |
-|---|---|---|
-| `--button-primary-color` | `#d84800` | CTA button fill from design |
-| `--form-input-border-color` | `#d0d0d0` | Input border |
-| `--form-label-color` | `#333` | Label text |
-| `--form-input-font-size` | `1rem` | Input typography |
-
-### Component-Specific Styles
-
-| Component | CSS File | What to style |
-|---|---|---|
-| wizard | components/wizard/wizard.css | Nav strip background, step colors |
-| card-choice | components/card-choice/card-choice.css | Card border, selected state |
-
-### Selector Rules (not covered by vars)
-
-| Target | Selector | Properties |
-|---|---|---|
-| fullName field accent | `.field-fullName` | `border-left: 4px solid #d84800` |
-```
-
-**Typical Steps:**
-1. Run `forms-component-discovery` — list registered components and CSS file paths
-2. Override `--form-*` vars in `:root` of `form.css` using `forms-style`
-3. Add scoped selector rules in `form.css` for anything not covered by vars
-4. Edit per-component CSS files for component-specific styles
-5. Verify: form renders with correct colors, typography, spacing; no unscoped rules
 
 ---
 

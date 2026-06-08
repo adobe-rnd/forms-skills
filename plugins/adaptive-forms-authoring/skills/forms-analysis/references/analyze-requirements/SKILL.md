@@ -45,6 +45,9 @@ Parse requirements input into a structured journey spec at `$FORMS_WORKSPACE/jou
 | Inline text from user | Write to `$FORMS_WORKSPACE/inputs/<journey>-requirements.md` first, then read |
 | `.docx` file | Run `scripts/docx-to-text.py <path>` → read output, then proceed |
 | With screenshots | Pass visuals to `visual-analysis` to fill screen structure gaps |
+| Images / Figma URLs / design file links | Attribute each to its screen and record under that screen's `Design references` in the spec |
+
+**Design references rule:** any image path, screenshot attachment, Figma URL (`figma.com/design/...`), or design file link found in the requirements input must be attributed to a specific screen. Record them under a `### Design references` sub-section inside the relevant screen entry. If a reference covers multiple screens, duplicate the entry per screen. If attribution is ambiguous, list under all plausible screens and mark `(unconfirmed)`. Never discard design references — they are carried forward into screen plans and consumed by `forms-style-screen`.
 
 ## Step 1 — Extract APIs to $FORMS_WORKSPACE/refs/apis/
 
@@ -118,6 +121,22 @@ Identify panels that should be extracted as reusable fragments. Apply thresholds
 
 If none: write `None` under the heading. Planner skips Fragment plan if `None`.
 
+For each fragment entry, add a `#### Design references` sub-section immediately after the fragment table, one per fragment:
+
+```markdown
+### Fragment: personal-details
+
+#### Design references
+| Source | URL / Path | Viewport | Notes |
+|---|---|---|---|
+| Figma | https://figma.com/design/{fileKey}/...?node-id={nodeId} | desktop | Fragment frame |
+| Screenshot | $FORMS_WORKSPACE/inputs/fragment-personal-details.png | desktop | — |
+
+_(Write `none` if no design references found for this fragment.)_
+```
+
+Apply the same **design references rule** as screens: any image, screenshot, or Figma URL in the requirements that pertains to a fragment must be captured here.
+
 In the affected `## Screens` sub-section, note the fragment reference instead of listing fields inline:
 
 ```markdown
@@ -137,6 +156,14 @@ One sub-section per wizard step. Single-screen journeys have one sub-section.
 
 ### Screen 1: <name>
 Purpose: <what the user does on this step>
+
+#### Design references
+| Source | URL / Path | Viewport | Notes |
+|---|---|---|---|
+| Figma | https://figma.com/design/{fileKey}/...?node-id={nodeId} | desktop | Main screen frame |
+| Screenshot | $FORMS_WORKSPACE/inputs/screen-01-desktop.png | desktop | — |
+
+_(Write `none` if no design references found for this screen.)_
 
 | Field Name | Type / fd:viewType | Required | Placeholder | Notes |
 |---|---|---|---|---|

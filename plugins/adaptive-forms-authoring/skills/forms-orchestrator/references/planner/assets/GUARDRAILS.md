@@ -27,14 +27,13 @@ Read the journey spec and determine which plan types apply:
 | Plan Type | Create when spec has... | Skills |
 |---|---|---|
 | **Custom Component** | `## Custom Components` section with entries | `forms-custom-components` |
-| **Fragment** (one per fragment) | `## Fragments` section with entries | `forms-author` |
-| **Screen** (one per wizard step) | Any screen under `## Screens` | `forms-author`, `forms-content-modeler` |
+| **Fragment** (one per fragment) | `## Fragments` section with entries | `forms-author`, `forms-style-screen` |
+| **Screen** (one per wizard step) | Any screen under `## Screens` | `forms-author`, `forms-content-modeler`, `forms-style-screen` |
 | **Interaction Flow** | `Screen count: N` where N > 1 (multi-screen journey) | `forms-rule-author` |
 | **Functional Rules** | `## Functional Rules` section with entries | `forms-rule-author` |
 | **Complex Rules** | `## Complex Rules` section with entries | `forms-rule-author` |
 | **Validation** | `## Validations` section with entries | `forms-rule-author` |
 | **Integration** | `## Integrations` section with entries | `forms-integration`, `forms-rule-author` |
-| **Style** | `## Style` section, or spec has brand colors / design tokens / theming requirements | `forms-style`, `forms-component-discovery` |
 | **Submit** | `## Submit` section (always present) | `forms-author`, `forms-integration` |
 | **QA** | Always — every journey ends with QA | lint + smoke test |
 
@@ -91,7 +90,6 @@ digraph plan_order {
 | Next | **Complex Rules** | Functional Rules |
 | Next | **Validation** | All Screen plans complete |
 | Next | **Integration** | All Screen plans complete |
-| Next | **Style** | All Screen plans complete (style what exists) |
 | Last-1 | **Submit** | Integration (if any), Validation |
 | Last | **QA** | All preceding plans |
 
@@ -102,7 +100,8 @@ digraph plan_order {
 ## Decomposition Principles
 
 1. **One concern per plan** — each plan targets one functional area. If a plan touches unrelated concerns, split it.
-2. **Screen plans are structure only** — fields + layout + CSS. No rules, no APIs, no navigation wiring.
+2. **Screen plans include structure and styling** — fields + layout + CSS (`forms-style-screen` runs as last step of each Screen plan). No rules, no APIs, no navigation wiring.
+3. **Design references must be copied into screen and fragment plans** — when writing a Screen or Fragment plan, read the `#### Design references` table from that screen's or fragment's entry in `spec.md` and paste it verbatim into the plan's `### Design References` section. If the spec has no design references, write `none` — do not omit the section. This ensures `forms-style-screen` always has a design source to work from without reading back through the spec.
 3. **Incremental testability** — after each plan, the form must be in a testable, non-broken state.
 4. **Explicit dependencies** — every plan declares which prior plans must be complete.
 5. **Max 15 plans per journey** — if more needed, journey is too complex; split it or flag to user.
