@@ -58,7 +58,7 @@ The orchestrator runs a state machine every session — reading context silently
 |--------|---------|--------|
 | `analysis` | Requirements → journey spec | `analyze-requirements`, `visual-analysis`, `analyze-v1-form` |
 | `content-author` | Form structure & components | `forms-author`, `forms-content-modeler`, `forms-custom-components`, `forms-component-discovery` |
-| `style` | CSS theming & component styling | `forms-style`, `forms-component-discovery` |
+| `style` | CSS theming & component styling | `forms-style-screen`, `forms-component-discovery` |
 | `rule-creator` | Business rules & custom functions | `forms-rule-author` |
 | `integration` | APIs, FDM, prefill, submit | `manage-apis` |
 | `context-management` | Session state & handover | `manage-context` |
@@ -70,8 +70,8 @@ The Planner generates plans from `journeys/<journey>/spec.md`. Each plan is one 
 | Plan Type | Purpose |
 |-----------|---------|
 | **Custom Component** | Scaffold custom `fd:viewType` block before Screen plans that use it |
-| **Fragment** (×N) | Create reusable panel as standalone JSON before Screen plans that reference it |
-| **Screen** (×N) | One wizard step — fields, layout, CSS. No rules or APIs |
+| **Fragment** (×N) | Create reusable panel as standalone JSON + style it — before Screen plans that reference it |
+| **Screen** (×N) | One wizard step — fields, layout, and CSS styling. No rules or APIs |
 | **Interaction Flow** | Wizard navigation + conditional step progression |
 | **Functional Rules** | Show/hide, enable/disable, set-value rules |
 | **Complex Rules** | Calculations and derived values |
@@ -91,6 +91,9 @@ Plans are written to `journeys/<journey>/plans/NN-<title>.md` and executed seque
 | Node.js 18+ | Rule transformer, rule save tools, form bundles |
 | Python 3.7+ | `api_skill.py` (stdlib only — no packages needed) |
 | `git` on PATH | Version control for EDS code changes |
+| Sites Content MCP | `forms-author` — AEM content read/write |
+| Chrome DevTools MCP | `forms-style-screen` — live form inspection and CSS iteration |
+| Figma MCP _(optional)_ | `forms-style-screen` — exact design values; requires `FIGMA_API_KEY` in `.env` |
 
 ---
 

@@ -43,6 +43,7 @@ The **forms-orchestrator** routes intents through a 6-step algorithm — it gene
 |--------|--------|
 | `analysis` | `analyze-requirements`, `analyze-v1-form`, `visual-analysis` |
 | `content-author` | `forms-author`, `forms-content-modeler`, `forms-custom-components` |
+| `style` | `forms-style-screen`, `forms-component-discovery` |
 | `rule-creator` | `forms-rule-author` |
 | `integration` | `manage-apis` |
 | `context-management` | `manage-context` |
@@ -68,6 +69,9 @@ forms-skills/
     │   └── references/
     ├── forms-custom-components/        ← custom EDS component authoring (fd:viewType pattern)
     │   ├── scripts/
+    │   └── references/
+    ├── forms-style-screen/             ← live iterative screen/fragment CSS styling (Chrome + Figma)
+    │   ├── assets/
     │   └── references/
     ├── forms-rule-author/             ← rule & custom function authoring
     ├── forms-integration/              ← integration domain

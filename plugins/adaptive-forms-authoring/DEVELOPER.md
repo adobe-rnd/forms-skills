@@ -99,6 +99,9 @@ forms-skills/
     ├── forms-custom-components/         # Custom EDS component authoring
     │   ├── scripts/
     │   └── references/
+    ├── forms-style-screen/              # Live iterative screen/fragment CSS styling
+    │   ├── assets/                      # feedback-widget.js
+    │   └── references/                  # aem-css-conventions, anti-patterns, figma-mcp, widget-recovery
     ├── forms-rule-author/               # Rule & custom function authoring
     │   ├── scripts/
     │   ├── assets/
