@@ -52,7 +52,12 @@ Manages API integrations for AEM Forms by authoring OpenAPI 3.0 YAML specs and J
 1. **Discover** — read `$FORMS_WORKSPACE/refs/apis/*.yaml` to find existing API specs; ask user if none exist
 2. **Add API spec** — if user provides a cURL, run `api_skill.py`; otherwise write YAML manually from template
 3. **Write JS client** — author `blocks/form/api-clients/<name>.js` following the client pattern below
-4. **Wire into form** — use **forms-rule-author** to create the custom function wrapper, then **forms-author** to patch the rule into the form's content model
+4. **Write custom function with response handler** — use **forms-rule-author** to create the custom function wrapper. The async helper MUST contain BOTH branches before the integration is considered done:
+   - **Success branch** (`response.ok === true` or `x-success-condition` passes): maps `response.body` fields onto form fields via `globals.functions.setProperty`
+   - **Error branch** (`response.ok === false` or condition fails): calls `globals.functions.markFieldAsInvalid` or sets an error panel visible — never silently swallows failures unless the spec explicitly says `On Error: silent`
+   
+   A custom function with a call but no response handler is **incomplete**. Do not mark the step done until both branches exist.
+5. **Wire into form** — use **forms-author** to patch the rule into the form's content model
 
 ## OpenAPI YAML Template
 
