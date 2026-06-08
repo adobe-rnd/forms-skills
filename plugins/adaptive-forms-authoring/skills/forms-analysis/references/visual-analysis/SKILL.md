@@ -84,7 +84,7 @@ For each field, ask: does this look like an OOTB field or a custom renderer?
 | Countdown display | `countdown-timer` (base: number-input) |
 | Modal/overlay panel | `confirm-modal` (base: panel) |
 
-If project `blocks/form/mappings.js` is accessible, cross-reference `customComponents` array.
+If project `$FORMS_EDS_ROOT/blocks/form/mappings.js` is accessible, cross-reference `customComponents` array.
 
 ### Step 3 — Catalog Fields Per Screen
 
@@ -150,7 +150,7 @@ Identify brand colors, typography, and spacing from the visual. Map each to its 
 
 > If the visual doesn't provide explicit values, note the token as `TBD` — do not guess. The Style plan will refine.
 
-**Custom component tokens** — if custom components (wizard, card-choice, etc.) have distinct visual treatment, note their specific vars (see `forms-style/references/form-css-vars.md` for the full list).
+**Custom component tokens** — if custom components (wizard, card-choice, etc.) have distinct visual treatment, note their specific vars (see `forms-style-screen/references/aem-css-conventions.md` for emitted class names and selector patterns).
 
 Skip this step if the design has no brand styling information (wireframe-only, no color/type specs).
 

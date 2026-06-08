@@ -73,12 +73,12 @@ Two entry points:
 ---
 
 ### style
-**No single router** — invoke `forms-style` directly.
-**Route when:** user asks to style, theme, or set colors/typography/layout on a form or component
+**No single router** — invoke `forms-style-screen` directly.
+**Route when:** user asks to style, theme, or set colors/typography/layout on a form screen or fragment
 
 | Skill | Path | Purpose |
 |-------|------|---------|
-| `forms-style` | `skills/forms-style/SKILL.md` | Edit `form.css` and component CSS files — CSS vars, selector rules, per-component styles |
+| `forms-style-screen` | `skills/forms-style-screen/SKILL.md` | Style a screen or fragment against a design — live iteration via Chrome + Figma, journey-scoped CSS |
 | `forms-component-discovery` | `skills/forms-component-discovery/SKILL.md` | Discover registered components and their CSS file locations before styling |
 
 ---

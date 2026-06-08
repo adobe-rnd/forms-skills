@@ -4,7 +4,7 @@ description: >
   Use when selecting field types for a form, discovering which components have
   CSS files for styling, or auditing what is registered in mappings.js. Reads
   both customComponents and OOTBComponentDecorators arrays. Also use when
-  forms-content-modeler is resolving a field intent, or forms-style needs to
+  forms-content-modeler is resolving a field intent, or forms-style-screen needs to
   know which component CSS files exist for this project.
 license: Apache-2.0
 metadata:
@@ -37,7 +37,7 @@ Survey all registered form components — custom `fd:viewType` components AND OO
 ## When to Use
 
 - Starting field type resolution in `forms-content-modeler`
-- Starting component CSS discovery in `forms-style`
+- Starting component CSS discovery in `forms-style-screen`
 - User asks "what components are available?" or "which components can I style?"
 - Authoring a new form and need the full component palette
 - After scaffolding a new custom component (invoked by `forms-custom-components`)
@@ -105,7 +105,7 @@ For each field intent:
 
 **Example:** "single selection as image cards" → `card-choice` (fd:viewType) + `radio-group` (fieldType) ✅
 
-**CSS discovery (forms-style context):**
+**CSS discovery (forms-style-screen context):**
 
 For each component in both arrays, its CSS file is:
 ```

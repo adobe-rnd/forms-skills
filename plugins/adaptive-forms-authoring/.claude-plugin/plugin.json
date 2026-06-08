@@ -19,7 +19,7 @@
     "./skills/forms-author",
     "./skills/forms-content-modeler",
     "./skills/forms-custom-components",
-    "./skills/forms-style",
+    "./skills/forms-style-screen",
     "./skills/forms-rule-author",
     "./skills/forms-integration",
     "./skills/forms-integration/references/manage-apis",

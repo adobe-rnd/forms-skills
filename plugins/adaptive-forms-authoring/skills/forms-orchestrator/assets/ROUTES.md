@@ -171,7 +171,7 @@ For isolated tasks with no journey context. First match wins.
 | Create form, add / modify / delete fields, panels | `forms-author`, `forms-content-modeler` |
 | Custom component, extend field, fd:viewType block | `forms-custom-components` |
 | Component inventory, what components exist | `forms-component-discovery` |
-| Style, theme, CSS, colors, typography, layout, border | `forms-style`, `forms-component-discovery` |
+| Style, theme, CSS, colors, typography, layout, border | `forms-style-screen`, `forms-component-discovery` |
 | Add rules, show/hide, validate, calculate | `forms-rule-author` |
 | Add / build APIs, OpenAPI, cURL | `forms-integration` |
 | Save progress, update handover | `forms-context-management` |
