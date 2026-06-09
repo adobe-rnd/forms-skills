@@ -72,3 +72,38 @@ Below the table, add a structured analysis paragraph covering:
 **Medium / low confidence** — scattered classes, ambiguous exception, or purely downstream bank-API failures:
 
 → Do not auto-proceed. Print findings + analysis paragraph and ask the user to clarify (stack trace, journey ID, or which row to fix). Continue at **Fix mode Step 2** once they reply.
+
+## Step 6 — Infrastructure escalation (Step E5)
+
+Fires automatically when ANY of these is true after Steps 3–5:
+- Step 3 returned zero rows for the API path in `ams_cq`
+- Step 4 rows have no extractable Java class (pure HTTP log, no exception)
+- `HTTP_STATUS` is known and `references/infra-routing.md` maps it to a non-`ams_cq` primary layer
+
+```
+Read references/infra-routing.md → look up HTTP_STATUS → primary layer
+        ↓
+Run validation probe: search index=<PRIMARY_INDEX> host="<HOST>" earliest=-24h | stats count
+        ↓
+count == 0 → ask user to confirm hostname/time window
+count > 0  → query primary layer using spl-infra-<layer>.spl + splunk-runner-infra.py
+        ↓
+Results found?
+  YES → present layer-specific root cause report (format in references/infra-routing.md), stop
+  NO  → query secondary layer (per routing table)
+        ↓
+  Results found?
+    YES → present report, stop
+    NO  → correlate all three layers in sequence (WAF → ELB → CDN)
+          → present unified failure-chain report
+```
+
+If `HTTP_STATUS` is not known, default escalation order: ELB → WAF → CDN.
+
+**Hostname for infra layers** — host filter format differs per index. Ask per layer if not in message:
+```
+AskUserQuestion:
+  Which host/resource filter for <WAF|CDN|ELB> logs?
+  (Leave blank for "*" — may be slow on large indexes)
+  Examples: hdfc-prod-waf* / E1ABC2* / hdfc-prod-alb*
+```

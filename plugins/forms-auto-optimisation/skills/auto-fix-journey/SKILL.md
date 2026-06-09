@@ -1,6 +1,6 @@
 ---
 name: auto-fix-journey
-description: Fixes backend Java errors in AEM Forms. Routes by user input — pasted Java stack trace or class:line → Fix mode; form URL → Telemetry mode; API path + 4xx/5xx → API Error mode; Splunk keyword / journey UUID / "drill deeper" → Splunk mode. Uses impact-analyser graph for repo routing and post-fix blast-radius analysis. Use when the user has a backend Java error, a failing API, or wants to explore Splunk logs.
+description: Fixes backend Java errors in AEM Forms. Five entry points: (1) Telemetry mode — user provides a form URL, skill queries optel for API errors in last 1 day and lets user select which to fix; (2) Fix mode — user provides a stack trace or class+line; (3) API Error mode — user provides an API path or error label (e.g. "High API Errors"), skill queries Splunk; (4) Splunk mode — explicit log exploration; (5) Infrastructure mode — WAF/CDN/ELB layer diagnosis when ams_cq returns no Java results or user targets a specific infra layer. Uses impact-analyser graph for repo/file routing and post-fix blast-radius analysis.
 compatibility: Requires git + gh CLI. Auto-installs impact-analyser CLI into ~/.impact-analyser/ on first run. Python 3 + splunk-sdk required only for Splunk mode.
 allowed-tools: Read Write Edit Bash Agent AskUserQuestion
 metadata:
@@ -21,9 +21,10 @@ End-to-end pipeline for backend Java errors in AEM Forms: classify → user-appr
 | Form URL alone (no stack, no API) | **Telemetry mode** | `references/telemetry-mode.md` |
 | API path + 4xx/5xx / error label | **API Error mode** | `references/api-error-mode.md` |
 | UUID / "trace journey" / "show errors" / "drill deeper" / "FDM performance" | **Splunk mode** | `references/splunk-mode.md` |
+| "check WAF" / "WAF block" / "403 blocked" / "check CDN" / "CloudFront" / "check ELB" / "502" / "503" / "504" / "check infra" / "where is it failing" | **Infrastructure mode** | this file |
 | Anything else | Ask which one applies | — |
 
-The other three modes all transition into Fix mode at **Step 2** once they have enough context (Splunk extracts class+exception, telemetry hands off via API Error mode, etc).
+Telemetry, API Error, and Splunk modes all transition into Fix mode at **Step 2** once they have enough context. Infrastructure mode is a separate diagnostic path.
 
 ## Inputs (Fix mode)
 
@@ -234,6 +235,127 @@ Capture `IA_MD = $(cat $RUN_DIR/ia-analysis.md)`. On failure, set `IA_MD` to a o
 
 ---
 
+# INFRASTRUCTURE MODE
+
+Use when the user explicitly names an infrastructure layer or error code, OR when Step E5 auto-escalation fires from API Error mode.
+
+## Step F0 — Parse inputs and identify target layer(s)
+
+Extract from user message:
+- `INFRA_LAYER` — `WAF` / `CDN` / `ELB` / `ALL` (if "check all layers" or "where is it failing")
+- `API_PATH` — route or page URL (e.g. `/baas/getCustomerStatus`, `/digital/pl-journey`)
+- `HTTP_STATUS` — numeric status code if mentioned
+- `HOURS` — look-back window [default: 24]
+
+If `INFRA_LAYER` is not determinable from the message AND `HTTP_STATUS` is provided:
+→ read `references/infra-routing.md`, look up `HTTP_STATUS` → set `INFRA_LAYER` to primary layer.
+
+If neither is determinable: ask once:
+```
+AskUserQuestion:
+  1. Which layer to check? WAF / CDN / ELB / all
+  2. API path or page URL affected
+  3. HTTP status code (if known)
+  4. Time window in hours [default: 24]
+```
+
+## Step F1 — Resolve hostnames
+
+Host filter format differs per index. Check message first; ask per layer if missing:
+
+| Layer | Index | Splunk host field | Ask prompt example |
+|---|---|---|---|
+| WAF | `dx_ams_aws_waf` | AWS WAF ACL name | "WAF host filter? e.g. hdfc-prod-waf* (blank = *)" |
+| CDN | `dx_ams_aws_cf` | CloudFront distribution ID | "CloudFront distribution filter? e.g. E1ABC2* (blank = *)" |
+| ELB | `ams_aws_elb_access` / `aws_elb_access` | Shared EC2 node IPs, e.g. `ip-10-153-244-*.or2.adobe.net` | Use `"*"` for host; always add customer keyword (e.g. `"hdfc"`) as `__CUSTOMER__` |
+
+**ELB is multi-tenant:** `ams_aws_elb_access` contains logs from all AMS customers on shared ELB nodes. The Splunk `host` is always an internal IP. Always set `__CUSTOMER__` to the customer name (e.g. `hdfc`) so the SPL filters by ELB name in the raw log. If unknown, ask:
+```
+AskUserQuestion: "Customer name for ELB filter? (e.g. hdfc, blank = search all tenants — very slow)"
+```
+
+Blank answer → use `"*"` for host, `"*"` for customer, and warn: `"Using wildcard — query covers all tenants and will be slow."`
+
+## Step F2 — Validation probe
+
+Before running full SPL, confirm the index has data:
+
+```bash
+# Run for each target layer
+search index=<TARGET_INDEX> host="<HOST_FILTER>" earliest=-<HOURS>h | stats count
+```
+
+- `count == 0` → tell user, ask to adjust hostname or time window; do not proceed
+- `count > 0`  → proceed to Step F3
+
+## Step F3 — Query target layer(s)
+
+Read `tools/splunk-runner-infra.py`. For each target layer, read the matching SPL file, substitute placeholders, write to `/tmp/fji_infra_<layer>.py`, run:
+
+```bash
+SPLUNK_PASS="<pass>" python3 /tmp/fji_infra_<layer>.py 2>/dev/null
+```
+
+| Layer | SPL file | Placeholders |
+|---|---|---|
+| WAF | `spl-infra-waf.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__` |
+| CDN | `spl-infra-cdn.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__` |
+| ELB | `spl-infra-elb.spl` | `__HOST__`, `__URI_FILTER__`, `__EARLIEST__`, `__LATEST__`, `__CUSTOMER__` |
+
+`__URI_FILTER__` → `API_PATH` if provided, else `"*"`.
+`__EARLIEST__` / `__LATEST__` → Unix epoch integers computed by runner from `HOURS`.
+`__CUSTOMER__` (ELB only) → customer keyword resolved in Step F1 (e.g. `hdfc`). Must be a plain alphanumeric keyword — the SPL wraps it in quotes. Use `*` to skip customer filtering (slow — scans all tenants).
+
+**Parallelism:** when `INFRA_LAYER=ALL`, run all three queries in parallel (single message, multiple `Agent` uses each running one query). Collect all results before Step F4.
+
+## Step F4 — Present root cause analysis
+
+Follow the output format in `references/infra-routing.md`.
+
+**Single layer result:**
+
+```
+Infrastructure Analysis — <LAYER> — <URI> — last <N>h
+
+Root cause: <one sentence — what rule/condition is causing the failure>
+
+| Metric        | Value                                           |
+|---------------|-------------------------------------------------|
+| Occurrences   | <N>                                             |
+| First seen    | <timestamp>                                     |
+| Last seen     | <timestamp>                                     |
+| Pattern       | <WAF rule ID / CDN status+cache / ELB backend>  |
+| Affected URIs | <list>                                          |
+
+Sample events:
+  [<timestamp>] <raw log excerpt — 200 chars>
+
+Recommended action: <specific next step>
+```
+
+**Correlated result (ALL layers or Step E5 failure-chain):**
+
+```
+Failure Chain Analysis — <URI> — last <N>h
+
+Layer        | Status     | Finding
+-------------|------------|---------------------------------------------------
+WAF          | ✅ clean   | No blocks matching this path
+ELB          | ❌ hit     | 847 × 502 — backend <IP> unhealthy since 09:14
+AEM (ams_cq) | ⚠️  silent | 0 logs — request never reached AEM
+
+Root cause: <one sentence identifying the exact break in the chain>
+
+Recommended action: <specific next step>
+```
+
+Severity classification (from `references/infra-routing.md`):
+- **systemic** — > 1 000 occurrences or affects all requests to the path
+- **recurring** — 100–1 000 occurrences
+- **sporadic** — < 100 occurrences
+
+---
+
 ## Error handling
 
 | Situation | Action |
@@ -247,5 +369,11 @@ Capture `IA_MD = $(cat $RUN_DIR/ia-analysis.md)`. On failure, set `IA_MD` to a o
 | `git push` fails | Surface the command; PR section gets `branch not pushed` note |
 | `gh` not installed | Print the compare URL |
 | `ia analyse` fails in Step 10 | One-line callout in PR body; never blocks the PR |
+| Mode F — validation probe returns count=0 | Tell user; ask to adjust hostname pattern or widen time window; do not run full query |
+| Mode F — index inaccessible (connection refused / permissions) | "Cannot reach `<INDEX>` — check VPN and Splunk permissions for this index" |
+| Mode F — WAF/CDN/ELB host pattern unknown | Ask once; blank → use `"*"` with slowness warning |
+| Mode F — all three infra layers return empty | "No infra signal found for `<PATH>` in last `<N>`h. AEM app logs (ams_cq) are the best next step." |
+| Mode F — ams_cq has partial results AND infra hit | Present both: AEM partial findings + infra root cause side-by-side |
+| Step E5 fires but HTTP_STATUS not known | Default escalation order: ELB → WAF → CDN |
 
 For Splunk-specific failures (ConnectionRefused, splunklib missing) see `references/splunk-mode.md`.
