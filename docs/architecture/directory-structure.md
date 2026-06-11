@@ -2,15 +2,17 @@
 name: directory-structure
 description: >
   Standard directory layout conventions for multi-skill systems.
-  Covers flat, grouped, and deep skill trees with type annotations.
-type: guidelines
+  Covers flat, grouped, and deep skill trees with type annotations,
+  using the adaptive-forms-authoring plugin as the reference layout.
+metadata:
+  type: guidelines
 ---
 
 # Skill Directory Structure
 
 How to organize a skill tree's files and folders. Follows the [agentskills.io specification](https://agentskills.io) for per-skill layout, with conventions for multi-skill composition.
 
-Every SKILL.md and asset file declares a `type` — see the [Skill Architecture Guide](README.md) for the full type reference.
+Every SKILL.md declares a `type` under `metadata:` — see the [Skill Architecture Guide](README.md) for the full type reference.
 
 ---
 
@@ -20,32 +22,27 @@ Every skill is a directory with at minimum a `SKILL.md`:
 
 ```
 <skill-name>/
-├── SKILL.md              # type: skill | router | domain
+├── SKILL.md              # metadata.type: skill | router
 ├── references/           # Sub-skills or reference docs
 │   ├── <sub-skill>/
-│   │   └── SKILL.md      # type: skill | router | domain
+│   │   └── SKILL.md      # metadata.type: skill | router
 │   └── <reference>.md
 ├── assets/               # Static resources, offloaded content
-│   ├── guidelines.md     # type: guidelines
-│   ├── routing-table.md  # type: routing-table
-│   └── templates/
-│       └── <template>.md
-├── scripts/              # Executable code
-│   └── <script>.sh
-├── eval/                 # Test fixtures and evaluation plans
-│   ├── eval-plan.md
-│   └── fixtures/
-└── plans/                # Generated plan files (plan-driven workflows)
-    └── <journey>/
-        ├── 01-<title>.md
-        └── 02-<title>.md
+│   ├── GUARDRAILS.md     # constraints & conventions
+│   ├── ROUTES.md         # routing algorithm (routers only)
+│   ├── SETUP.md          # inline bootstrap (orchestrator only)
+│   └── TEMPLATE.md       # template emitted/used by the skill
+└── scripts/              # Executable code
+    └── <script>.sh
 ```
 
 **Rules:**
-- `name` in SKILL.md frontmatter **must match** the directory name
-- `type` in SKILL.md frontmatter **must match** the skill's role (see below)
-- SKILL.md body should be **under 500 lines / 5,000 tokens** (routers: under 100 lines)
-- Use relative paths for all file references
+- `name` in SKILL.md frontmatter **must match** the directory name.
+- `metadata.type` **must match** the skill's role (`router` or `skill`).
+- SKILL.md body should be **under 500 lines / 5,000 tokens** (routers: under ~100 lines).
+- Use relative paths for all file references.
+
+> **Generated artifacts (plans, specs, journey state) do NOT live in the skill tree.** They are written at runtime into the workspace (`$FORMS_WORKSPACE`) — see [Runtime Workspace](#runtime-workspace).
 
 ---
 
@@ -54,38 +51,36 @@ Every skill is a directory with at minimum a `SKILL.md`:
 In a multi-layer skill tree, each layer uses specific types:
 
 ```
-Level 0 (entry point)     → type: router       (orchestrator / gateway)
-Level 1 (registries)      → type: router       (domain registry)
-                          → type: skill         (planner — generates plans dynamically)
-Level 2 (grouping)        → type: domain        (domain routers)
-Level 3 (implementation)  → type: skill         (leaf skills — do the work)
+Level 0 (entry point)     → metadata.type: router   (orchestrator / gateway)
+Level 1 (registry)        → metadata.type: router   (domain registry — flat catalog)
+Level 1 (planner)         → metadata.type: skill    (generates plans dynamically)
+Level 2 (domain entry)    → metadata.type: router   (e.g. forms-analysis, forms-integration)
+                            OR metadata.type: skill  (e.g. forms-rule-author, or no router at all)
+Level 3 (implementation)  → metadata.type: skill    (leaf skills — do the work)
 
-Supporting files at any level:
-  assets/routing-table.md → type: routing-table
-  assets/guidelines.md    → type: guidelines
-  assets/plan-template.md → type: plan-template  (plan-driven only)
-  references/*-plan.md    → type: plan-type       (plan-driven only)
-  references/*-strategy.md → type: strategy       (plan-driven only)
+Supporting asset files (untyped markdown unless noted):
+  assets/ROUTES.md       → routing algorithm
+  assets/GUARDRAILS.md   → cross-cutting constraints
+  assets/SETUP.md        → inline workspace bootstrap
+  assets/TEMPLATE.md     → plan template (type: template) or domain SKILL template
 ```
 
 | Level | Type | Routing? | Implementation? | Max Lines |
 |-------|------|----------|-----------------|-----------|
-| 0 | `router` | Yes | No | 100 |
-| 1 | `router` | Yes | No | 100 |
-| 2 | `domain` | Yes | No | 100 |
-| 1 | `skill` (planner) | No | Yes (generates plans) | 500 |
-| 3 | `skill` | No | Yes | 500 |
-| Any | `routing-table` | N/A | N/A | No limit |
-| Any | `guidelines` | N/A | N/A | No limit |
-| Any | `plan-template` | N/A | N/A | No limit |
-| Any | `plan-type` | N/A | N/A | No limit |
-| Any | `strategy` | N/A | N/A | No limit |
+| 0 | `router` | Yes | No | ~100 |
+| 1 (registry) | `router` | Yes | No | ~100 |
+| 1 (planner) | `skill` | No | Yes (generates plans) | 500 |
+| 2 (domain entry) | `router` or `skill` | Yes | Sometimes | ~100 / 500 |
+| 3 (leaf) | `skill` | No | Yes | 500 |
+| Any (asset) | *(untyped, or `template`)* | N/A | N/A | No limit |
+
+> There is **no `type: domain`**. Domains are logical groupings catalogued by the registry; their entry skills declare `router` or `skill`. See [Skill Architecture Guide](README.md#skill-types).
 
 ---
 
 ## Flat Layout (1–4 skills)
 
-All skills are `type: skill`. No router needed:
+All skills are `metadata.type: skill`. No router needed:
 
 ```
 my-skill-tree/
@@ -93,11 +88,11 @@ my-skill-tree/
 │   └── plugin.json
 └── skills/
     ├── skill-a/
-    │   └── SKILL.md          # type: skill
+    │   └── SKILL.md          # metadata.type: skill
     ├── skill-b/
-    │   └── SKILL.md          # type: skill
+    │   └── SKILL.md          # metadata.type: skill
     └── skill-c/
-        └── SKILL.md          # type: skill
+        └── SKILL.md          # metadata.type: skill
 ```
 
 Each skill is standalone and triggered independently by its `description` field.
@@ -106,7 +101,7 @@ Each skill is standalone and triggered independently by its `description` field.
 
 ## Grouped Layout (5–10 skills)
 
-Add a `type: router` at the top that dispatches to `type: skill` leaves:
+Add a `metadata.type: router` at the top that dispatches to `skill` leaves:
 
 ```
 my-skill-tree/
@@ -114,81 +109,114 @@ my-skill-tree/
 │   └── plugin.json
 └── skills/
     └── <orchestrator>/
-        ├── SKILL.md              # type: router — dispatches to sub-skills
+        ├── SKILL.md              # metadata.type: router — dispatches to sub-skills
         ├── assets/
-        │   ├── routing-table.md  # type: routing-table (if routing is complex)
-        │   └── guidelines.md     # type: guidelines (if cross-cutting rules exist)
+        │   ├── ROUTES.md         # routing algorithm (if routing is complex)
+        │   └── GUARDRAILS.md     # constraints (if cross-cutting rules exist)
         └── references/
             ├── skill-a/
-            │   └── SKILL.md      # type: skill
+            │   └── SKILL.md      # metadata.type: skill
             ├── skill-b/
-            │   └── SKILL.md      # type: skill
+            │   └── SKILL.md      # metadata.type: skill
             └── skill-c/
-                └── SKILL.md      # type: skill
+                └── SKILL.md      # metadata.type: skill
 ```
 
-The `type: router` SKILL.md is lean (< 100 lines) and links to `assets/` for details.
+The router SKILL.md is lean (< 100 lines) and links to `assets/` for details.
 
 ---
 
-## Deep Layout (10+ skills, multi-phase workflows)
+## Deep Layout (10+ skills, plan-driven workflows)
 
-The full type stack: `router` → `router` (registries) + `skill` (planner) → `domain` → `skill`:
+This is the layout of the **`adaptive-forms-authoring`** reference plugin. The orchestrator owns the planner and registry; **every domain skill is a sibling** under `skills/` — the registry catalogs them by path, it does not contain them.
 
 ```
-my-skill-tree/
+plugins/adaptive-forms-authoring/
 ├── .claude-plugin/
 │   └── plugin.json
 └── skills/
-    └── <orchestrator>/
-        ├── SKILL.md                          # type: router (gateway)
-        ├── assets/
-        │   ├── routing-table.md              # type: routing-table
-        │   └── guidelines.md                 # type: guidelines
-        │
-        ├── references/
-        │   ├── <planner>/
-        │   │   ├── SKILL.md                  # type: skill (plan generator)
-        │   │   ├── assets/
-        │   │   │   └── plan-template.md      # type: plan-template
-        │   │   └── references/
-        │   │       ├── default-strategy.md   # type: strategy
-        │   │       ├── structure-plan.md     # type: plan-type
-        │   │       ├── workflow-plan.md      # type: plan-type
-        │   │       ├── logic-plan.md         # type: plan-type
-        │   │       ├── integration-plan.md   # type: plan-type
-        │   │       └── infrastructure-plan.md # type: plan-type
-        │   │
-        │   └── <domain-registry>/
-        │       ├── SKILL.md                  # type: router (registry)
-        │       ├── assets/
-        │       │   ├── skills-catalog.md
-        │       │   ├── skill-resolution.md
-        │       │   └── contribution-guide.md
-        │       └── references/
-        │           ├── <domain-a>/
-        │           │   ├── SKILL.md          # type: domain
-        │           │   └── references/
-        │           │       └── <skill-1>/
-        │           │           └── SKILL.md  # type: skill (leaf)
-        │           └── <domain-b>/
-        │               ├── SKILL.md          # type: domain
-        │               └── references/
-        │                   └── ...           # type: skill (leaves)
-        │
-        └── plans/                            # Generated plan files (at runtime)
-            └── <journey>/
-                ├── 01-form-structure.md
-                ├── 02-workflow-branch-a.md
-                ├── 03-api-integration.md
-                └── 04-error-handling.md
+    ├── forms-orchestrator/
+    │   ├── SKILL.md                       # metadata.type: router (gateway)
+    │   ├── assets/
+    │   │   ├── ROUTES.md                  # routing algorithm
+    │   │   ├── GUARDRAILS.md              # constraints & conventions
+    │   │   └── SETUP.md                   # inline workspace bootstrap
+    │   └── references/
+    │       ├── planner/
+    │       │   ├── SKILL.md               # metadata.type: skill (plan generator)
+    │       │   └── assets/
+    │       │       ├── GUARDRAILS.md      # plan-type selection + ordering
+    │       │       └── TEMPLATE.md        # type: template (plan-file schema)
+    │       └── domain-registry/
+    │           ├── SKILL.md               # metadata.type: router (flat catalog)
+    │           └── assets/
+    │               └── TEMPLATE.md        # domain SKILL template (produces type: router)
+    │
+    ├── forms-analysis/                    # analysis domain — entry: router
+    │   ├── SKILL.md                       # metadata.type: router
+    │   └── references/
+    │       ├── analyze-requirements/SKILL.md   # metadata.type: skill
+    │       ├── visual-analysis/SKILL.md        # metadata.type: skill
+    │       ├── analyze-v1-form/SKILL.md        # metadata.type: skill
+    │       └── task-types.md
+    │
+    ├── forms-author/                      # content-author domain — no router (direct)
+    │   ├── SKILL.md                       # metadata.type: skill
+    │   └── references/ …
+    ├── forms-content-modeler/SKILL.md     # content-author — metadata.type: skill
+    ├── forms-component-discovery/SKILL.md # content-author/style — metadata.type: skill
+    ├── forms-custom-components/SKILL.md   # content-author — metadata.type: skill
+    │
+    ├── forms-rule-author/                 # rule-creator domain — entry: skill
+    │   ├── SKILL.md                       # metadata.type: skill
+    │   └── references/ …
+    │
+    ├── forms-integration/                 # integration domain — entry: router
+    │   ├── SKILL.md                       # metadata.type: router
+    │   └── references/
+    │       └── manage-apis/SKILL.md       # metadata.type: skill
+    │
+    ├── forms-style-screen/SKILL.md        # style domain — metadata.type: skill
+    └── forms-context-management/SKILL.md  # context-management — metadata.type: skill
 ```
 
 Key characteristics of the plan-driven deep layout:
-- **The planner is a single `type: skill`** that generates plans dynamically at runtime
-- **`plans/` directory starts empty** and is populated by the planner based on requirements
-- **Plan type references** live under the planner as structured specs for each category of work
-- **Strategy files** control decomposition — user can override with `plans/custom-strategy.md`
+- **The planner is a single `type: skill`** that generates plans dynamically at runtime.
+- **The domain registry is a flat catalog** — it resolves an intent or plan step to a sibling skill's `SKILL.md` path.
+- **Domains are logical, not structural** — a domain may have a router entry (`forms-analysis`, `forms-integration`), a skill entry (`forms-rule-author`), or no entry point (`content-author`, `style` route to leaves directly).
+- **No generated artifacts in the tree** — plans and specs are written to `$FORMS_WORKSPACE` at runtime.
+
+---
+
+## Runtime Workspace
+
+The generated, journey-specific artifacts live **outside the skill tree**, in the workspace rooted at `$FORMS_WORKSPACE` (bootstrapped by `forms-orchestrator/assets/SETUP.md`):
+
+```
+$FORMS_WORKSPACE/
+├── inputs/                       # raw input docs / screenshots
+├── refs/
+│   ├── apis/<name>.<ext>         # extracted API definitions
+│   └── component-registry.md     # written by forms-component-discovery
+├── .agent/
+│   └── handover.md               # session state / active plan
+└── journeys/
+    └── <journey>/
+        ├── spec.md               # produced by forms-analysis
+        └── plans/                # produced by the planner
+            ├── 01-<screen>.md
+            ├── 02-interaction-flow.md
+            └── NN-qa.md
+```
+
+| Artifact | Path | Produced By |
+|----------|------|-------------|
+| Raw inputs | `$FORMS_WORKSPACE/inputs/` | user / analysis INTAKE |
+| API refs | `$FORMS_WORKSPACE/refs/apis/<name>.<ext>` | `forms-analysis` (EXTRACTING) |
+| Component registry | `$FORMS_WORKSPACE/refs/component-registry.md` | `forms-component-discovery` |
+| Journey spec | `$FORMS_WORKSPACE/journeys/<journey>/spec.md` | `forms-analysis` |
+| Plan files | `$FORMS_WORKSPACE/journeys/<journey>/plans/NN-<title>.md` | `planner` |
+| Session handover | `$FORMS_WORKSPACE/.agent/handover.md` | `forms-context-management` |
 
 ---
 
@@ -196,21 +224,14 @@ Key characteristics of the plan-driven deep layout:
 
 | Convention | Rule |
 |------------|------|
-| **`type` field** | Every SKILL.md and typed asset file must declare `type` in frontmatter. |
-| **`type: router`** | < 100 lines. Route only, never implement. |
-| **`type: domain`** | < 100 lines. Route only, never implement. Groups related skills. |
-| **`type: skill`** | < 500 lines / 5,000 tokens. Does the actual work. |
-| **`type: routing-table`** | Asset file. Routing algorithm offloaded from a router. |
-| **`type: guidelines`** | Asset file. Cross-cutting constraints for multiple skills. |
+| **`metadata.type`** | Every SKILL.md must declare `type` under `metadata:` (`router` or `skill`). |
+| **`type: router`** | < ~100 lines. Route only, never implement. |
+| **`type: skill`** | < 500 lines / 5,000 tokens. Does the actual work (planner included). |
+| **No `type: domain`** | Domains are registry groupings, not a frontmatter type. |
 | **`references/`** | Sub-skills (folders with SKILL.md) or reference docs. |
-| **`assets/`** | Offloaded content: `routing-table`, `guidelines`, templates, catalogs. |
-| **`assets/templates/`** | Templates for creating new items. Each template prescribes a fixed `type`. |
+| **`assets/`** | Offloaded content: `ROUTES.md`, `GUARDRAILS.md`, `SETUP.md`, `TEMPLATE.md`, catalogs. |
 | **`scripts/`** | Executable code. Self-contained, with error handling. |
-| **`eval/`** | Test plans and fixtures for evaluating skill quality. |
-| **`type: plan-template`** | Asset file. Schema/template for plan files generated by a planner. |
-| **`type: plan-type`** | Reference file. Defines spec patterns for a category of plans (structure, workflow, etc.). |
-| **`type: strategy`** | Reference file. Plan decomposition strategy (default or custom). |
-| **`plans/`** | Generated plan files. Created by the planner at runtime, executed by the orchestrator. |
+| **Generated artifacts** | Plans / specs / handover live in `$FORMS_WORKSPACE`, never in the skill tree. |
 | **Directory name = `name` field** | Always. No exceptions. |
 
 ---
@@ -219,14 +240,15 @@ Key characteristics of the plan-driven deep layout:
 
 | Anti-Pattern | Why It's Bad | Fix |
 |-------------|-------------|-----|
-| Missing `type` in frontmatter | Contributors can't tell what the file does without reading it | Add `type` — it's required |
-| `type: router` with > 100 lines | Loaded on every routing decision, wastes tokens | Offload to `type: routing-table` and `type: guidelines` assets |
-| `type: skill` that also routes to sub-skills | Violates single-responsibility, bloats the file | Split into `type: router` + `type: skill` |
-| `type: domain` that implements logic | Domains are routers — they dispatch, not implement | Move implementation to a `type: skill` leaf |
-| Deeply nested references (3+ levels) | Hard to discover, slow to navigate | Flatten or use registries (`type: router`) |
-| Guidelines duplicated across skills | Drift, contradictions | Consolidate in `type: guidelines` asset at parent level |
+| Missing `type` under `metadata` | Contributors can't tell what the file does without reading it | Add `metadata.type` — it's required |
+| `type: router` with > 100 lines | Loaded on every routing decision, wastes tokens | Offload to `ROUTES.md` and `GUARDRAILS.md` assets |
+| `type: skill` that also routes to sub-skills | Violates single-responsibility, bloats the file | Split into `router` + `skill` |
+| Nesting domain skills under the registry | Couples the catalog to the skills; breaks sibling resolution | Keep skills as siblings under `skills/`; let the registry catalog them by path |
+| Using a `type: domain` value | Not a real type in this system | Use `router` or `skill`; treat the domain as a registry grouping |
+| Deeply nested references (3+ levels) | Hard to discover, slow to navigate | Flatten or catalog via the registry |
+| Guidelines duplicated across skills | Drift, contradictions | Consolidate in a `GUARDRAILS.md` asset at the parent level |
+| Writing plans/specs into the skill tree | Pollutes the shipped plugin with per-journey state | Write them to `$FORMS_WORKSPACE` |
 | `resources/` instead of `references/` + `assets/` | Non-standard naming, confuses the discovery model | Rename to standard directories |
-| Template without a fixed `type` | Users don't know what type the output file should be | Every template must prescribe a fixed `type` |
-| Plans with more than 10 steps | Too much scope in a single plan | Split into two plans along a natural boundary |
-| More than 15 plans per journey | Journey is too complex | Decompose the journey into sub-journeys |
-| Plan scope defined by skill domain instead of feature | Produces fragmented, hard-to-test increments | Scope plans by feature — each plan can invoke multiple skill domains |
+| Plans with more than ~10 steps | Too much scope in a single plan | Split along a natural boundary |
+| More than 15 plans per journey | Journey is too complex | Decompose into sub-journeys |
+| Plan scope defined by skill domain instead of feature | Fragmented, hard-to-test increments | Scope plans by feature — a plan may invoke multiple domains |

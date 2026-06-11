@@ -3,7 +3,8 @@ name: skill-router-template
 description: >
   Generalized template for SKILL.md files that route user intents
   to sub-skills. Routers dispatch — they do not implement.
-type: router
+metadata:
+  type: router
 ---
 
 # Skill Router Template
@@ -20,28 +21,27 @@ Copy and fill in the sections below.
 
 ### Frontmatter
 
-The `type` field in frontmatter declares the skill's architectural role. Always include it.
+The `type` field declares the skill's architectural role and lives under `metadata:`. Always include it.
 
-| `type` | Use When |
+| `metadata.type` | Use When |
 |--------|----------|
-| `router` | Any SKILL.md that dispatches to sub-skills (orchestrators, registries, generic routers) |
-| `domain` | Domain router — groups related skills under a domain (use domain-template.md instead) |
-| `skill` | Leaf skill that does actual work (not a router — don't use this template). Also used for **planners** that dynamically generate plans from requirements — see [Plan-Driven Workflows](README.md#plan-driven-workflows) |
+| `router` | Any SKILL.md that dispatches to sub-skills (orchestrators, registries, domain entry routers) |
+| `skill` | Leaf skill that does actual work (don't use this template). Also used for **planners** that dynamically generate plans from a journey spec — see [Plan-Driven Workflows](README.md#plan-driven-workflows) |
 
 ```
 ---
 name: <router-id>
 description: >
   <One-line purpose. What does this router dispatch? What triggers it?>
-type: router
 license: Apache-2.0
 metadata:
   author: <Author or Organization>
   version: "<semver>"
+  type: router
 ---
 ```
 
-> **Note:** Generic routers use `type: router`. For domain-specific routers, use the domain template (`type: domain`). For plan-driven workflows, pair this router with a planner (`type: skill`) — see [Plan-Driven Workflows](README.md#plan-driven-workflows). Leaf skills use `type: skill`.
+> **Note:** There is no `type: domain`. A domain is a logical grouping catalogued by the registry; its entry router uses `type: router`. For plan-driven workflows, pair this router with a planner (`type: skill`) — see [Plan-Driven Workflows](README.md#plan-driven-workflows). Leaf skills use `type: skill`.
 
 ### Body
 
@@ -83,10 +83,10 @@ Link to offloaded content. Remove rows that don't apply.
 
 | What | Where |
 |------|-------|
-| Routing algorithm (detailed) | [`assets/routing-table.md`](assets/routing-table.md) |
-| Constraints & conventions | [`assets/guidelines.md`](assets/guidelines.md) |
-| Contribution guide | [`assets/contribution-guide.md`](assets/contribution-guide.md) |
-| Templates | `assets/templates/` |
+| Routing algorithm (detailed) | [`assets/ROUTES.md`](assets/ROUTES.md) |
+| Constraints & conventions | [`assets/GUARDRAILS.md`](assets/GUARDRAILS.md) |
+| Inline setup / bootstrap | [`assets/SETUP.md`](assets/SETUP.md) |
+| Templates | `assets/TEMPLATE.md` |
 ```
 
 ---
@@ -108,10 +108,10 @@ Link to offloaded content. Remove rows that don't apply.
 | Symptom | Action |
 |---------|--------|
 | SKILL.md exceeds ~100 lines | Offload the largest section to `assets/` |
-| Routing algorithm has multi-step logic, decision trees, or precedence rules | Move to `assets/routing-table.md` |
-| Constraints apply across multiple sub-skills | Move to `assets/guidelines.md` |
-| Contribution instructions (how to add skills, extend the router) | Move to `assets/contribution-guide.md` |
-| Templates for creating new sub-skills | Move to `assets/templates/` |
+| Routing algorithm has multi-step logic, decision trees, or precedence rules | Move to `assets/ROUTES.md` |
+| Constraints apply across multiple sub-skills | Move to `assets/GUARDRAILS.md` |
+| Inline bootstrap / workspace setup steps | Move to `assets/SETUP.md` |
+| Templates for creating new sub-skills | Move to `assets/TEMPLATE.md` |
 
 ---
 
@@ -120,5 +120,6 @@ Link to offloaded content. Remove rows that don't apply.
 | Router | Type | Pattern | Location |
 |--------|------|---------|----------|
 | Forms Orchestrator | `router` | Top-level gateway → planner + domain registry | `plugins/adaptive-forms-authoring/skills/forms-orchestrator/SKILL.md` |
-| Domain Registry | `router` | Catalogs domains, resolves plan steps to skills | `plugins/adaptive-forms-authoring/skills/forms-orchestrator/references/domain-registry/SKILL.md` |
-| Analysis Domain | `domain` | Routes analysis intents to analysis skills | `plugins/adaptive-forms-authoring/skills/forms-orchestrator/references/domain-registry/references/analysis/SKILL.md` |
+| Domain Registry | `router` | Flat catalog, resolves plan steps / intents to sibling skills | `plugins/adaptive-forms-authoring/skills/forms-orchestrator/references/domain-registry/SKILL.md` |
+| Analysis (domain entry) | `router` | Routes analysis intents to analysis sub-skills | `plugins/adaptive-forms-authoring/skills/forms-analysis/SKILL.md` |
+| Integration (domain entry) | `router` | Routes integration intents to `manage-apis` | `plugins/adaptive-forms-authoring/skills/forms-integration/SKILL.md` |
