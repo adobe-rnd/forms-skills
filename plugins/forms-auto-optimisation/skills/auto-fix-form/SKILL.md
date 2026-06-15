@@ -192,15 +192,19 @@ If `old_string` is not unique: re-spawn the sub-agent with wider context once. W
 
 ## Phase 5 — Performance-bot gate
 
+When fixes span multiple target repos, run perf-bot for all repos in parallel (one `Agent` per repo, single message with multiple tool uses). Collect all reports before spawning fix sub-agents.
+
+Per repo:
+
 ```bash
 bash ../../shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
 ```
 
-Parse the resulting `.perf-bot-report.md` per `references/perf-bot-violations.md`. For each violation, spawn one sub-agent using `assets/perf-bot-fix-prompt.md`. Loop until 0 violations or 3 iterations — remaining go to PR's "Performance follow-ups".
+Parse each `.perf-bot-report.md` per `references/perf-bot-violations.md`. For each violation, spawn one sub-agent using `assets/perf-bot-fix-prompt.md`. Fix sub-agents across different repos run in parallel; violations within the same repo run sequentially. Loop until 0 violations or 3 iterations — remaining go to PR's "Performance follow-ups".
 
-Capture each iteration's report into `$RUN_DIR/perf-bot-report-iter<N>.md`.
+Capture each iteration's report into `$RUN_DIR/perf-bot-report-<repo>-iter<N>.md`.
 
-If the CLI install or Node check fails, surface in the PR body and proceed to Phase 6 — the error-fix commit still happens.
+If the CLI install or Node check fails for a repo, surface in the PR body and proceed to Phase 6 — the error-fix commit still happens.
 
 ## Phase 6 — Commit, push, PR
 
