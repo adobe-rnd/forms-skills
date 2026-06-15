@@ -124,15 +124,47 @@ bash ../../shared/scripts/ia-triage.sh \
 
 Collect all results before proceeding. The triage summary JSON gives `ia_repo`, `ia_file`, `ia_trail`. Attach to each entry as `iaContext`.
 
-For any entry where `ia_repo` differs from `$REPO_NAME`, that error targets a foreign repo. Resolve each unique foreign repo once (parallel if multiple):
+#### Foreign repo resolution
+
+For any entry where `ia_repo` differs from `$REPO_NAME`, that error targets a foreign repo. Resolve **each unique `ia_repo`** before showing the error table (parallel if multiple):
+
+**Step 1 — workspace lookup:**
 
 ```bash
-eval "$(bash ../../shared/scripts/resolve-repo.sh --name "$ia_repo" --clone-url "<from IA config>")"
+eval "$(bash ../../shared/scripts/resolve-repo.sh --name "$ia_repo")"
 ```
 
-Set `entry.targetRepoPatch = { repoPath, repoName }` or leave null if resolution failed.
+**Step 2 — if `REPO_SOURCE == "ask"` (not found locally):**
 
-Display the finalised table (error, file:line, count, target repo, IA summary) and proceed to Phase 3.
+Use `AskUserQuestion` with exactly two questions in one message:
+
+> IA traced the error to repo **`<ia_repo>`**, which isn't cloned in the workspace.
+>
+> 1. **Local path** — What is the full path to your local clone of `<ia_repo>`?
+>    _(e.g. `/Users/you/workspace/HDFC_PLForms`)_
+> 2. **Base branch** — Which branch should the fix target?
+>    _(leave blank to auto-detect from the repo's `origin/HEAD`)_
+
+Once the user replies:
+- Validate the path: `git -C "<path>" rev-parse --show-toplevel` — if it fails, ask again.
+- Resolve the base branch: if the user left it blank, run:
+  ```bash
+  git -C "<path>" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'
+  ```
+  Fall back to `git -C "<path>" branch --show-current` if `origin/HEAD` is unset.
+- Set `entry.targetRepoPatch = { repoPath, repoName: basename(repoPath), baseBranch }`.
+
+**Step 3 — if workspace lookup succeeded (`REPO_SOURCE != "ask"`):**
+
+Resolve the base branch automatically (no user prompt needed):
+
+```bash
+git -C "$REPO_PATH" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'
+```
+
+Set `entry.targetRepoPatch = { repoPath: $REPO_PATH, repoName: $REPO_NAME, baseBranch }`.
+
+Display the finalised table (error, file:line, count, target repo, base branch, IA summary) and proceed to Phase 3.
 
 See `references/fix-classification.md` for the page-level / repo-search special cases (when `file` is a page URL or no URL is present).
 
@@ -167,7 +199,14 @@ Every `pending` entry → fix task. `needs_review` → PR's "Manual review neede
 
 ### 4.1 Branch per target repo
 
-Group plan entries by their target repo (`entry.targetRepoPatch.repoPath ?? $REPO_PATH`). For each unique target, follow `shared/references/branch-and-commit.md` to checkout a fresh `fix/auto-fix-<slug>-<TODAY>` branch off `BASE_BRANCH`.
+Group plan entries by their target repo (`entry.targetRepoPatch.repoPath ?? $REPO_PATH`). For each unique target repo:
+
+- `BASE_BRANCH` = `entry.targetRepoPatch.baseBranch` (set during Phase 2.B foreign-repo resolution, or resolved from `origin/HEAD` for the primary repo).
+- Follow `shared/references/branch-and-commit.md` to checkout a fresh `fix/auto-fix-<slug>-<TODAY>` branch off `BASE_BRANCH`.
+
+If `BASE_BRANCH` is still unset at this point (edge case: primary repo with no `origin/HEAD`), ask the user once before creating the branch:
+
+> "Which branch should the fix target in `<repoName>`? (e.g. `main`, `release-5.2.10`)"
 
 ### 4.2 Spawn fix sub-agents
 
@@ -238,7 +277,7 @@ Print: `📄 Run report saved: $RUN_DIR/auto-fix-report.md`
 |---|---|
 | `FORM_URL` missing AND no stack frame in message | Ask once before proceeding |
 | `optel-query` returns no data | Ask whether to enter errors manually or abort |
-| `REPO_SOURCE == "ask"` | Ask the user for the local clone path |
+| Foreign repo not in workspace (`REPO_SOURCE == "ask"`) | Ask for local clone path + base branch in one `AskUserQuestion` (Phase 2.B); validate path with `git rev-parse`; retry once on bad path |
 | `ia triage` returns empty for a custom-class frame | Continue with source-only analysis; `iaContext = null` |
 | Source file 404 / minified with no map | Flag `needs_review`; suggest source maps |
 | Phase 3 — plan empty after skips | Ask `add: <error>` or `cancel`; never auto-approve empty |
