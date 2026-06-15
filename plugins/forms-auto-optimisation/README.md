@@ -6,7 +6,7 @@ Automated AEM Forms error diagnosis and repair. Two skills plus a small shared t
 
 ### `auto-fix-form` — Frontend JS error fixing
 
-End-to-end workflow for diagnosing and fixing AEM/EDS form JS errors. Queries optel telemetry, traces error origins through the impact-analyser graph, runs a user-gated fix plan, applies patches via sub-agents, gates the working tree through performance-bot, runs blast-radius impact analysis, and raises a PR per affected repo.
+End-to-end workflow for diagnosing and fixing AEM/EDS form JS errors. Queries optel telemetry, traces error origins through the impact-analyser graph, runs a user-gated fix plan, applies patches via sub-agents, gates the working tree through performance-bot, and raises a PR per affected repo.
 
 Entry points:
 - Form URL → telemetry-driven run
@@ -20,7 +20,7 @@ Diagnoses and fixes backend Java errors in AEM Forms. Routes by user input:
 - API path + 4xx/5xx → API Error mode
 - Journey UUID / "drill deeper" / Splunk keyword → Splunk mode
 
-Uses the impact-analyser graph for repo routing and runs post-fix blast-radius analysis.
+Uses the impact-analyser graph for repo routing.
 
 ## Shared toolkit
 

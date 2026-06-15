@@ -194,10 +194,6 @@ Capture each iteration's report into `$RUN_DIR/perf-bot-report-iter<N>.md`.
 
 If the CLI install or Node check fails, surface in the PR body and proceed to Phase 6 — the error-fix commit still happens.
 
-## Phase 5.5 — Impact analysis & cross-repo
-
-Best-effort. When `IA_UNAVAILABLE` is empty and at least one patch was applied, follow `references/cross-repo-propagation.md`. Otherwise skip to Phase 6 with a one-line note in the PR.
-
 ## Phase 6 — Commit, push, PR
 
 For each target repo with applied fixes, follow `shared/references/branch-and-commit.md`:
@@ -212,15 +208,13 @@ PR body sections (in order):
 2. Errors fixed (Phase 4 — file, line, error, explanation).
 3. Performance-bot violations fixed (Phase 5).
 4. Performance follow-ups (Phase 5 leftovers).
-5. Impact Analysis — full `IA_MD` from Phase 5.5 (or a one-line callout if unavailable).
-6. Cross-Repo PRs table (Phase 5.6).
-7. Manual review needed — `needs_review` entries from Phase 4 + plan-iteration `needs_review` + cross-repo equivalents.
-8. Form context — `FORM_URL`, date range, error counts from 2.A.
-9. Test plan checklist.
+5. Manual review needed — `needs_review` entries from Phase 4 + plan-iteration `needs_review` + cross-repo equivalents.
+6. Form context — `FORM_URL`, date range, error counts from 2.A.
+7. Test plan checklist.
 
 ## Phase 7 — Run report
 
-Write `$RUN_DIR/auto-fix-report.md` with one section per phase: resolved paths, telemetry table, IA triage JSON per error, every Phase 3 command + plan diff, fix sub-agent prompts + JSON, per-iteration perf-bot reports, Phase 5.5 / 5.6 artefacts, Phase 6 commit SHAs + PR URLs.
+Write `$RUN_DIR/auto-fix-report.md` with one section per phase: resolved paths, telemetry table, IA triage JSON per error, every Phase 3 command + plan diff, fix sub-agent prompts + JSON, per-iteration perf-bot reports, Phase 6 commit SHAs + PR URLs.
 
 Print: `📄 Run report saved: $RUN_DIR/auto-fix-report.md`
 
@@ -242,4 +236,4 @@ Print: `📄 Run report saved: $RUN_DIR/auto-fix-report.md`
 | Both `errorFixedFiles[]` and `perfFixedFiles[]` empty | Skip commit; PR step decides whether to open empty PR |
 | Run interrupted between 4.3 and 6.1 | On retry, ask whether to discard or stash — never auto-discard |
 | `git push` fails | Show the command; continue to PR step with `needs_review: "branch not pushed"` |
-| `IA_UNAVAILABLE` set | Skip Phase 5.5/5.6 entirely; one-line PR callout |
+| `IA_UNAVAILABLE` set | IA triage skipped; continue without `iaContext` |
