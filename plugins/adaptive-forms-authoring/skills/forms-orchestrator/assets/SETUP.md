@@ -173,7 +173,6 @@ Collect these in two passes: **conversational values** first, then **token place
 | # | Variable | What to ask | Help text |
 |---|----------|-------------|-----------|
 | 1 | `AEM_HOST` | "What is your AEM Author URL?" | Pattern: `https://author-pXXXX-eYYYY.adobeaemcloud.com`. Find it in Cloud Manager → Program → Environment → Author URL. |
-| 2 | `AEM_WRITE_PATHS` | "Which AEM content paths should be writable? (comma-separated)" | e.g. `/content/forms/af/my-team` |
 
 **Pass 2 — Write placeholder, user pastes directly into `.env`:**
 
@@ -192,8 +191,7 @@ Offer these but don't require them:
 
 | Variable | Default | What to ask |
 |----------|---------|-------------|
-| `GITHUB_TOKEN` | — | "GitHub PAT for authenticated push or `gh pr create`? (optional — skip if using SSH)" |
-| `GITHUB_BRANCH` | `main` | "Which branch? (default: main)" |
+| `AEM_FORM_CONFIG_PATH` | inherited from template | "What is the AEM Configuration path to use for your forms? (optional — skip to inherit from the blank form template)" |
 
 #### Handling "skip" or "I'll do it later"
 
@@ -213,27 +211,13 @@ If the user says they use basic auth instead of a bearer token:
 
 ### Step 4: Write `.env`
 
-Append all collected credentials to `.skills-workspace/.env` (below the `FORMS_WORKSPACE`/`FORMS_EDS_ROOT` lines written in Step 2). For conversational values, write the actual collected value. For tokens, write the placeholder marker. GitHub vars are written as commented-out optional entries:
+Copy `env.sample` from the plugin assets directory to `.skills-workspace/.env`:
 
+```bash
+cp "${CLAUDE_PLUGIN_ROOT}/skills/forms-orchestrator/assets/env.sample" .skills-workspace/.env
 ```
-# ── Workspace ────────────────────────────────────────────
-FORMS_WORKSPACE=<absolute-path>/.skills-workspace
-FORMS_EDS_ROOT=<absolute-path>
 
-# ── AEM Cloud Service ────────────────────────────────────
-AEM_HOST=<collected-value>
-AEM_TOKEN=<paste-your-bearer-token-here>
-
-# ── AEM Write Paths ──────────────────────────────────────
-AEM_WRITE_PATHS=<collected-value>
-
-# ── Figma (optional — required for forms-style-screen Figma-enhanced mode) ──
-# FIGMA_API_KEY=<paste-your-figma-api-key-here>
-
-# ── GitHub (optional — for authenticated git push over HTTPS or gh pr create) ──
-# GITHUB_TOKEN=<paste-your-github-pat-here>
-# GITHUB_BRANCH=main
-```
+Then substitute the collected values in-place — replace `<absolute-path>`, `<collected-value>`, and placeholder markers with actual values gathered in Step 3. For tokens, leave the `<paste-...>` marker as-is — the user will paste directly into the file.
 
 After writing the file, tell the user to open it and paste their token:
 > "I've saved your `.env` file. One value needs your attention — open `.skills-workspace/.env` in your editor and replace the placeholder marker for `AEM_TOKEN` with your actual token. Let me know when you're done."
@@ -430,12 +414,10 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 | `FORMS_WORKSPACE` | Yes (auto) | Absolute path to `.skills-workspace/` root — first line of `.env`, written during setup, read by all tools |
 | `FORMS_EDS_ROOT` | Yes (auto) | Absolute path to EDS repo root — parent of `.skills-workspace/`; all EDS code (`blocks/form/`) lives here |
 | `AEM_HOST` | Yes | AEM Cloud Service Author URL |
+| `AEM_FORM_CONFIG_PATH` | No | JCR path to AEM configuration node used for forms (e.g. `/conf/forms/default-site`). If unset, config is inherited from the blank form template page. |
 | `AEM_TOKEN` | Yes* | Bearer token from AEM Developer Console |
 | `AEM_USERNAME` | Yes* | Basic auth username (alternative to token) |
 | `AEM_PASSWORD` | Yes* | Basic auth password (alternative to token) |
-| `AEM_WRITE_PATHS` | Yes | Comma-separated AEM paths allowed for push |
-| `GITHUB_TOKEN` | No | Classic personal access token with `repo` scope — required for authenticated git push over HTTPS or `gh pr create` |
-| `GITHUB_BRANCH` | No | Branch to work from (default: `main`) |
 | `FIGMA_API_KEY` | No | Figma personal access token — required for `forms-style-screen` Figma-enhanced mode |
 | `DEBUG` | No | Set to `true` to enable rule bridge debug output |
 
@@ -462,8 +444,7 @@ All CLI tools shipped with the plugin auto-resolve the workspace directory by re
 | Tool reads wrong `.env` | `FORMS_WORKSPACE` missing from `.env` | Add `FORMS_WORKSPACE=/absolute/path/.skills-workspace` as the first line of `.env` |
 | Tool writes files in wrong directory | `FORMS_WORKSPACE` missing from `.env` | Add `FORMS_WORKSPACE=/absolute/path/.skills-workspace` as the first line of `.env` |
 | `401 Unauthorized` from AEM | Token expired or invalid | Regenerate bearer token from AEM Developer Console |
-| `403 Forbidden` on push | Path not in allowlist | Add the AEM path to `AEM_WRITE_PATHS` in `.env` |
-| Form not found via MCP | Wrong JCR path | Use `get-aem-pages(publishPath: "<path>")` to discover the correct pageId first |
+| Form not found via MCP | Wrong JCR path | Use `get-aem-pages(authorPath: "<path>")` to discover the correct pageId first |
 | `.env` committed to git | Security risk | Add `.env` to `.skills-workspace/.gitignore` immediately; rotate all exposed credentials |
 | Hooks not firing | `.claude/settings.json` in wrong location | Make sure `.claude/settings.json` is at the EDS repo root, not inside `.skills-workspace/` |
 

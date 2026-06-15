@@ -1,13 +1,16 @@
 # Form Metadata Workflow
 
-## Page-level (title + description)
+## Page-level (title + description + config)
 
 Use the eTag from the most recent `get-aem-page-content` — do NOT call `get-aem-page-metadata` for a separate eTag.
+
+> **Note:** Include `sling:configRef` only when `AEM_FORM_CONFIG_PATH` is set. Omit it otherwise — the value copied from the template page is preserved.
 
 ```json
 [
   { "op": "replace", "path": "/properties/jcr:title", "value": "..." },
-  { "op": "replace", "path": "/properties/jcr:description", "value": "..." }
+  { "op": "replace", "path": "/properties/jcr:description", "value": "..." },
+  { "op": "replace", "path": "/properties/sling:configRef", "value": "<AEM_FORM_CONFIG_PATH>" }
 ]
 ```
 
