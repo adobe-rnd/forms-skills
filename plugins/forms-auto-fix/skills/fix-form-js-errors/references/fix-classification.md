@@ -1,6 +1,6 @@
 ---
 name: fix-classification
-description: Error-to-fix-type classification tables and page-level/repo-search fix strategies for the auto-fix-form skill.
+description: Error-to-fix-type classification tables and page-level/repo-search fix strategies for the fix-form-js-errors skill.
 type: reference
 ---
 
@@ -8,7 +8,7 @@ type: reference
 
 ## By fileUrl pattern
 
-Used in Phase 2C (Mode B) and Phase 2A (telemetry) of `auto-fix-form`.
+Used in Phase 2C (Mode B) and Phase 2A (telemetry) of `fix-form-js-errors`.
 
 | Condition | Fix type |
 |-----------|----------|

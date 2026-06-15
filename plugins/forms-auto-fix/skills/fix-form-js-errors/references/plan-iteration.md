@@ -1,12 +1,12 @@
 ---
 name: plan-iteration
-description: Deterministic state machine, command grammar, and plan-data shape for Phase 3 of the auto-fix-form skill. Drives the user-facing plan iteration loop until approval.
+description: Deterministic state machine, command grammar, and plan-data shape for Phase 3 of the fix-form-js-errors skill. Drives the user-facing plan iteration loop until approval.
 type: reference
 ---
 
 # Phase 3 — Plan Iteration State Machine
 
-Phase 3 of `auto-fix-form` blocks all writes (no `Edit`, no branch creation, no commit) until the user explicitly authorises the transition to Phase 4. This file defines the loop precisely so two runs over identical input produce identical behaviour.
+Phase 3 of `fix-form-js-errors` blocks all writes (no `Edit`, no branch creation, no commit) until the user explicitly authorises the transition to Phase 4. This file defines the loop precisely so two runs over identical input produce identical behaviour.
 
 ## Plan data shape
 

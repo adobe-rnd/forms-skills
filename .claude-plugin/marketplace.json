@@ -14,9 +14,9 @@
       "description": "Build, edit, and integrate AEM Adaptive Forms through conversation — analyze requirements, scaffold forms, add rules and functions, manage APIs, and sync with Edge Delivery Services."
     },
     {
-      "name": "forms-auto-optimisation",
-      "source": "./plugins/forms-auto-optimisation",
-      "description": "Automated AEM Forms error repair — diagnose and fix frontend JS errors via optel telemetry and backend Java errors via Splunk, with impact analysis and auto-raised PRs."
+      "name": "forms-auto-fix",
+      "source": "./plugins/forms-auto-fix",
+      "description": "Automated AEM Forms error repair — diagnose and fix frontend JS errors via optel telemetry and backend Java errors via Splunk, with auto-raised PRs."
     }
   ]
 }

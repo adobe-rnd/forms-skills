@@ -1,6 +1,6 @@
 ---
 name: sub-agent-prompt-java
-description: Prompt template for Java fix sub-agents spawned by auto-fix-journey Step 7. Substitute every __PLACEHOLDER__ before sending. Returns JSON per shared/references/sub-agent-contract.md.
+description: Prompt template for Java fix sub-agents spawned by fix-forms-java-errors Step 7. Substitute every __PLACEHOLDER__ before sending. Returns JSON per shared/references/sub-agent-contract.md.
 ---
 
 # Java Fix Sub-Agent Prompt Template

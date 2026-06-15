@@ -1,5 +1,5 @@
 ---
-name: auto-fix-form
+name: fix-form-js-errors
 description: End-to-end workflow for fixing AEM/EDS form JS errors. Invoke with a form URL (telemetry-driven run) or a pasted JS stack frame (skip telemetry). Generates a user-gated fix plan, applies patches via sub-agents, runs performance-bot, and raises a PR. Use when the user provides a form URL or pastes a JS stack trace, TypeError, or ReferenceError.
 compatibility: Requires git + gh CLI. Auto-installs performance-bot to ~/.performance-bot/ and impact-analyser to ~/.impact-analyser/ on first run; degrades gracefully if either is unavailable.
 allowed-tools: Read Write Edit Bash Glob Grep Agent Skill WebFetch AskUserQuestion
@@ -36,7 +36,7 @@ End-to-end pipeline: discover JS errors on a form → user approves a per-error 
 Skill-specific artefacts live under `${HOME}/form-auto-fix/`:
 
 - `.env` — user-managed env vars (none required for this skill; loaded for compatibility).
-- `<repo-name>/` — auto-cloned target repos (shared with `auto-fix-journey`).
+- `<repo-name>/` — auto-cloned target repos (shared with `fix-forms-java-errors`).
 - `runs/<form-slug>-<YYYY-MM-DD>/` — per-run output, sub-agent prompts, perf-bot reports, IA reports.
 
 Shared CLIs and graph data live at their canonical locations and are reusable outside this skill:

@@ -1,5 +1,5 @@
 ---
-name: auto-fix-journey
+name: fix-forms-java-errors
 description: Fixes backend Java errors in AEM Forms. Five entry points: (1) Telemetry mode — user provides a form URL, skill queries optel for API errors in last 1 day and lets user select which to fix; (2) Fix mode — user provides a stack trace or class+line; (3) API Error mode — user provides an API path or error label (e.g. "High API Errors"), skill queries Splunk; (4) Splunk mode — explicit log exploration; (5) Infrastructure mode — WAF/CDN/ELB layer diagnosis when ams_cq returns no Java results or user targets a specific infra layer. Uses impact-analyser graph for repo/file routing.
 compatibility: Requires git + gh CLI. Auto-installs impact-analyser CLI into ~/.impact-analyser/ on first run. Python 3 + splunk-sdk required only for Splunk mode.
 allowed-tools: Read Write Edit Bash Agent AskUserQuestion
@@ -41,7 +41,7 @@ If `SHORT_CLASS` or `EXCEPTION_TYPE` is missing from the user's message, ask onc
 
 ## Workspace
 
-Skill-specific artefacts under `${HOME}/form-auto-fix/` (shared with `auto-fix-form`):
+Skill-specific artefacts under `${HOME}/form-auto-fix/` (shared with `fix-form-js-errors`):
 
 - `.env` — Splunk credentials (only needed for API Error / Splunk modes).
 - `<repo-name>/` — auto-cloned Java repos.
@@ -65,7 +65,7 @@ Full table in `shared/references/branch-and-commit.md`. Summary:
 
 | Tool | Requires |
 |---|---|
-| `Edit` / `Write` | Plan approved AND `HEAD` is `fix/auto-fix-journey-*` AND patch came from sub-agent JSON |
+| `Edit` / `Write` | Plan approved AND `HEAD` is `fix/forms-java-*` AND patch came from sub-agent JSON |
 | `git commit` | At least one patch applied AND `HEAD` is the fix branch |
 | `git push` | Commit succeeded |
 | `gh pr create` | Push succeeded |
@@ -201,7 +201,7 @@ If `need_more_info`: stop, relay `what_i_know` + `questions` to the user, wait f
 
 ## Step 9 — Branch, commit, push
 
-Follow `shared/references/branch-and-commit.md`. Fix branch: `fix/auto-fix-journey-<short-class-slug>-<YYYY-MM-DD>`.
+Follow `shared/references/branch-and-commit.md`. Fix branch: `fix/forms-java-<short-class-slug>-<YYYY-MM-DD>`.
 
 ## Step 10 — Raise PR
 
