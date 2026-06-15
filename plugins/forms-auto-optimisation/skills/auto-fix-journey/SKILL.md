@@ -11,7 +11,7 @@ metadata:
 
 # Auto Fix Journey
 
-End-to-end pipeline for backend Java errors in AEM Forms: classify → user-approve a plan → patch → IA blast-radius → PR.
+End-to-end pipeline for backend Java errors in AEM Forms: classify → user-approve a plan → patch → PR.
 
 ## Routing — first match wins
 

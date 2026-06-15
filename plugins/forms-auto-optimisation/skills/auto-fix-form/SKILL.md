@@ -11,7 +11,7 @@ metadata:
 
 # Auto Fix Form
 
-End-to-end pipeline: discover JS errors on a form → user approves a per-error fix plan → patches applied → perf-bot gate → impact analysis → PR per affected repo.
+End-to-end pipeline: discover JS errors on a form → user approves a per-error fix plan → patches applied → perf-bot gate → PR per affected repo.
 
 ## When to use
 
@@ -220,7 +220,7 @@ PR body sections (in order):
 2. Errors fixed (Phase 4 — file, line, error, explanation).
 3. Performance-bot violations fixed (Phase 5).
 4. Performance follow-ups (Phase 5 leftovers).
-5. Manual review needed — `needs_review` entries from Phase 4 + plan-iteration `needs_review` + cross-repo equivalents.
+5. Manual review needed — `needs_review` entries from Phase 4 + plan-iteration `needs_review`.
 6. Form context — `FORM_URL`, date range, error counts from 2.A.
 7. Test plan checklist.
 
