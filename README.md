@@ -25,14 +25,8 @@ A collection of AI agent plugins for building, editing, and integrating AEM Form
 ### Vercel Skills (npx)
 
 ```bash
-# Install all skills in a plugin
-npx skills add adobe-rnd/forms-skills --path plugins/adaptive-forms-authoring --all
-
-# Install a single skill
-npx skills add adobe-rnd/forms-skills --path plugins/adaptive-forms-authoring --skill create-form
-
-# List available skills
-npx skills add adobe-rnd/forms-skills --path plugins/adaptive-forms-authoring --list
+# Install all skills
+npx skills add adobe-rnd/forms-skills
 ```
 
 See each plugin's README for prerequisites, required environment variables, and first-run instructions.
