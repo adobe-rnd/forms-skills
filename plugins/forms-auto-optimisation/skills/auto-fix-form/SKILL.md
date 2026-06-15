@@ -111,9 +111,10 @@ Apply classification + dedup per `references/fix-classification.md`. Render a nu
 
 ### 2.B IA triage
 
-For each selected error:
+Spawn all selected errors' triage calls in parallel (one `Agent` per error, single message with multiple tool uses):
 
 ```bash
+# per error — all launched in the same message
 bash ../../shared/scripts/ia-triage.sh \
   --type "<type>" --message "<message>" \
   --file-url "<fileUrl>" --line "<line>" --col "<col>" \
@@ -121,9 +122,9 @@ bash ../../shared/scripts/ia-triage.sh \
   --out "$RUN_DIR/ia-triage-<id>.json"
 ```
 
-The triage summary JSON gives `ia_repo`, `ia_file`, `ia_trail`. Attach to the entry as `iaContext`.
+Collect all results before proceeding. The triage summary JSON gives `ia_repo`, `ia_file`, `ia_trail`. Attach to each entry as `iaContext`.
 
-If `ia_repo` differs from `$REPO_NAME`, that error targets a foreign repo. Resolve once:
+For any entry where `ia_repo` differs from `$REPO_NAME`, that error targets a foreign repo. Resolve each unique foreign repo once (parallel if multiple):
 
 ```bash
 eval "$(bash ../../shared/scripts/resolve-repo.sh --name "$ia_repo" --clone-url "<from IA config>")"
@@ -145,11 +146,18 @@ Per error, spawn one sub-agent using `assets/plan-sub-agent-prompt.md`. Seed wit
 
 Parallelism: different files → parallel; same file → sequential (re-read between).
 
-`need_more_info` results block `approve` until the user answers or skips them.
-
 ### 3.2 Present and iterate
 
-Render the numbered plan (file, root cause, approach, scope, risk per entry). Loop on user commands per `references/plan-iteration.md` until `approve`. On `cancel` → `"Run cancelled — no changes made."` and exit; no branch, no edit.
+Render the numbered plan (file, root cause, approach, scope, risk per entry). Mark `need_more_info` entries visibly (e.g. `[?]`) but do not block the rest of the plan.
+
+Two tracks run concurrently:
+
+- **Unblocked entries** (`pending` / `needs_review` / `skipped`): available for `approve` immediately.
+- **Blocked entries** (`need_more_info`): relay `what_i_know` + `questions` inline beneath the entry. The user answers with `answer <N>: <text>` to unblock, or `skip <N>` to drop. Once unblocked, re-spawn that entry's sub-agent with the original prompt + answers appended; update the plan in place.
+
+`approve` is accepted as soon as **no `need_more_info` entries remain** (all answered or skipped). If the user types `approve` while blocked entries are still open, respond: `"Entry <N> still needs: <question> — answer or skip it first."` and stay in the loop.
+
+Loop on all user commands per `references/plan-iteration.md` until `approve`. On `cancel` → `"Run cancelled — no changes made."` and exit; no branch, no edit.
 
 ### 3.3 Approval freezes the plan
 
