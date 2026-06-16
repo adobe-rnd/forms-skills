@@ -1,0 +1,6 @@
+{
+  "type": "commonjs",
+  "dependencies": {
+    "@adobe/json-formula": "^0.1.50"
+  }
+}

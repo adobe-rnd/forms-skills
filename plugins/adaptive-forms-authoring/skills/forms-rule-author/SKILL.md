@@ -1,12 +1,33 @@
 ---
 name: forms-rule-author
-description: "Generates AEM Forms business rules from a JCR form definition or Sites Content API content model and a natural language prompt. Produces { fd:rules, fd:events } ready for insertion into the rule store. Use when creating show/hide, validate, calculate, event, enabled, format, or trigger rules for AEM Adaptive Form fields."
+description: >
+  Use when creating business rules for AEM Adaptive Form fields — show/hide,
+  validate, calculate, event handlers (click, value-commit, init),
+  enabled/disabled, or format rules. Input is a form definition (JCR or Sites
+  Content API) and a natural language prompt.
+license: Apache-2.0
 compatibility: "Scripts are pre-bundled in $SKILL_DIR/scripts/ — no npm install required at runtime."
+metadata:
+  author: Adobe
+  version: "0.1"
+  type: skill
+  triggers:
+    - rule
+    - show hide
+    - validate
+    - calculate
+    - event handler
+    - click event
+    - value commit
+    - enabled disabled
+    - format rule
+    - business rule
 ---
 
 Generate AEM Forms business rules from a form definition (JCR or Sites Content API), a natural language prompt, and an optional custom functions JS file. Produces `{ fd:rules, fd:events }` ready for insertion into the rule store.
 
 > **Script path:** All scripts are in `$SKILL_DIR/scripts/`. Run with `node $SKILL_DIR/scripts/<name>.jsh` (Node.js) or `<name>` (SLICC jsh — auto-discovered as commands). No `npm install` required.
+> **Script invocation:** `references/tools-reference.md` is the authoritative reference for every script — args, output format, and exit codes. Consult it before running any script. Do not guess invocation from inline examples.
 
 ## Inputs
 
@@ -122,7 +143,29 @@ Fix any errors using the `code` field and the grammar files, then re-validate.
 
 ### Step 10: Generate formula
 
+If the target field already exists (`find-field` returned `found: true`), pass `--content-model-file` and `--field-pointer` so existing rules for the same `fd:*` key are prepended and compiled together. Omit both flags for new fields.
+
 ```bash
+# Existing field, adding a new rule alongside existing ones (fd:visible, fd:enabled, fd:validate only)
+node $SKILL_DIR/scripts/generate-formula.jsh \
+  /tmp/rule.json \
+  --tree /tmp/treeJson.json \
+  --functions /tmp/customFunctions.json \
+  --event <fd:key> \
+  --content-model-file /tmp/content-model.json \
+  --field-pointer <field-pointer>
+
+# Existing field, replacing/updating an existing rule (user intent: change, not add)
+node $SKILL_DIR/scripts/generate-formula.jsh \
+  /tmp/rule.json \
+  --tree /tmp/treeJson.json \
+  --functions /tmp/customFunctions.json \
+  --event <fd:key> \
+  --content-model-file /tmp/content-model.json \
+  --field-pointer <field-pointer> \
+  --override
+
+# New field — no prior rules, start fresh
 node $SKILL_DIR/scripts/generate-formula.jsh \
   /tmp/rule.json \
   --tree /tmp/treeJson.json \
@@ -147,6 +190,8 @@ node $SKILL_DIR/scripts/merge-formula.jsh /tmp/formula-output.json
 ```
 
 ### Step 12: Output
+
+**This skill generates rules only — it does NOT apply them.** Return the `merge-formula` output to `forms-author`, which applies it via `references/apply-rule-workflow.md` → `apply-rule-patch.bundle.js` → `patch-aem-page-content`. Do NOT PATCH `fd:rules` or `fd:events` directly from this skill.
 
 Return the `merge-formula` output directly:
 ```json
@@ -199,7 +244,7 @@ Use `qualifiedId` (the `$form.*` path from `find-field.jsh`) as the field bindin
 | SHOW_EXPRESSION / VISIBLE_EXPRESSION | `references/grammar/visibility-expressions.md`, `references/grammar/conditions.md`, `references/component-lookup.md` | `05` always; `06` for property conditions |
 | ACCESS_EXPRESSION / DISABLE_EXPRESSION | `references/grammar/enabled-expressions.md`, `references/grammar/conditions.md`, `references/component-lookup.md` | `05` always; `06` for property conditions |
 | Custom function needed (write or call) | (any above) + Step 5 (`parse-functions`) | `12`, `13` |
-| Always | `references/tools-reference.md` | `05` |
+| Always | — | `05` |
 
 **Rule:** Load the minimum set. Do NOT load all grammar files for every request.
 

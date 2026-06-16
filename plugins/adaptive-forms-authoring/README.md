@@ -1,29 +1,5 @@
-# adaptive-forms-authoring plugin
-
-Build, edit, and integrate AEM Adaptive Forms through conversation — analyze requirements, scaffold forms, add rules and functions, manage APIs, and sync with Edge Delivery Services.
-
-## Prerequisites
-
-| Requirement | Why |
-|-------------|-----|
-| Node.js 18+ | Runs the form validator, rule transformer, and rule save tools |
-| Python 3.10+ | Runs form sync, API manager, and rule validation (deps managed by the plugin) |
-| `git` on PATH | Used by `eds-code-sync` and `git-sandbox` for repo operations |
-
-The plugin bundles its own Python virtual environment — you don't install Python packages yourself.
-
-## Required environment variables
-
-Set these in `<workspace>/.env` after running `setup-workspace`:
-
-```bash
-AEM_HOST="https://author-pXXXX-eYYYY.adobeaemcloud.com"
-AEM_TOKEN="<service token>"
-FORMS_WORKSPACE="<absolute path to your workspace>"
-GITHUB_TOKEN="<PAT with repo scope>"   # optional — only for eds-code-sync
-```
-
-The `setup-workspace` skill walks you through this on first use; you don't have to populate it by hand.
+# Adobe Skills for Adaptive Forms Authoring
+Build, edit, and manage AEM Adaptive Forms with natural language prompts. This plugin provides a suite of skills for form analysis, content authoring, rule creation, integration management, and context handling — all orchestrated through a central router that translates requirements into actionable plans. Whether you're starting from scratch or iterating on existing forms, these skills empower you to streamline your AEM Forms development process with ease.
 
 ## Install
 
@@ -47,120 +23,76 @@ npx skills add adobe/skills --path plugins/adaptive-forms-authoring --skill crea
 npx skills add adobe/skills --path plugins/adaptive-forms-authoring --list
 ```
 
-Python dependencies install on first use.
+## Available Skills
 
-## Verify
+### AEM Forms
 
-After installation, ask your agent:
+Turn natural language into production AEM Adaptive Forms. A plan-driven skill gateway across 5 domains.
 
-> _"Set up a new AEM Forms workspace for my project."_
-
-The `setup-workspace` skill creates the workspace, writes `.env`, runs system checks, and performs the first form sync. Once that succeeds you're ready to build:
-
-> _"Here's the requirements doc for a personal loan application. Build the form."_
-
-The `forms-orchestrator` (entry point) generates plans, routes through six domains (`analysis`, `build`, `logic`, `integration`, `infra`, `context`), and dispatches to leaf skills.
-
-## Plugin layout
-
-```
-plugins/adaptive-forms-authoring/
-├── .claude-plugin/plugin.json
-├── README.md
-├── pyproject.toml
-├── setup.sh                                # wrapper → skills/forms-orchestrator/scripts/setup.sh
-├── skills/
-│   └── forms-orchestrator/                  # entry-point skill
-│       ├── SKILL.md
-│       ├── assets/
-│       ├── scripts/                          # shared CLI tools
-│       └── references/
-│           ├── planner/                      # plan generator (skill)
-│           └── domain-registry/              # domain & skill catalog (skill)
-│               └── references/<domain>/...
-├── agents/                                   # custom subagents (none yet)
-├── hooks/                                    # plugin hooks (none yet)
-└── tests/
-```
-
-## How it works
-
-The plugin is a **Plan-Driven Skill Gateway** — a layered router with a planner and a domain registry that maps user intent to the right skill.
-
-```
-User Intent → forms-orchestrator → Planner / Domain Registry → Domain Router → Skill → Tools
-```
-
-| Domain | Purpose | Skills |
-|--------|---------|--------|
-| `analysis` | Requirements & documentation | `analyze-requirements`, `analyze-v1-form`, `create-screen-doc`, `review-screen-doc` |
-| `build` | Form structure & components | `scaffold-form`, `create-form`, `create-component` |
-| `logic` | Business rules & functions | `add-rules`, `create-function`, `optimize-rules` |
-| `integration` | APIs & data | `manage-apis` |
-| `infra` | Setup, sync, deploy | `setup-workspace`, `sync-forms`, `sync-eds-code`, `git-sandbox` |
-| `context` | Agent memory & session continuity | `manage-context` |
-
-Routing follows the 6-step algorithm in `skills/forms-orchestrator/assets/routing-table.md`. See `skills/forms-orchestrator/SKILL.md` for the full constraints and table.
-
-## Develop on the plugin
-
+**Quick Start:**
 ```bash
-git clone <repo-url>
-cd plugins/adaptive-forms-authoring
-./skills/forms-orchestrator/scripts/setup.sh
+# Say: "Set up a new AEM Forms workspace for my project."
+# Then: "Here's the requirements doc for my form. Build it."
 ```
 
-The setup script:
-1. Creates `.venv/` at the plugin root (uses `uv` if available, falls back to `python3 -m venv`).
-2. Installs the project in editable mode (`pip install -e ".[dev]"`).
-3. Installs Node.js bridge dependencies (`npm install` in `skills/forms-orchestrator/scripts/rule_coder/bridge/`).
+The **forms-orchestrator** routes intents through a 6-step algorithm — it generates plans from requirements via a Planner, resolves skills via a Domain Registry, and executes them. For single tasks it routes directly to the matching domain.
 
-Activate the venv in a new shell:
+#### Domains
 
-```bash
-source .venv/bin/activate
+| Domain | Skills |
+|--------|--------|
+| `analysis` | `analyze-requirements`, `analyze-v1-form`, `visual-analysis` |
+| `content-author` | `forms-author`, `forms-content-modeler`, `forms-custom-components` |
+| `style` | `forms-style-screen`, `forms-component-discovery` |
+| `rule-creator` | `forms-rule-author` |
+| `integration` | `manage-apis` |
+| `context-management` | `manage-context` |
+
+**Requirements:** Node.js 18+, `git` on PATH.
+
+## Repository Structure
+
+```
+forms-skills/
+├── .claude-plugin/plugin.json          ← plugin identity (aem-forms)
+├── evals/                              ← eval scenarios, fixtures, runner scripts
+├── lib/                                ← shared scripts and Python runtime
+│   └── scripts/                           (rule transform/validate .jsh scripts)
+└── skills/
+    ├── forms-orchestrator/             ← entry point router
+    ├── forms-analysis/                 ← analysis domain
+    ├── forms-author/                   ← content authoring domain
+    │   ├── scripts/                    ← pre-built bundles (no npm install at runtime)
+    │   └── references/
+    ├── forms-content-modeler/          ← component JSON builder (used by forms-author)
+    │   ├── scripts/
+    │   └── references/
+    ├── forms-custom-components/        ← custom EDS component authoring (fd:viewType pattern)
+    │   ├── scripts/
+    │   └── references/
+    ├── forms-style-screen/             ← live iterative screen/fragment CSS styling (Chrome + Figma)
+    │   ├── assets/
+    │   └── references/
+    ├── forms-rule-author/             ← rule & custom function authoring
+    ├── forms-integration/              ← integration domain
+    └── forms-context-management/       ← context & session domain
 ```
 
-| Flag | Purpose |
-|------|---------|
-| `--force` | Delete existing `.venv/` and recreate |
-| `--skip-deps` | Create the venv without installing packages |
+## Guides
 
-Run the structure test:
+- [Onboarding Guide](ONBOARDING.md) — architecture, state machine, plan types, getting started
+- [Developer Guide](DEVELOPER.md) — setup, tests, evals, repo structure, adding skills
 
-```bash
-bash tests/test_plugin_structure.sh
-```
+## Contributing
 
-There's also a manual end-to-end plan in `tests/e2e-test-plan.md` and an error-handling guide in `tests/error-handling-guide.md`.
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines on adding or updating skills. Join [#agentskills](https://adobe.enterprise.slack.com/archives/C0APTKDNPEY) on Adobe Slack for questions and discussion.
 
-## CLI tools
+## Resources
 
-Shared tools at `skills/forms-orchestrator/scripts/`:
-
-| Tool | Description |
-|------|-------------|
-| `api-manager` | Manage OpenAPI specs and JS clients |
-| `rule-transform` | Transform form JSON for rule editing |
-| `rule-validate` | Validate rule JSON against grammar |
-| `rule-save` | Save compiled rules back to form |
-| `rule-grammar` | Print the rule grammar reference |
-| `parse-functions` | Parse custom function JSDoc annotations |
-
-Skill-embedded tools live under `skills/forms-orchestrator/references/domain-registry/references/<domain>/references/<skill>/scripts/`:
-
-| Tool | Skill | Language |
-|------|-------|----------|
-| `form-sync` | `infra/sync-forms` | Python |
-| `eds-code-sync` | `infra/sync-eds-code` | Python |
-| `git-sandbox` | `infra/git-sandbox` | Python |
-| `form-validate` | `build/create-form` | Node.js |
-| `scaffold-form` | `build/scaffold-form` | Python |
-| `cct-create` | `build/create-component` | Python |
-| `api-skill` | `integration/manage-apis` | Python |
-
-Always reference these from a SKILL.md as `${CLAUDE_PLUGIN_ROOT}/skills/forms-orchestrator/scripts/<tool>` — never hardcode absolute paths. See `skills/forms-orchestrator/assets/guidelines.md` and `skills/forms-orchestrator/references/domain-registry/assets/contribution-guide.md`.
+- [agentskills.io Specification](https://agentskills.io)
+- [Claude Code Plugins](https://code.claude.com/docs/en/discover-plugins)
+- [#agentskills Slack Channel](https://adobe.enterprise.slack.com/archives/C0APTKDNPEY)
 
 ## License
 
-Apache 2.0 — see [LICENSE](../../LICENSE).
+Apache 2.0 - see [LICENSE](LICENSE) for details.

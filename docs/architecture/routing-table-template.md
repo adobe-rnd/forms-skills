@@ -1,18 +1,19 @@
 ---
 name: routing-table-template
 description: >
-  Template for routing table asset files. Use when a router SKILL.md's
+  Template for routing-algorithm asset files. Use when a router SKILL.md's
   routing logic is too complex to keep inline.
-type: routing-table
+metadata:
+  type: guidelines
 ---
 
 # Routing Table Template
 
 Use this template when your router SKILL.md's routing logic exceeds a simple table — e.g., it has multi-step algorithms, decision trees, precedence rules, or resolution logic.
 
-> **Produces type:** `routing-table` — Asset files created from this template must have `type: routing-table` in their frontmatter. This type signals that the file contains routing logic offloaded from a `type: router` or `type: domain` SKILL.md.
+> **Produces:** an untyped routing-algorithm asset, conventionally named `ROUTES.md`. It holds routing logic offloaded from a `type: router` SKILL.md.
 
-> **Where this file lives:** `<skill>/assets/routing-table.md`
+> **Where this file lives:** `<skill>/assets/ROUTES.md` (e.g. `forms-orchestrator/assets/ROUTES.md`)
 > **Referenced from:** The router's SKILL.md via a markdown link
 
 ---
@@ -25,11 +26,10 @@ Copy and adapt the sections below.
 
 ```
 ---
-name: routing-table
+name: <router-name>-routes
 description: >
   Routing algorithm for <router-name>. Defines the step-by-step logic
   for matching user intents to sub-skills.
-type: routing-table
 ---
 
 # Routing Algorithm

@@ -3,16 +3,17 @@ name: guidelines-template
 description: >
   Template for guidelines and constraints asset files. Use when cross-cutting
   rules apply across multiple skills in a router's tree.
-type: guidelines
+metadata:
+  type: guidelines
 ---
 
 # Guidelines Template
 
 Use this template when you have constraints, conventions, or rules that apply across multiple skills managed by a single router. Instead of duplicating them in each leaf skill, consolidate them in one asset file.
 
-> **Produces type:** `guidelines` — Asset files created from this template must have `type: guidelines` in their frontmatter. This type signals that the file contains cross-cutting constraints read by `type: router` or `type: domain` SKILL.md files.
+> **Produces:** an untyped constraints asset, conventionally named `GUARDRAILS.md`. It holds cross-cutting constraints read by `type: router` SKILL.md files.
 
-> **Where this file lives:** `<skill>/assets/guidelines.md`
+> **Where this file lives:** `<skill>/assets/GUARDRAILS.md` (e.g. `forms-orchestrator/assets/GUARDRAILS.md`)
 > **Referenced from:** The router's SKILL.md via a markdown link
 
 ---
@@ -25,10 +26,9 @@ Copy and adapt the sections below.
 
 ```
 ---
-name: guidelines
+name: <router-name>-guardrails
 description: >
   Constraints and conventions for all skills under <router-name>.
-type: guidelines
 ---
 
 # <Router Name> — Guidelines

@@ -1,6 +1,26 @@
 ---
 name: forms-author
-description: "All AEM Adaptive Forms content operations via the Sites Content MCP API. Orchestrates component building (via forms-content-modeler) and rule generation (via forms-rule-author). Invoke directly for any form operation. Triggers: create form, add field, add panel, add fragment, change property, delete field, move field, set required, rename, add options, set submit action, prefill, schema, apply rule, when, if, show/hide rule, validate rule, calculate."
+description: >
+  Use when creating or modifying an AEM Adaptive Form via the Sites Content MCP API — create form, add/edit/delete/move fields and panels, add fragment, set required/options/submit action/prefill/schema, apply rules. NOT for custom EDS components — use forms-custom-components instead.
+license: Apache-2.0
+metadata:
+  author: Adobe
+  version: "0.1"
+  type: skill
+  triggers:
+    - create form
+    - add field
+    - edit field
+    - delete field
+    - move field
+    - add panel
+    - add fragment
+    - submit action
+    - prefill
+    - schema
+    - show hide rule
+    - validate rule
+    - calculate rule
 ---
 
 # forms-author
