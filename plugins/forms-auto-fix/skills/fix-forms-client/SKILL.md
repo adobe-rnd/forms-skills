@@ -1,5 +1,5 @@
 ---
-name: auto-fix-form
+name: fix-forms-client
 description: End-to-end workflow for fixing AEM/EDS form JS errors. Invoke with a form URL (telemetry-driven run) or a pasted JS stack frame (skip telemetry). Generates a user-gated fix plan, applies patches via sub-agents, runs performance-bot, and raises a PR. Use when the user provides a form URL or pastes a JS stack trace, TypeError, or ReferenceError.
 compatibility: Requires git + gh CLI. Auto-installs performance-bot to ~/.performance-bot/ and impact-analyser to ~/.impact-analyser/ on first run; degrades gracefully if either is unavailable.
 allowed-tools: Read Write Edit Bash Glob Grep Agent Skill WebFetch AskUserQuestion
@@ -11,7 +11,7 @@ metadata:
 
 # Auto Fix Form
 
-End-to-end pipeline: discover JS errors on a form → user approves a per-error fix plan → patches applied → perf-bot gate → impact analysis → PR per affected repo.
+End-to-end pipeline: discover JS errors on a form → user approves a per-error fix plan → patches applied → perf-bot gate → PR per affected repo.
 
 ## When to use
 
@@ -36,7 +36,7 @@ End-to-end pipeline: discover JS errors on a form → user approves a per-error 
 Skill-specific artefacts live under `${HOME}/form-auto-fix/`:
 
 - `.env` — user-managed env vars (none required for this skill; loaded for compatibility).
-- `<repo-name>/` — auto-cloned target repos (shared with `auto-fix-journey`).
+- `<repo-name>/` — auto-cloned target repos (shared with `fix-forms-server`).
 - `runs/<form-slug>-<YYYY-MM-DD>/` — per-run output, sub-agent prompts, perf-bot reports, IA reports.
 
 Shared CLIs and graph data live at their canonical locations and are reusable outside this skill:
@@ -111,9 +111,10 @@ Apply classification + dedup per `references/fix-classification.md`. Render a nu
 
 ### 2.B IA triage
 
-For each selected error:
+Spawn all selected errors' triage calls in parallel (one `Agent` per error, single message with multiple tool uses):
 
 ```bash
+# per error — all launched in the same message
 bash ../../shared/scripts/ia-triage.sh \
   --type "<type>" --message "<message>" \
   --file-url "<fileUrl>" --line "<line>" --col "<col>" \
@@ -121,17 +122,49 @@ bash ../../shared/scripts/ia-triage.sh \
   --out "$RUN_DIR/ia-triage-<id>.json"
 ```
 
-The triage summary JSON gives `ia_repo`, `ia_file`, `ia_trail`. Attach to the entry as `iaContext`.
+Collect all results before proceeding. The triage summary JSON gives `ia_repo`, `ia_file`, `ia_trail`. Attach to each entry as `iaContext`.
 
-If `ia_repo` differs from `$REPO_NAME`, that error targets a foreign repo. Resolve once:
+#### Foreign repo resolution
+
+For any entry where `ia_repo` differs from `$REPO_NAME`, that error targets a foreign repo. Resolve **each unique `ia_repo`** before showing the error table (parallel if multiple):
+
+**Step 1 — workspace lookup:**
 
 ```bash
-eval "$(bash ../../shared/scripts/resolve-repo.sh --name "$ia_repo" --clone-url "<from IA config>")"
+eval "$(bash ../../shared/scripts/resolve-repo.sh --name "$ia_repo")"
 ```
 
-Set `entry.targetRepoPatch = { repoPath, repoName }` or leave null if resolution failed.
+**Step 2 — if `REPO_SOURCE == "ask"` (not found locally):**
 
-Display the finalised table (error, file:line, count, target repo, IA summary) and proceed to Phase 3.
+Use `AskUserQuestion` with exactly two questions in one message:
+
+> IA traced the error to repo **`<ia_repo>`**, which isn't cloned in the workspace.
+>
+> 1. **Local path** — What is the full path to your local clone of `<ia_repo>`?
+>    _(e.g. `/Users/you/workspace/HDFC_PLForms`)_
+> 2. **Base branch** — Which branch should the fix target?
+>    _(leave blank to auto-detect from the repo's `origin/HEAD`)_
+
+Once the user replies:
+- Validate the path: `git -C "<path>" rev-parse --show-toplevel` — if it fails, ask again.
+- Resolve the base branch: if the user left it blank, run:
+  ```bash
+  git -C "<path>" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'
+  ```
+  Fall back to `git -C "<path>" branch --show-current` if `origin/HEAD` is unset.
+- Set `entry.targetRepoPatch = { repoPath, repoName: basename(repoPath), baseBranch }`.
+
+**Step 3 — if workspace lookup succeeded (`REPO_SOURCE != "ask"`):**
+
+Resolve the base branch automatically (no user prompt needed):
+
+```bash
+git -C "$REPO_PATH" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'
+```
+
+Set `entry.targetRepoPatch = { repoPath: $REPO_PATH, repoName: $REPO_NAME, baseBranch }`.
+
+Display the finalised table (error, file:line, count, target repo, base branch, IA summary) and proceed to Phase 3.
 
 See `references/fix-classification.md` for the page-level / repo-search special cases (when `file` is a page URL or no URL is present).
 
@@ -145,11 +178,18 @@ Per error, spawn one sub-agent using `assets/plan-sub-agent-prompt.md`. Seed wit
 
 Parallelism: different files → parallel; same file → sequential (re-read between).
 
-`need_more_info` results block `approve` until the user answers or skips them.
-
 ### 3.2 Present and iterate
 
-Render the numbered plan (file, root cause, approach, scope, risk per entry). Loop on user commands per `references/plan-iteration.md` until `approve`. On `cancel` → `"Run cancelled — no changes made."` and exit; no branch, no edit.
+Render the numbered plan (file, root cause, approach, scope, risk per entry). Mark `need_more_info` entries visibly (e.g. `[?]`) but do not block the rest of the plan.
+
+Two tracks run concurrently:
+
+- **Unblocked entries** (`pending` / `needs_review` / `skipped`): available for `approve` immediately.
+- **Blocked entries** (`need_more_info`): relay `what_i_know` + `questions` inline beneath the entry. The user answers with `answer <N>: <text>` to unblock, or `skip <N>` to drop. Once unblocked, re-spawn that entry's sub-agent with the original prompt + answers appended; update the plan in place.
+
+`approve` is accepted as soon as **no `need_more_info` entries remain** (all answered or skipped). If the user types `approve` while blocked entries are still open, respond: `"Entry <N> still needs: <question> — answer or skip it first."` and stay in the loop.
+
+Loop on all user commands per `references/plan-iteration.md` until `approve`. On `cancel` → `"Run cancelled — no changes made."` and exit; no branch, no edit.
 
 ### 3.3 Approval freezes the plan
 
@@ -159,7 +199,14 @@ Every `pending` entry → fix task. `needs_review` → PR's "Manual review neede
 
 ### 4.1 Branch per target repo
 
-Group plan entries by their target repo (`entry.targetRepoPatch.repoPath ?? $REPO_PATH`). For each unique target, follow `shared/references/branch-and-commit.md` to checkout a fresh `fix/auto-fix-<slug>-<TODAY>` branch off `BASE_BRANCH`.
+Group plan entries by their target repo (`entry.targetRepoPatch.repoPath ?? $REPO_PATH`). For each unique target repo:
+
+- `BASE_BRANCH` = `entry.targetRepoPatch.baseBranch` (set during Phase 2.B foreign-repo resolution, or resolved from `origin/HEAD` for the primary repo).
+- Follow `shared/references/branch-and-commit.md` to checkout a fresh `fix/auto-fix-<slug>-<TODAY>` branch off `BASE_BRANCH`.
+
+If `BASE_BRANCH` is still unset at this point (edge case: primary repo with no `origin/HEAD`), ask the user once before creating the branch:
+
+> "Which branch should the fix target in `<repoName>`? (e.g. `main`, `release-5.2.10`)"
 
 ### 4.2 Spawn fix sub-agents
 
@@ -184,19 +231,19 @@ If `old_string` is not unique: re-spawn the sub-agent with wider context once. W
 
 ## Phase 5 — Performance-bot gate
 
+When fixes span multiple target repos, run perf-bot for all repos in parallel (one `Agent` per repo, single message with multiple tool uses). Collect all reports before spawning fix sub-agents.
+
+Per repo:
+
 ```bash
 bash ../../shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
 ```
 
-Parse the resulting `.perf-bot-report.md` per `references/perf-bot-violations.md`. For each violation, spawn one sub-agent using `assets/perf-bot-fix-prompt.md`. Loop until 0 violations or 3 iterations — remaining go to PR's "Performance follow-ups".
+Parse each `.perf-bot-report.md` per `references/perf-bot-violations.md`. For each violation, spawn one sub-agent using `assets/perf-bot-fix-prompt.md`. Fix sub-agents across different repos run in parallel; violations within the same repo run sequentially. Loop until 0 violations or 3 iterations — remaining go to PR's "Performance follow-ups".
 
-Capture each iteration's report into `$RUN_DIR/perf-bot-report-iter<N>.md`.
+Capture each iteration's report into `$RUN_DIR/perf-bot-report-<repo>-iter<N>.md`.
 
-If the CLI install or Node check fails, surface in the PR body and proceed to Phase 6 — the error-fix commit still happens.
-
-## Phase 5.5 — Impact analysis & cross-repo
-
-Best-effort. When `IA_UNAVAILABLE` is empty and at least one patch was applied, follow `references/cross-repo-propagation.md`. Otherwise skip to Phase 6 with a one-line note in the PR.
+If the CLI install or Node check fails for a repo, surface in the PR body and proceed to Phase 6 — the error-fix commit still happens.
 
 ## Phase 6 — Commit, push, PR
 
@@ -212,15 +259,13 @@ PR body sections (in order):
 2. Errors fixed (Phase 4 — file, line, error, explanation).
 3. Performance-bot violations fixed (Phase 5).
 4. Performance follow-ups (Phase 5 leftovers).
-5. Impact Analysis — full `IA_MD` from Phase 5.5 (or a one-line callout if unavailable).
-6. Cross-Repo PRs table (Phase 5.6).
-7. Manual review needed — `needs_review` entries from Phase 4 + plan-iteration `needs_review` + cross-repo equivalents.
-8. Form context — `FORM_URL`, date range, error counts from 2.A.
-9. Test plan checklist.
+5. Manual review needed — `needs_review` entries from Phase 4 + plan-iteration `needs_review`.
+6. Form context — `FORM_URL`, date range, error counts from 2.A.
+7. Test plan checklist.
 
 ## Phase 7 — Run report
 
-Write `$RUN_DIR/auto-fix-report.md` with one section per phase: resolved paths, telemetry table, IA triage JSON per error, every Phase 3 command + plan diff, fix sub-agent prompts + JSON, per-iteration perf-bot reports, Phase 5.5 / 5.6 artefacts, Phase 6 commit SHAs + PR URLs.
+Write `$RUN_DIR/auto-fix-report.md` with one section per phase: resolved paths, telemetry table, IA triage JSON per error, every Phase 3 command + plan diff, fix sub-agent prompts + JSON, per-iteration perf-bot reports, Phase 6 commit SHAs + PR URLs.
 
 Print: `📄 Run report saved: $RUN_DIR/auto-fix-report.md`
 
@@ -232,7 +277,7 @@ Print: `📄 Run report saved: $RUN_DIR/auto-fix-report.md`
 |---|---|
 | `FORM_URL` missing AND no stack frame in message | Ask once before proceeding |
 | `optel-query` returns no data | Ask whether to enter errors manually or abort |
-| `REPO_SOURCE == "ask"` | Ask the user for the local clone path |
+| Foreign repo not in workspace (`REPO_SOURCE == "ask"`) | Ask for local clone path + base branch in one `AskUserQuestion` (Phase 2.B); validate path with `git rev-parse`; retry once on bad path |
 | `ia triage` returns empty for a custom-class frame | Continue with source-only analysis; `iaContext = null` |
 | Source file 404 / minified with no map | Flag `needs_review`; suggest source maps |
 | Phase 3 — plan empty after skips | Ask `add: <error>` or `cancel`; never auto-approve empty |
@@ -242,4 +287,4 @@ Print: `📄 Run report saved: $RUN_DIR/auto-fix-report.md`
 | Both `errorFixedFiles[]` and `perfFixedFiles[]` empty | Skip commit; PR step decides whether to open empty PR |
 | Run interrupted between 4.3 and 6.1 | On retry, ask whether to discard or stash — never auto-discard |
 | `git push` fails | Show the command; continue to PR step with `needs_review: "branch not pushed"` |
-| `IA_UNAVAILABLE` set | Skip Phase 5.5/5.6 entirely; one-line PR callout |
+| `IA_UNAVAILABLE` set | IA triage skipped; continue without `iaContext` |

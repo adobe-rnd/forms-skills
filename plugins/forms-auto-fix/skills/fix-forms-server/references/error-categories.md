@@ -1,6 +1,6 @@
 ---
 name: error-categories
-description: Named category patterns for Splunk result grouping and the analyst-narrative output format for the auto-fix-journey skill.
+description: Named category patterns for Splunk result grouping and the analyst-narrative output format for the fix-forms-server skill.
 ---
 
 # Error Category Naming Rules

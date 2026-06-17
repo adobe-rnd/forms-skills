@@ -1,6 +1,6 @@
 ---
-name: auto-fix-journey
-description: Fixes backend Java errors in AEM Forms. Five entry points: (1) Telemetry mode — user provides a form URL, skill queries optel for API errors in last 1 day and lets user select which to fix; (2) Fix mode — user provides a stack trace or class+line; (3) API Error mode — user provides an API path or error label (e.g. "High API Errors"), skill queries Splunk; (4) Splunk mode — explicit log exploration; (5) Infrastructure mode — WAF/CDN/ELB layer diagnosis when ams_cq returns no Java results or user targets a specific infra layer. Uses impact-analyser graph for repo/file routing and post-fix blast-radius analysis.
+name: fix-forms-server
+description: Fixes backend Java errors in AEM Forms. Five entry points: (1) Telemetry mode — user provides a form URL, skill queries optel for API errors in last 1 day and lets user select which to fix; (2) Fix mode — user provides a stack trace or class+line; (3) API Error mode — user provides an API path or error label (e.g. "High API Errors"), skill queries Splunk; (4) Splunk mode — explicit log exploration; (5) Infrastructure mode — WAF/CDN/ELB layer diagnosis when ams_cq returns no Java results or user targets a specific infra layer. Uses impact-analyser graph for repo/file routing.
 compatibility: Requires git + gh CLI. Auto-installs impact-analyser CLI into ~/.impact-analyser/ on first run. Python 3 + splunk-sdk required only for Splunk mode.
 allowed-tools: Read Write Edit Bash Agent AskUserQuestion
 metadata:
@@ -11,7 +11,7 @@ metadata:
 
 # Auto Fix Journey
 
-End-to-end pipeline for backend Java errors in AEM Forms: classify → user-approve a plan → patch → IA blast-radius → PR.
+End-to-end pipeline for backend Java errors in AEM Forms: classify → user-approve a plan → patch → PR.
 
 ## Routing — first match wins
 
@@ -41,7 +41,7 @@ If `SHORT_CLASS` or `EXCEPTION_TYPE` is missing from the user's message, ask onc
 
 ## Workspace
 
-Skill-specific artefacts under `${HOME}/form-auto-fix/` (shared with `auto-fix-form`):
+Skill-specific artefacts under `${HOME}/form-auto-fix/` (shared with `fix-forms-client`):
 
 - `.env` — Splunk credentials (only needed for API Error / Splunk modes).
 - `<repo-name>/` — auto-cloned Java repos.
@@ -65,7 +65,7 @@ Full table in `shared/references/branch-and-commit.md`. Summary:
 
 | Tool | Requires |
 |---|---|
-| `Edit` / `Write` | Plan approved AND `HEAD` is `fix/auto-fix-journey-*` AND patch came from sub-agent JSON |
+| `Edit` / `Write` | Plan approved AND `HEAD` is `fix/forms-java-*` AND patch came from sub-agent JSON |
 | `git commit` | At least one patch applied AND `HEAD` is the fix branch |
 | `git push` | Commit succeeded |
 | `gh pr create` | Push succeeded |
@@ -201,28 +201,9 @@ If `need_more_info`: stop, relay `what_i_know` + `questions` to the user, wait f
 
 ## Step 9 — Branch, commit, push
 
-Follow `shared/references/branch-and-commit.md`. Fix branch: `fix/auto-fix-journey-<short-class-slug>-<YYYY-MM-DD>`.
+Follow `shared/references/branch-and-commit.md`. Fix branch: `fix/forms-java-<short-class-slug>-<YYYY-MM-DD>`.
 
-## Step 10 — Impact analysis on the committed diff
-
-```bash
-git -C "$REPO_PATH" diff HEAD~1 HEAD --name-only \
-  | while IFS= read -r f; do echo "$REPO_PATH/$f"; done > "$RUN_DIR/ia-diff.txt"
-
-eval $IA_CMD analyse $IA_CONFIG_FLAG \
-  --diff "$RUN_DIR/ia-diff.txt" \
-  $IA_GRAPH_FLAG $IA_CONCEPT_ONLY \
-  --format json > "$RUN_DIR/ia-analysis.json"
-
-node -e "
-  const d = JSON.parse(require('fs').readFileSync('$RUN_DIR/ia-analysis.json','utf8'));
-  require('fs').writeFileSync('$RUN_DIR/ia-analysis.md', d.markdown || '');
-"
-```
-
-Capture `IA_MD = $(cat $RUN_DIR/ia-analysis.md)`. On failure, set `IA_MD` to a one-line callout and continue.
-
-## Step 11 — Raise PR
+## Step 10 — Raise PR
 
 `gh pr create` per `shared/references/branch-and-commit.md`. PR body sections:
 
@@ -230,8 +211,7 @@ Capture `IA_MD = $(cat $RUN_DIR/ia-analysis.md)`. On failure, set `IA_MD` to a o
 2. **Errors fixed** — table: class, exception, fix type, explanation. Structural fixes only.
 3. **Flagged for manual review** — logic-type entries with manual-test checklists.
 4. **Framework recommendations** — config-type entries with CRX / FDM paths.
-5. **Impact Analysis** — `IA_MD` embedded verbatim (or unavailability callout).
-6. **Test plan** — focused on the journeys / forms identified in IA D3 output.
+5. **Test plan** — focused on the journeys / forms affected by this error.
 
 ---
 
@@ -368,7 +348,6 @@ Severity classification (from `references/infra-routing.md`):
 | `old_string` not unique twice | `needs_review`; carry into PR body |
 | `git push` fails | Surface the command; PR section gets `branch not pushed` note |
 | `gh` not installed | Print the compare URL |
-| `ia analyse` fails in Step 10 | One-line callout in PR body; never blocks the PR |
 | Mode F — validation probe returns count=0 | Tell user; ask to adjust hostname pattern or widen time window; do not run full query |
 | Mode F — index inaccessible (connection refused / permissions) | "Cannot reach `<INDEX>` — check VPN and Splunk permissions for this index" |
 | Mode F — WAF/CDN/ELB host pattern unknown | Ask once; blank → use `"*"` with slowness warning |

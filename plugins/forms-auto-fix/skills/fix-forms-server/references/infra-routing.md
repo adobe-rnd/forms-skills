@@ -1,6 +1,6 @@
 ---
 name: infra-routing
-description: HTTP status → Splunk index routing table and output format rules for Infrastructure Mode (Mode F) and Mode E auto-escalation in auto-fix-journey.
+description: HTTP status → Splunk index routing table and output format rules for Infrastructure Mode (Mode F) and Mode E auto-escalation in fix-forms-server.
 ---
 
 # HTTP Status → Layer Routing Table

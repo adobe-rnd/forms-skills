@@ -1,12 +1,12 @@
 ---
 name: sub-agent-contract
-description: Canonical JSON shapes every sub-agent in the forms-auto-optimisation plugin returns. Read once; referenced from every sub-agent prompt.
+description: Canonical JSON shapes every sub-agent in the forms-auto-fix plugin returns. Read once; referenced from every sub-agent prompt.
 type: reference
 ---
 
 # Sub-Agent JSON Contract
 
-Every sub-agent spawned by `auto-fix-form` or `auto-fix-journey` returns **exactly one** JSON object on stdout — no prose, no markdown fences. The orchestrator owns every `Edit` / `Write` / `git` / shell call; sub-agents are read-only analysers.
+Every sub-agent spawned by `fix-forms-client` or `fix-forms-server` returns **exactly one** JSON object on stdout — no prose, no markdown fences. The orchestrator owns every `Edit` / `Write` / `git` / shell call; sub-agents are read-only analysers.
 
 ## Three shapes (pick one)
 

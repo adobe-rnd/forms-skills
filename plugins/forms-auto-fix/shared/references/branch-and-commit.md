@@ -1,6 +1,6 @@
 ---
 name: branch-and-commit
-description: Fix-branch naming, commit message structure, push, and PR-raising rules shared by auto-fix-form and auto-fix-journey.
+description: Fix-branch naming, commit message structure, push, and PR-raising rules shared by fix-forms-client and fix-forms-server.
 type: reference
 ---
 
@@ -13,8 +13,8 @@ fix/auto-fix-<slug>-<YYYY-MM-DD>
 ```
 
 `<slug>` is:
-- `auto-fix-form`: the last non-empty path segment of `FORM_URL`, slugified. Fallback: `$(basename "$REPO_PATH")`.
-- `auto-fix-journey`: the `SHORT_CLASS` of the throw site, slugified.
+- `fix-forms-client`: the last non-empty path segment of `FORM_URL`, slugified. Fallback: `$(basename "$REPO_PATH")`.
+- `fix-forms-server`: the `SHORT_CLASS` of the throw site, slugified.
 
 If the branch already exists on remote, append `-v2`, `-v3`, … :
 
@@ -64,7 +64,7 @@ Performance-bot violations fixed (--diff HEAD):
 - ...
 ```
 
-For `auto-fix-journey`, the structure is:
+For `fix-forms-server`, the structure is:
 
 ```
 fix: auto-fix <N> backend errors in AEM Forms journey
@@ -108,6 +108,6 @@ If `gh` is not installed or fails, print the compare URL instead:
 | Tool call | Pre-condition |
 |---|---|
 | `Edit` / `Write` (source file) | Plan approved AND `HEAD` is a `fix/auto-fix-*` branch AND patch came from sub-agent JSON |
-| `git commit` | Perf-bot ran (auto-fix-form) OR Java fix applied (auto-fix-journey) AND `HEAD` is the fix branch |
+| `git commit` | Perf-bot ran (fix-forms-client) OR Java fix applied (fix-forms-server) AND `HEAD` is the fix branch |
 | `git push` | `git commit` succeeded |
 | `gh pr create` | `git push` succeeded (or the fallback compare URL is being printed) |

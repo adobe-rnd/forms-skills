@@ -1,12 +1,12 @@
 ---
 name: perf-bot-violations
-description: Maps each performance-bot --diff HEAD violation type to a fix recipe used by the Phase 5.2 sub-agents of auto-fix-form.
+description: Maps each performance-bot --diff HEAD violation type to a fix recipe used by the Phase 5.2 sub-agents of fix-forms-client.
 type: reference
 ---
 
 # Performance-Bot Violation Recipes
 
-Used by **Phase 5** of `auto-fix-form` — after Phase 4.3 has applied the approved error fixes to the working tree but **not yet committed them**, and before the single combined commit at Phase 6.1. The CLI is local-only and reads only git-changed JS/CSS — no URL, no browser.
+Used by **Phase 5** of `fix-forms-client` — after Phase 4.3 has applied the approved error fixes to the working tree but **not yet committed them**, and before the single combined commit at Phase 6.1. The CLI is local-only and reads only git-changed JS/CSS — no URL, no browser.
 
 ## Install + run via the shared helper
 
@@ -17,7 +17,7 @@ bash ../../shared/scripts/perf-bot.sh --mode run --repo "$REPO_PATH"
 
 The helper installs the CLI into `${HOME}/.performance-bot/` on first call, ensures `.perf-bot-report.md` is in `.gitignore`, then runs `--diff HEAD` and writes the report to `<repo>/.perf-bot-report.md`. It prints a one-line JSON summary including `violations` (line count of `- ⚠`).
 
-`--diff HEAD` diffs the working tree (uncommitted changes) against the current `HEAD` commit. Because the auto-fix-form orchestrator **defers** the combined commit to Phase 6, `HEAD` still points at `BASE_BRANCH`'s tip during the perf-bot loop — so this command captures all uncommitted error+perf changes in one cumulative scan.
+`--diff HEAD` diffs the working tree (uncommitted changes) against the current `HEAD` commit. Because the fix-forms-client orchestrator **defers** the combined commit to Phase 6, `HEAD` still points at `BASE_BRANCH`'s tip during the perf-bot loop — so this command captures all uncommitted error+perf changes in one cumulative scan.
 
 The CLI exits `0` even when violations are found, so the report file MUST be parsed. Iteration N+1 sees iteration N's uncommitted edits — that's intentional.
 

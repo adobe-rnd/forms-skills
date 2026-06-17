@@ -1,0 +1,13 @@
+{
+  "name": "forms-auto-fix",
+  "version": "0.1.0",
+  "description": "Automated diagnosis and repair of AEM Forms errors — frontend JS errors via telemetry + perf-bot gating (fix-forms-client), and backend Java errors via Splunk (fix-forms-server).",
+  "author": { "name": "Adobe" },
+  "repository": "https://github.com/adobe-aem-forms/forms-skills",
+  "license": "Apache-2.0",
+  "skills": [
+    "./skills/fix-forms-client",
+    "./skills/fix-forms-server"
+  ],
+  "keywords": ["adobe", "aem", "forms", "error-fixing", "telemetry", "splunk", "java", "performance"]
+}
