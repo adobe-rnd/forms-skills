@@ -4,7 +4,7 @@ Automated AEM Forms error diagnosis and repair. Two skills plus a small shared t
 
 ## Skills
 
-### `fix-form-js-errors` — Frontend JS error fixing
+### `fix-forms-client` — Frontend JS error fixing
 
 End-to-end workflow for diagnosing and fixing AEM/EDS form JS errors. Queries optel telemetry, traces error origins through the impact-analyser graph, runs a user-gated fix plan, applies patches via sub-agents, gates the working tree through performance-bot, and raises a PR per affected repo.
 
@@ -12,7 +12,7 @@ Entry points:
 - Form URL → telemetry-driven run
 - Pasted JS stack frame / `TypeError` / `ReferenceError` → skips telemetry, goes straight to planning
 
-### `fix-forms-java-errors` — Backend Java error fixing
+### `fix-forms-server` — Backend Java error fixing
 
 Diagnoses and fixes backend Java errors in AEM Forms. Routes by user input:
 - Pasted Java stack trace or `ClassName:line` → Fix mode
@@ -75,8 +75,8 @@ Both sets are auto-installed on first run. Run output never lands inside the use
 |---|---|---|
 | `git` | both | in PATH |
 | `gh` | both | authenticated to `adobe-aem-forms`; run `gh auth status` |
-| Node 20 | `fix-form-js-errors` + IA triage | bundled `better_sqlite3` is ABI 115; Node ≥ 21 → installed Node 20 via NVM is used automatically |
-| Python 3 + `splunk-sdk` | `fix-forms-java-errors` Splunk / API Error modes | `pip install splunk-sdk` |
+| Node 20 | `fix-forms-client` + IA triage | bundled `better_sqlite3` is ABI 115; Node ≥ 21 → installed Node 20 via NVM is used automatically |
+| Python 3 + `splunk-sdk` | `fix-forms-server` Splunk / API Error modes | `pip install splunk-sdk` |
 
 Auto-installed on first run (no manual setup):
 - `impact-analyser` CLI → `~/.impact-analyser/cli/`

@@ -1,5 +1,5 @@
 ---
-name: fix-forms-java-errors
+name: fix-forms-server
 description: Fixes backend Java errors in AEM Forms. Five entry points: (1) Telemetry mode — user provides a form URL, skill queries optel for API errors in last 1 day and lets user select which to fix; (2) Fix mode — user provides a stack trace or class+line; (3) API Error mode — user provides an API path or error label (e.g. "High API Errors"), skill queries Splunk; (4) Splunk mode — explicit log exploration; (5) Infrastructure mode — WAF/CDN/ELB layer diagnosis when ams_cq returns no Java results or user targets a specific infra layer. Uses impact-analyser graph for repo/file routing.
 compatibility: Requires git + gh CLI. Auto-installs impact-analyser CLI into ~/.impact-analyser/ on first run. Python 3 + splunk-sdk required only for Splunk mode.
 allowed-tools: Read Write Edit Bash Agent AskUserQuestion
@@ -41,7 +41,7 @@ If `SHORT_CLASS` or `EXCEPTION_TYPE` is missing from the user's message, ask onc
 
 ## Workspace
 
-Skill-specific artefacts under `${HOME}/form-auto-fix/` (shared with `fix-form-js-errors`):
+Skill-specific artefacts under `${HOME}/form-auto-fix/` (shared with `fix-forms-client`):
 
 - `.env` — Splunk credentials (only needed for API Error / Splunk modes).
 - `<repo-name>/` — auto-cloned Java repos.
