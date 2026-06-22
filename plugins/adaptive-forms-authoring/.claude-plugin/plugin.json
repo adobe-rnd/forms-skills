@@ -15,7 +15,7 @@
     "./skills/forms-analysis/references/analyze-requirements",
     "./skills/forms-analysis/references/analyze-v1-form",
     "./skills/forms-analysis/references/visual-analysis",
-    "./skills/forms-component-inventory",
+    "./skills/forms-component-discovery",
     "./skills/forms-author",
     "./skills/forms-content-modeler",
     "./skills/forms-custom-components",
@@ -23,8 +23,7 @@
     "./skills/forms-rule-author",
     "./skills/forms-integration",
     "./skills/forms-integration/references/manage-apis",
-    "./skills/forms-context-management",
-    "./skills/forms-context-management/references/manage-context"
+    "./skills/forms-context-management"
   ],
   "keywords": [
     "adobe",
